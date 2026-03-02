@@ -1,10 +1,11 @@
+import { defineEventHandler, readBody } from 'h3'
 import { useDb } from '../../../../utils/db'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const db = await useDb()
 
-    const usuarioLogadoId = 1 // TODO: Pegar do auth
+    const usuarioLogadoId = 1 
     const { matriculas, statusAprovacao } = body
 
     if (!matriculas || matriculas.length === 0) {
@@ -13,7 +14,6 @@ export default defineEventHandler(async (event) => {
 
     try {
         for (const matricula of matriculas) {
-            // Busca os dados antigos do contracheque pela matrícula
             const checkReq = db.request()
             checkReq.input('matricula', parseInt(matricula))
             const resBusca = await checkReq.query(`SELECT * FROM operacao.baseContracheque WHERE matricula = @matricula`)
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
 
                 let mesAnoString = row.mesAno
                 if (row.mesAno instanceof Date) {
-                    mesAnoString = row.mesAno.toISOString().split('T')[0] // Formata Date YYYY-MM-DD
+                    mesAnoString = row.mesAno.toISOString().split('T')[0] 
                 }
                 updateReq.input('mesAno', mesAnoString)
 
@@ -44,22 +44,22 @@ export default defineEventHandler(async (event) => {
                 updateReq.input('usuario', usuarioLogadoId)
 
                 await updateReq.query(`
-          EXEC operacao.baseContracheque_Atualiza 
-            @codigo = @codigo,
-            @funcionario = @funcionario,
-            @cpf = @cpf,
-            @projeto = @projeto,
-            @valorLiquido = @valorLiquido,
-            @matricula = @matricula,
-            @mesAno = @mesAno,
-            @decimoTerceiro = @decimoTerceiro,
-            @feriasConstitucional = @feriasConstitucional,
-            @multaFgts = @multaFgts,
-            @submodulo = @submodulo,
-            @valorRetencao = @valorRetencao,
-            @statusAprovacao = @statusAprovacao,
-            @usuario = @usuario
-        `)
+                EXEC operacao.baseContracheque_Atualiza 
+                @codigo = @codigo,
+                @funcionario = @funcionario,
+                @cpf = @cpf,
+                @projeto = @projeto,
+                @valorLiquido = @valorLiquido,
+                @matricula = @matricula,
+                @mesAno = @mesAno,
+                @decimoTerceiro = @decimoTerceiro,
+                @feriasConstitucional = @feriasConstitucional,
+                @multaFgts = @multaFgts,
+                @submodulo = @submodulo,
+                @valorRetencao = @valorRetencao,
+                @statusAprovacao = @statusAprovacao,
+                @usuario = @usuario
+                `)
             }
         }
 
@@ -71,6 +71,6 @@ export default defineEventHandler(async (event) => {
 
     } catch (error: any) {
         console.error('Erro no processamento do contracheque:', error)
-        return { status: 'failed', mensagem: 'Operação não realizada: ' + error.message }
+        return { status: 'failed', message: 'Erro ao gravar no banco de dados.' } 
     }
 })

@@ -1,3 +1,4 @@
+import { defineEventHandler, readBody } from 'h3'
 import { useDb } from '../../../../utils/db'
 
 export default defineEventHandler(async (event) => {
@@ -10,27 +11,14 @@ export default defineEventHandler(async (event) => {
         const request = db.request()
 
         let sql = `
-      SELECT 
-        C.codigo, 
-        C.funcionario, 
-        C.cpf, 
-        P.descricao AS projeto, 
-        C.valorLiquido, 
-        C.matricula, 
-        C.mesAno, 
-        C.decimoTerceiro, 
-        C.feriasConstitucional, 
-        C.multaFgts, 
-        C.submodulo, 
-        C.valorRetencao, 
-        C.statusAprovacao 
-      FROM operacao.baseContracheque C 
-      LEFT JOIN cadastro.projeto P ON P.codigo = C.projeto
-      WHERE (1=1)
-    `
+        SELECT C.codigo, F.nomeCompleto AS funcionario, C.cpf, P.descricao AS projeto, C.valorLiquido, C.matricula, C.mesAno, 
+        C.decimoTerceiro, C.feriasConstitucional, C.multaFgts, C.submodulo, C.valorRetencao, C.statusAprovacao FROM operacao.baseContracheque C 
+        LEFT JOIN cadastro.projeto P ON P.codigo = C.projeto
+        LEFT JOIN cadastro.Funcionario F ON F.codigo = C.funcionario
+        WHERE (1=1)
+        `
 
         if (mesAno && mesAno !== '0') {
-            // mesAno vem como MM/YYYY, precisa virar YYYY-MM-01 na query MSSQL
             const partes = mesAno.split('/')
             if (partes.length === 2) {
                 request.input('mesAno', `${partes[1]}-${partes[0]}-01`)
@@ -57,11 +45,11 @@ export default defineEventHandler(async (event) => {
 
         return {
             status: 'success',
-            results: result.recordset
+            data: result.recordset 
         }
 
     } catch (error: any) {
         console.error('Erro na listagem de Contracheque:', error)
-        return { status: 'failed', mensagem: 'Erro na API de filtro: ' + error.message }
+        return { status: 'failed', message: 'Erro ao buscar no banco de dados.' } 
     }
 })
