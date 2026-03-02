@@ -79,8 +79,13 @@ onMounted(() => {
 onUnmounted(() => { clearInterval(timer) })
 
 const logout = () => {
-  localStorage.removeItem('user')
-  localStorage.removeItem('token')
+  if (process.client) {
+    localStorage.removeItem('user')
+  }
+  
+  const tokenCookie = useCookie('token')
+  tokenCookie.value = null
+  
   router.push('/login')
 }
 

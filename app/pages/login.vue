@@ -134,11 +134,8 @@ const router = useRouter()
 const { isDark, toggleTheme } = useTheme()
 
 onMounted(() => {
-  if (process.client) {
-    const user = localStorage.getItem('user')
-    const token = localStorage.getItem('token')
-    if (user && token) router.push('/')
-  }
+  const token = useCookie('token')
+  if (token.value) router.push('/')
 })
 
 const form = ref({ login: '', senha: '' })
@@ -156,8 +153,12 @@ const handleLogin = async () => {
           nome: form.value.login,
           token: 'token-dummy-' + Date.now()
         }
+        
         localStorage.setItem('user', JSON.stringify(userData))
-        localStorage.setItem('token', userData.token)
+        
+        const tokenCookie = useCookie('token')
+        tokenCookie.value = userData.token
+        
         router.push('/')
       } else {
         error.value = 'Usuário ou senha incorretos'
