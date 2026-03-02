@@ -220,8 +220,7 @@ const abrirModalFuncionarios = async (id: number) => {
 }
 
 const gerarPdfOficio = (id: number) => {
-  // Ajuste o caminho da API do PDF quando criar
-  window.open(`/api/configuracao/parametroOficioPdf?codigo=${id}`, '_blank')
+  window.open(`/api/configuracao/parametros/oficio/pdf?codigo=${id}`, '_blank')
 }
 
 const novoRegistro = () => router.push('/operacao/oficio/lancamentoReembolso/cadastro?id=0')
