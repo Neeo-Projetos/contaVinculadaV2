@@ -91,9 +91,13 @@ const draw = () => {
   // Draw links
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
-      const a = particles[i], b = particles[j]
-      const dx = a.x - b.x, dy = a.y - b.y
+      const a = particles[i] as Particle
+      const b = particles[j] as Particle
+      
+      const dx = a.x - b.x
+      const dy = a.y - b.y
       const d = Math.sqrt(dx * dx + dy * dy)
+      
       if (d < LINK_DIST) {
         const opacity = (1 - d / LINK_DIST) * 0.35
         ctx.beginPath()
@@ -124,7 +128,6 @@ onMounted(() => {
   draw()
   window.addEventListener('resize', onResize)
   canvas.value?.addEventListener('mousemove', onMouseMove)
-  // Use window for mouse tracking across full screen
   window.addEventListener('mousemove', onMouseMove)
   window.addEventListener('mouseleave', onMouseLeave)
 })
@@ -137,13 +140,4 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
-.particles-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-}
-</style>
+<style scoped src="./style.css"></style>
