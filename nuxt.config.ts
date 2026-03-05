@@ -2,6 +2,13 @@
 export default defineNuxtConfig({
   srcDir: 'app/',
 
+  // Nuxt ler as subpastas dos composables automaticamente
+  imports: {
+    dirs: [
+      'composables/**'
+    ]
+  },
+
   devtools: { enabled: true },
 
   modules: [
@@ -50,6 +57,7 @@ export default defineNuxtConfig({
 
   css: [
     '@/assets/css/tailwind.css',
+    '@/assets/global/animacoesGlobais.css'
   ],
 
   runtimeConfig: {
