@@ -10,6 +10,7 @@ export function useFuncionarioListagem() {
   const carregandoHistorico = ref(false)
   const modalFiltroAvancadoAberto = ref(false)
   const projetosAtivos = ref<any[]>([])
+  const modalExibicaoAberto = ref(false)
 
   const filtro = reactive({
     nomeParam: '',
@@ -19,6 +20,16 @@ export function useFuncionarioListagem() {
     projetoParam: '',
     ativoParam: '1'
   })
+
+  const colunasVisiveis = reactive({
+    cpf: true,
+    matricula: true,
+    projeto: true,
+    status: true,
+    historico: true
+  })
+
+  const colunasTemp = reactive({ ...colunasVisiveis })
 
   const sugestoesNome = ref<any[]>([])
   const mostrandoSugestoes = ref(false)
@@ -104,17 +115,21 @@ export function useFuncionarioListagem() {
   }
 
   const abrirModalExibicao = () => {
-    console.log('Abrindo modal de Controle de Exibição...')
+    Object.assign(colunasTemp, colunasVisiveis)
+    modalExibicaoAberto.value = true
+  }
+
+  const aplicarExibicao = () => {
+    Object.assign(colunasVisiveis, colunasTemp)
+    modalExibicaoAberto.value = false
   }
 
   const abrirModalHistorico = async (codigo: number) => {
-    // Abre o modal e mostra o loading
     modalHistoricoAberto.value = true
     carregandoHistorico.value = true
     historicoSelecionado.value = [] 
 
     try {
-      // Bate na nossa API nova de histórico
       const data = await $fetch<any>('/api/cadastro/funcionario/historico', {
         method: 'POST',
         body: { codigo }
@@ -164,6 +179,11 @@ export function useFuncionarioListagem() {
     modalFiltroAvancadoAberto,
     aplicarFiltroAvancado,
     projetosAtivos,
-    carregarProjetos
+    carregarProjetos,
+    modalExibicaoAberto,
+    colunasVisiveis,
+    limparFiltrosAvancados,
+    colunasTemp,
+    aplicarExibicao
   }
 }

@@ -180,15 +180,17 @@
             <thead class="bg-white dark:bg-[#1a1c23] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-20">
               <tr>
                 <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nome do Funcionário</th>
-                <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Documento (CPF)</th>
-                <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Matrícula</th>
-                <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Projeto / Alocação</th>
-                <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
-                <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Histórico</th>
+                
+                <th v-show="colunasVisiveis.cpf" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Documento (CPF)</th>
+                <th v-show="colunasVisiveis.matricula" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Matrícula</th>
+                <th v-show="colunasVisiveis.projeto" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Projeto / Alocação</th>
+                <th v-show="colunasVisiveis.status" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
+                <th v-show="colunasVisiveis.historico" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Histórico</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-800/50 bg-white dark:bg-[#1e2029]">
               <tr v-for="item in listaRegistros" :key="item.codigo" class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors group">
+                
                 <td class="px-6 py-4">
                   <NuxtLink :to="`/cadastro/funcionario/cadastro?codigo=${item.codigo}`" class="flex items-center gap-3 cursor-pointer group-hover:opacity-80 transition-opacity">
                     <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0 border border-transparent group-hover:border-emerald-300 transition-colors">
@@ -200,12 +202,16 @@
                     </div>
                   </NuxtLink>
                 </td>
-                <td class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">{{ item.cpf }}</td>
-                <td class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">{{ item.matricula }}</td>
-                <td class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">
+                
+                <td v-show="colunasVisiveis.cpf" class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">{{ item.cpf }}</td>
+                
+                <td v-show="colunasVisiveis.matricula" class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">{{ item.matricula }}</td>
+                
+                <td v-show="colunasVisiveis.projeto" class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">
                   <span class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-full text-xs font-semibold">{{ item.projeto || 'Não Alocado' }}</span>
                 </td>
-                <td class="px-6 py-4 text-center">
+                
+                <td v-show="colunasVisiveis.status" class="px-6 py-4 text-center">
                   <span v-if="item.ativo" class="inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-3 py-1 rounded-full text-xs font-bold">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Ativo
                   </span>
@@ -213,7 +219,8 @@
                     <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Inativo
                   </span>
                 </td>
-                <td class="px-6 py-4 text-center">
+                
+                <td v-show="colunasVisiveis.historico" class="px-6 py-4 text-center">
                   <button @click="abrirModalHistorico(item.codigo)" title="Ver Histórico" class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800/50">
                     <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" />
                   </button>
@@ -238,6 +245,12 @@
       @limpar="limparFiltrosAvancados"
       @aplicar="aplicarFiltroAvancado"
     />
+    <AppModalExibicao 
+      :aberto="modalExibicaoAberto"
+      :colunas="colunasTemp"
+      @close="modalExibicaoAberto = false"
+      @aplicar="aplicarExibicao"
+    />
   </div>
 </template>
 
@@ -251,7 +264,7 @@ const {
   destacarTexto, buscarLista, visaoAtual, abrirModalFiltroAvancado, 
   abrirModalExibicao, modalHistoricoAberto, historicoSelecionado, abrirModalHistorico, 
   modalFiltroAvancadoAberto, limparFiltrosAvancados, aplicarFiltroAvancado,
-  projetosAtivos, carregarProjetos
+  projetosAtivos, carregarProjetos, modalExibicaoAberto, colunasVisiveis, colunasTemp, aplicarExibicao
 } = useFuncionarioListagem()
 
 onMounted(() => {
