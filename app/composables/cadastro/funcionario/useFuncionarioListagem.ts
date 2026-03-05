@@ -5,6 +5,9 @@ export function useFuncionarioListagem() {
   const buscaRealizada = ref(false)
   const listaRegistros = ref<any[]>([])
   const visaoAtual = ref<'lista' | 'cards'>('lista')
+  const modalHistoricoAberto = ref(false)
+  const historicoSelecionado = ref<any[]>([])
+  const carregandoHistorico = ref(false)
 
   const filtro = reactive({
     nomeParam: '',
@@ -88,6 +91,31 @@ export function useFuncionarioListagem() {
     console.log('Abrindo modal de Controle de Exibição...')
   }
 
+  const abrirModalHistorico = async (codigo: number) => {
+    // Abre o modal e mostra o loading
+    modalHistoricoAberto.value = true
+    carregandoHistorico.value = true
+    historicoSelecionado.value = [] 
+
+    try {
+      // Bate na nossa API nova de histórico
+      const data = await $fetch<any>('/api/cadastro/funcionario/historico', {
+        method: 'POST',
+        body: { codigo }
+      })
+      
+      if (data && data.status === 'success') {
+        historicoSelecionado.value = data.data
+      } else {
+        console.error(data?.message || 'Erro ao carregar histórico')
+      }
+    } catch (err) {
+      console.error('Falha na API de histórico:', err)
+    } finally {
+      carregandoHistorico.value = false
+    }
+  }
+
   return {
     carregandoTela,
     buscaRealizada,
@@ -103,6 +131,10 @@ export function useFuncionarioListagem() {
     buscarLista,
     visaoAtual,
     abrirModalFiltroAvancado,
-    abrirModalExibicao
+    abrirModalExibicao,
+    modalHistoricoAberto,
+    historicoSelecionado,
+    carregandoHistorico,
+    abrirModalHistorico
   }
 }

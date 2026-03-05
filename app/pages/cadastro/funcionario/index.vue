@@ -133,54 +133,103 @@
         <p class="font-medium text-sm text-center">Nenhum funcionário encontrado com os filtros informados.</p>
       </div>
 
-      <div v-else class="overflow-x-auto relative z-10">
-        <table class="w-full text-left border-collapse">
-          <thead class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-20">
-            <tr>
-              <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nome do Funcionário</th>
-              <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Documento (CPF)</th>
-              <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Matrícula</th>
-              <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Projeto / Alocação</th>
-              <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
-              <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Ação</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-800/50">
-            <tr v-for="item in listaRegistros" :key="item.codigo" class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors group">
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
-                    {{ item.nomeCompleto.charAt(0).toUpperCase() }}
-                  </div>
-                  <div class="flex flex-col">
-                    <span class="font-bold text-gray-900 dark:text-gray-100">{{ item.nomeCompleto }}</span>
-                    <span class="text-xs text-gray-500 dark:text-gray-500">{{ item.email }}</span>
-                  </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">{{ item.cpf }}</td>
-              <td class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">{{ item.matricula }}</td>
-              <td class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">
-                <span class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-full text-xs font-semibold">{{ item.projeto || 'Não Alocado' }}</span>
-              </td>
-              <td class="px-6 py-4 text-center">
-                <span v-if="item.ativo" class="inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-3 py-1 rounded-full text-xs font-bold">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Ativo
-                </span>
-                <span v-else class="inline-flex items-center gap-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 px-3 py-1 rounded-full text-xs font-bold">
-                  <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Inativo
-                </span>
-              </td>
-              <td class="px-6 py-4 text-right">
-                <NuxtLink :to="`/cadastro/funcionario/cadastro?codigo=${item.codigo}`" class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800/50">
-                  <Icon name="fa7-solid:pen" class="w-4 h-4" />
-                </NuxtLink>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div v-else class="relative z-10 bg-gray-50/30 dark:bg-transparent">
+        
+        <div v-if="visaoAtual === 'cards'" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 p-4 sm:p-6">
+          <div v-for="item in listaRegistros" :key="item.codigo" class="bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-gray-700/60 rounded-2xl p-5 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 transition-all duration-300 shadow-sm hover:shadow-md group flex flex-col gap-4">
+            
+            <div class="flex justify-between items-start gap-3">
+              <NuxtLink :to="`/cadastro/funcionario/cadastro?codigo=${item.codigo}`" class="flex-1 group-hover:opacity-80 transition-opacity">
+                <h3 class="font-extrabold text-lg text-gray-900 dark:text-gray-100 leading-tight mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{{ item.nomeCompleto }}</h3>
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">{{ item.projeto || 'Não Alocado' }}</span>
+              </NuxtLink>
+              
+              <span v-if="item.ativo" class="shrink-0 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-2.5 py-1 rounded-full text-xs font-bold">
+                Ativo
+              </span>
+              <span v-else class="shrink-0 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 px-2.5 py-1 rounded-full text-xs font-bold">
+                Inativo
+              </span>
+            </div>
+
+            <div class="flex flex-col gap-2.5 text-sm text-gray-600 dark:text-gray-400 mt-2">
+              <div class="flex items-center gap-3">
+                <div class="w-6 flex justify-center"><Icon name="fa7-solid:address-card" class="w-4 h-4 opacity-70" /></div>
+                <span class="font-medium">{{ item.cpf }}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-6 flex justify-center"><Icon name="fa7-solid:id-badge" class="w-4 h-4 opacity-70" /></div>
+                <span class="font-medium">{{ item.matricula }}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-6 flex justify-center"><Icon name="fa7-solid:envelope" class="w-4 h-4 opacity-70" /></div>
+                <span class="font-medium truncate" :title="item.email">{{ item.email || 'Sem e-mail' }}</span>
+              </div>
+            </div>
+
+            <div class="mt-auto pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-end">
+              <button @click="abrirModalHistorico(item.codigo)" class="flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all">
+                <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" /> Ver Histórico
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-white dark:bg-[#1a1c23] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-20">
+              <tr>
+                <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nome do Funcionário</th>
+                <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Documento (CPF)</th>
+                <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Matrícula</th>
+                <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Projeto / Alocação</th>
+                <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
+                <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Histórico</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-800/50 bg-white dark:bg-[#1e2029]">
+              <tr v-for="item in listaRegistros" :key="item.codigo" class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors group">
+                <td class="px-6 py-4">
+                  <NuxtLink :to="`/cadastro/funcionario/cadastro?codigo=${item.codigo}`" class="flex items-center gap-3 cursor-pointer group-hover:opacity-80 transition-opacity">
+                    <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0 border border-transparent group-hover:border-emerald-300 transition-colors">
+                      {{ item.nomeCompleto.charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ item.nomeCompleto }}</span>
+                      <span class="text-xs text-gray-500 dark:text-gray-500">{{ item.email }}</span>
+                    </div>
+                  </NuxtLink>
+                </td>
+                <td class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">{{ item.cpf }}</td>
+                <td class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">{{ item.matricula }}</td>
+                <td class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">
+                  <span class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-full text-xs font-semibold">{{ item.projeto || 'Não Alocado' }}</span>
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <span v-if="item.ativo" class="inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-3 py-1 rounded-full text-xs font-bold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Ativo
+                  </span>
+                  <span v-else class="inline-flex items-center gap-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 px-3 py-1 rounded-full text-xs font-bold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Inativo
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <button @click="abrirModalHistorico(item.codigo)" title="Ver Histórico" class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800/50">
+                    <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" />
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
+    <AppModalHistorico 
+      :isOpen="modalHistoricoAberto" 
+      titulo="Histórico do Funcionário"
+      :historico="historicoSelecionado"
+      @close="modalHistoricoAberto = false" 
+    />
   </div>
 </template>
 
@@ -190,6 +239,7 @@ const {
   carregandoTela, buscaRealizada, listaRegistros, filtro,
   sugestoesNome, mostrandoSugestoes, buscandoSugestoes,
   buscarSugestoesNome, selecionarSugestao, fecharSugestoesDelay,
-  destacarTexto, buscarLista, visaoAtual, abrirModalFiltroAvancado, abrirModalExibicao
+  destacarTexto, buscarLista, visaoAtual, abrirModalFiltroAvancado, 
+  abrirModalExibicao,modalHistoricoAberto,historicoSelecionado,abrirModalHistorico
 } = useFuncionarioListagem()
 </script>
