@@ -1,4 +1,4 @@
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive } from 'vue'
 
 export function useFuncionarioListagem() {
   const carregandoTela = ref(false)
@@ -10,12 +10,6 @@ export function useFuncionarioListagem() {
   const modalFiltroAvancadoAberto = ref(false)
   const projetosAtivos = ref<any[]>([])
   const modalExibicaoAberto = ref(false)
-
-  const listaCompleta = ref<any[]>([])
-  const paginaAtual = ref(1)
-  const itensPorPagina = ref(10)
-  const totalRegistros = computed(() => listaCompleta.value.length)
-  const totalPaginas = computed(() => Math.ceil(totalRegistros.value / itensPorPagina.value))
 
   const filtro = reactive({
     nomeParam: '',
@@ -34,55 +28,14 @@ export function useFuncionarioListagem() {
     historico: true
   })
 
-  const paginasExibidas = computed(() => {
-    const total = totalPaginas.value
-    const atual = paginaAtual.value
-
-    if (total <= 7) {
-      return Array.from({ length: total }, (_, i) => i + 1)
-    }
-
-    const paginas: (number | string)[] = []
-    
-    if (atual <= 4) {
-      paginas.push(1, 2, 3, 4, 5, '...', total)
-    } 
-    else if (atual >= total - 3) {
-      paginas.push(1, '...', total - 4, total - 3, total - 2, total - 1, total)
-    } 
-    else {
-      paginas.push(1, '...', atual - 1, atual, atual + 1, '...', total)
-    }
-
-    return paginas
-  })
-
   const colunasTemp = reactive({ ...colunasVisiveis })
 
-  const registroInicial = computed(() => {
-    if (totalRegistros.value === 0) return 0
-    return ((paginaAtual.value - 1) * itensPorPagina.value) + 1
-  })
-  
-  const registroFinal = computed(() => {
-    const final = paginaAtual.value * itensPorPagina.value
-    return final > totalRegistros.value ? totalRegistros.value : final
-  })
+  const listaCompleta = ref<any[]>([])
+  const paginacao = usePaginacaoFrontEnd(listaCompleta)
 
   const filtrar = () => {
-    paginaAtual.value = 1
+    paginacao.resetarPaginacao()
     buscarLista()
-  }
-
-  const mudarPagina = (novaPagina: number) => {
-    if (novaPagina >= 1 && novaPagina <= totalPaginas.value) {
-      paginaAtual.value = novaPagina
-    }
-  }
-
-  const mudarItensPorPagina = (quantidade: number) => {
-    itensPorPagina.value = quantidade
-    paginaAtual.value = 1
   }
 
   const sugestoesNome = ref<any[]>([])
@@ -134,12 +87,6 @@ export function useFuncionarioListagem() {
     return texto.replace(regex, '<span class="font-extrabold text-emerald-600 dark:text-emerald-400">$1</span>')
   }
 
-  const listaRegistros = computed(() => {
-    const inicio = (paginaAtual.value - 1) * itensPorPagina.value
-    const fim = inicio + itensPorPagina.value
-    return listaCompleta.value.slice(inicio, fim)
-  })
-
   const buscarLista = async () => {
     carregandoTela.value = true
     buscaRealizada.value = true
@@ -149,7 +96,7 @@ export function useFuncionarioListagem() {
         body: filtro
       })
       listaCompleta.value = data?.results || []
-      paginaAtual.value = 1
+      paginacao.resetarPaginacao() 
     } catch (err: any) {
       console.error(err)
     } finally {
@@ -220,7 +167,6 @@ export function useFuncionarioListagem() {
   return {
     carregandoTela,
     buscaRealizada,
-    listaRegistros,
     filtro,
     sugestoesNome,
     mostrandoSugestoes,
@@ -246,15 +192,17 @@ export function useFuncionarioListagem() {
     limparFiltrosAvancados,
     colunasTemp,
     aplicarExibicao,
-    paginaAtual,
-    itensPorPagina,
-    totalRegistros,
-    totalPaginas,
-    registroInicial,
-    registroFinal,
     filtrar,
-    mudarPagina,
-    mudarItensPorPagina ,
-    paginasExibidas
+    
+    listaRegistros: paginacao.listaPaginada,
+    paginaAtual: paginacao.paginaAtual,
+    itensPorPagina: paginacao.itensPorPagina,
+    totalRegistros: paginacao.totalRegistros,
+    totalPaginas: paginacao.totalPaginas,
+    registroInicial: paginacao.registroInicial,
+    registroFinal: paginacao.registroFinal,
+    paginasExibidas: paginacao.paginasExibidas,
+    mudarPagina: paginacao.mudarPagina,
+    mudarItensPorPagina: paginacao.mudarItensPorPagina
   }
 }
