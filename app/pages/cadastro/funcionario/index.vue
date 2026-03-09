@@ -26,7 +26,7 @@
       </template>
 
       <template #acoes-secundarias>
-        <button v-show="visaoAtual === 'lista'" @click="abrirModalExibicao"
+        <button @click="abrirModalExibicao"
           class="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all shadow-sm">
           <Icon name="fa7-solid:table-columns" class="w-4 h-4 opacity-70" /> Exibição
         </button>
@@ -116,10 +116,12 @@
       <template #cards="{ item }">
         <AppCardListagem :titulo="item.nomeCompleto" subtituloNome="Matrícula" :subtituloValor="item.matricula"
           :ativo="item.ativo" :categoriaTexto="item.projeto || 'Não Alocado'" categoriaIcone="fa7-solid:building"
-          :detalhes="[
-            { icone: 'fa7-solid:address-card', texto: item.cpf },
+          :mostrarSubtitulo="colunasVisiveis.matricula" :mostrarStatus="colunasVisiveis.status"
+          :mostrarCategoria="colunasVisiveis.projeto" :mostrarHistorico="colunasVisiveis.historico" :detalhes="[
+            ...(colunasVisiveis.cpf ? [{ icone: 'fa7-solid:address-card', texto: item.cpf }] : []),
             { icone: 'fa7-solid:envelope', texto: item.email || 'Sem e-mail' }
           ]" @clique-titulo="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
+          @ver-detalhes="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
           @ver-historico="abrirModalHistorico(item.codigo)" />
       </template>
 
