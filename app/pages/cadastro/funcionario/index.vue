@@ -11,18 +11,7 @@
           :mostrarMenu="mostrandoSugestoes" placeholder="Digite o nome do funcionário..." @buscar="buscarSugestoesNome"
           @selecionar="selecionarSugestao" @fechar="fecharSugestoesDelay" @enter="buscarLista" />
 
-        <div class="w-full sm:w-44 shrink-0 relative">
-          <select v-model="filtro.ativoParam" @change="buscarLista"
-            class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all cursor-pointer appearance-none">
-            <option value="" class="bg-white dark:bg-[#1e2029] text-gray-700 dark:text-gray-300">Status: Todos</option>
-            <option value="1" class="bg-white dark:bg-[#1e2029] text-gray-700 dark:text-gray-300">Status: Ativos
-            </option>
-            <option value="0" class="bg-white dark:bg-[#1e2029] text-gray-700 dark:text-gray-300">Status: Inativos
-            </option>
-          </select>
-          <Icon name="fa7-solid:chevron-down"
-            class="absolute right-4 top-4 w-3 h-3 text-gray-400 pointer-events-none" />
-        </div>
+        <AppDropdownStatus v-model="filtro.ativoParam" @change="buscarLista" />
       </template>
 
       <template #acoes-secundarias>
