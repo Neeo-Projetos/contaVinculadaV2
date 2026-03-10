@@ -123,16 +123,29 @@
 
     <AppModalHistorico :aberto="modalHistoricoAberto" titulo="Histórico do Funcionário"
       :historico="historicoSelecionado" @close="modalHistoricoAberto = false" />
-    <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" :filtroObj="filtro" :projetos="projetosAtivos"
-      @close="modalFiltroAvancadoAberto = false" @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado" />
-    <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" @close="modalExibicaoAberto = false"
-      @aplicar="aplicarExibicao" />
+    
+    <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" 
+      @close="modalFiltroAvancadoAberto = false" @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
+      
+      <AppInputCpf v-model="filtro.cpfParam" label="Documento (CPF)" placeholder="Digite o CPF..." />
+      
+      <AppInputTexto v-model="filtro.matriculaParam" label="Matrícula" placeholder="Ex: 31758" icone="fa7-solid:id-badge" />
+      
+      <AppSelect v-model="filtro.projetoParam" label="Projeto / Alocação" placeholder="Todos os Projetos"
+        :opcoes="projetosFormatados" />
+      
+      <AppInputEmail v-model="filtro.emailParam" label="E-mail" placeholder="email@empresa.com" />
+      
+    </AppModalFiltroAvancado>
+
+    <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labelsColunas" 
+      @close="modalExibicaoAberto = false" @aplicar="aplicarExibicao" />
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, computed } from "vue";
 
 const {
   carregandoTela, buscaRealizada, listaRegistros, filtro, sugestoesNome, mostrandoSugestoes, buscandoSugestoes,
@@ -140,8 +153,19 @@ const {
   abrirModalExibicao, modalHistoricoAberto, historicoSelecionado, abrirModalHistorico, modalFiltroAvancadoAberto,
   limparFiltrosAvancados, aplicarFiltroAvancado, projetosAtivos, carregarProjetos, modalExibicaoAberto,
   colunasVisiveis, colunasTemp, aplicarExibicao, paginaAtual, itensPorPagina, totalRegistros, totalPaginas,
-  registroInicial, registroFinal, mudarPagina, mudarItensPorPagina, paginasExibidas, buscarLista
+  registroInicial, registroFinal, mudarPagina, mudarItensPorPagina, paginasExibidas, buscarLista,
+  labelsColunas 
 } = useFuncionarioListagem();
+
+const projetosFormatados = computed(() => {
+  return [
+    { codigo: '', descricao: 'Todos os Projetos' }, 
+    ...projetosAtivos.value.map(p => ({
+      codigo: p.codigo,
+      descricao: `${p.apelido} - ${p.descricao}`
+    }))
+  ]
+})
 
 onMounted(() => {
   carregarProjetos();
