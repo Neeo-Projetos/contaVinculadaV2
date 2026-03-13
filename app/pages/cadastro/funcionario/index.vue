@@ -11,7 +11,7 @@
           :mostrarMenu="mostrandoSugestoes" placeholder="Digite o nome do funcionário..." @buscar="buscarSugestoesNome"
           @selecionar="selecionarSugestao" @fechar="fecharSugestoesDelay" @enter="buscarLista" />
 
-        <AppDropdownStatus v-model="filtro.ativoParam" @change="buscarLista" />
+        <AppSelecaoStatus v-model="filtro.ativoParam" @change="buscarLista" />
       </template>
 
       <template #acoes-secundarias>
