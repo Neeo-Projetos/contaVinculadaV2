@@ -16,23 +16,23 @@
 
       <template #acoes-secundarias>
         <button @click="abrirModalExibicao"
-          class="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all shadow-sm">
+          class="flex items-center gap-2 px-4 h-11 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all shadow-sm">
           <Icon name="fa7-solid:table-columns" class="w-4 h-4 opacity-70" /> Exibição
         </button>
 
         <button @click="abrirModalFiltroAvancado"
-          class="flex items-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-800/80 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700/50 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all shadow-sm">
+          class="flex items-center gap-2 px-4 h-11 bg-gray-100 dark:bg-gray-800/80 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700/50 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all shadow-sm">
           <Icon name="fa7-solid:filter" class="w-4 h-4 text-gray-500 dark:text-gray-400" /> Filtros Avançados
         </button>
       </template>
 
       <template #acoes-principais>
         <NuxtLink to="/cadastro/funcionario/cadastro"
-          class="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white rounded-xl text-sm font-bold transition-all shadow-md">
+          class="w-full sm:w-auto flex items-center justify-center gap-3 px-6 h-11 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white rounded-xl text-sm font-bold transition-all shadow-md">
           <Icon name="fa7-solid:user-plus" class="w-5 h-5" /> Novo Funcionário
         </NuxtLink>
         <button @click="buscarLista"
-          class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-3 bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white rounded-xl text-sm font-bold transition-all shadow-md">
+          class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 h-11 bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white rounded-xl text-sm font-bold transition-all shadow-md">
           <Icon name="fa7-solid:magnifying-glass" class="w-5 h-5" /> Pesquisar Funcionários
         </button>
       </template>
@@ -66,35 +66,40 @@
       </template>
 
       <template #linhas-tabela="{ item }">
-        <td class="px-6 py-2">
+        <td class="px-6 py-2 max-w-[250px] whitespace-normal">
           <NuxtLink :to="`/cadastro/funcionario/cadastro?codigo=${item.codigo}`"
             class="flex items-center gap-3 cursor-pointer group-hover:opacity-80 transition-opacity">
             <div
               class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0 border border-transparent group-hover:border-emerald-300 transition-colors">
               {{ item.nomeCompleto.charAt(0).toUpperCase() }}
             </div>
-            <div class="flex flex-col">
+            <div class="flex flex-col min-w-0">
               <span
-                class="font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{
+                class="font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors break-words">{{
                   item.nomeCompleto }}</span>
-              <span class="text-xs text-gray-500 dark:text-gray-500">{{ item.email }}</span>
+              <span class="text-xs text-gray-500 dark:text-gray-500 break-words">{{ item.email }}</span>
             </div>
           </NuxtLink>
         </td>
-        <td v-show="colunasVisiveis.cpf" class="px-6 py-2 font-medium text-gray-600 dark:text-gray-400">{{ item.cpf }}
+        
+        <td v-show="colunasVisiveis.cpf" class="px-6 py-2 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+          {{ item.cpf }}
         </td>
+        
         <td v-show="colunasVisiveis.matricula"
-          class="px-6 py-2 font-medium text-gray-600 dark:text-gray-400 text-center">{{ item.matricula }}</td>
+          class="px-6 py-2 font-medium text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.matricula }}</td>
+          
         <td v-show="colunasVisiveis.projeto" class="px-6 py-2 font-medium text-gray-600 dark:text-gray-400 text-center">
           <div
-            class="inline-block bg-gray-50 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 px-4 py-2 rounded-2xl text-xs font-semibold leading-relaxed max-w-[250px] whitespace-normal break-words border border-gray-200/50 dark:border-gray-700/50 shadow-sm text-center">
+            class="inline-block bg-gray-50 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 px-4 py-2 rounded-2xl text-xs font-semibold leading-relaxed max-w-[220px] whitespace-normal break-words border border-gray-200/50 dark:border-gray-700/50 shadow-sm text-center">
             {{ item.projeto || "Não Alocado" }}
           </div>
         </td>
-        <td v-show="colunasVisiveis.status" class="px-6 py-2 text-center">
+        
+        <td v-show="colunasVisiveis.status" class="px-6 py-2 text-center whitespace-nowrap">
           <AppAtivo :ativo="item.ativo" />
         </td>
-        <td v-show="colunasVisiveis.historico" class="px-6 py-2 text-center">
+        <td v-show="colunasVisiveis.historico" class="px-6 py-2 text-center whitespace-nowrap">
           <button @click="abrirModalHistorico(item.codigo)" title="Ver Histórico"
             class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800/50">
             <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" />
@@ -118,16 +123,29 @@
 
     <AppModalHistorico :aberto="modalHistoricoAberto" titulo="Histórico do Funcionário"
       :historico="historicoSelecionado" @close="modalHistoricoAberto = false" />
-    <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" :filtroObj="filtro" :projetos="projetosAtivos"
-      @close="modalFiltroAvancadoAberto = false" @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado" />
-    <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" @close="modalExibicaoAberto = false"
-      @aplicar="aplicarExibicao" />
+    
+    <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" 
+      @close="modalFiltroAvancadoAberto = false" @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
+      
+      <AppInputCpf v-model="filtro.cpfParam" label="Documento (CPF)" placeholder="Digite o CPF..." />
+      
+      <AppInputTexto v-model="filtro.matriculaParam" label="Matrícula" placeholder="Ex: 31758" icone="fa7-solid:id-badge" />
+      
+      <AppSelect v-model="filtro.projetoParam" label="Projeto / Alocação" placeholder="Todos os Projetos"
+        :opcoes="projetosFormatados" />
+      
+      <AppInputEmail v-model="filtro.emailParam" label="E-mail" placeholder="email@empresa.com" />
+      
+    </AppModalFiltroAvancado>
+
+    <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labelsColunas" 
+      @close="modalExibicaoAberto = false" @aplicar="aplicarExibicao" />
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, computed } from "vue";
 
 const {
   carregandoTela, buscaRealizada, listaRegistros, filtro, sugestoesNome, mostrandoSugestoes, buscandoSugestoes,
@@ -135,8 +153,19 @@ const {
   abrirModalExibicao, modalHistoricoAberto, historicoSelecionado, abrirModalHistorico, modalFiltroAvancadoAberto,
   limparFiltrosAvancados, aplicarFiltroAvancado, projetosAtivos, carregarProjetos, modalExibicaoAberto,
   colunasVisiveis, colunasTemp, aplicarExibicao, paginaAtual, itensPorPagina, totalRegistros, totalPaginas,
-  registroInicial, registroFinal, mudarPagina, mudarItensPorPagina, paginasExibidas, buscarLista
+  registroInicial, registroFinal, mudarPagina, mudarItensPorPagina, paginasExibidas, buscarLista,
+  labelsColunas 
 } = useFuncionarioListagem();
+
+const projetosFormatados = computed(() => {
+  return [
+    { codigo: '', descricao: 'Todos os Projetos' }, 
+    ...projetosAtivos.value.map(p => ({
+      codigo: p.codigo,
+      descricao: `${p.apelido} - ${p.descricao}`
+    }))
+  ]
+})
 
 onMounted(() => {
   carregarProjetos();

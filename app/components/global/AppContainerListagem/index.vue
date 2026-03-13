@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col relative transition-all duration-300 flex-1"
-       :class="(buscaRealizada && lista.length > 0) ? 'min-h-[450px]' : ''">
+  <div class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col relative transition-all duration-300"
+       :class="lista.length === 0 ? 'flex-1' : ''">
 
     <div v-if="carregando && lista.length === 0" class="flex-1 flex flex-col items-center justify-center py-12 px-6 animate-fade-in">
       <div class="relative flex items-center justify-center mb-6">
@@ -38,13 +38,13 @@
         </div>
       </div>
 
-      <div v-if="visaoAtual === 'cards'" class="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-5 p-4 sm:p-6 mb-4">
+      <div v-if="visaoAtual === 'cards'" class="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-5 p-4 sm:p-6">
         <template v-for="(item, index) in lista" :key="item.codigo || index">
           <slot name="cards" :item="item"></slot>
         </template>
       </div>
 
-      <div v-else class="overflow-x-auto flex-1 mb-4">
+      <div v-else class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead class="bg-gray-50 dark:bg-[#1a1c23] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-20">
             <tr class="divide-x divide-gray-200 dark:divide-gray-800">
@@ -59,7 +59,7 @@
         </table>
       </div>
 
-      <div class="bg-gray-50 dark:bg-[#1a1c23] border-t border-gray-200 dark:border-gray-800 p-4 sm:px-6 flex flex-col xl:flex-row items-center justify-between gap-4 mt-auto rounded-b-2xl">
+      <div class="bg-gray-50 dark:bg-[#1a1c23] border-t border-gray-200 dark:border-gray-800 p-4 sm:px-6 flex flex-col xl:flex-row items-center justify-between gap-4 mt-auto">
         <div class="text-sm font-medium text-gray-500 dark:text-gray-400 text-center xl:text-left">
           Mostrando de <span class="font-bold text-gray-900 dark:text-gray-100">{{ registroInicial }}</span>
           até <span class="font-bold text-gray-900 dark:text-gray-100">{{ registroFinal }}</span>
@@ -111,7 +111,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType } from 'vue'
+import { type PropType, ref } from 'vue'
 
 const props = defineProps({
   carregando: { type: Boolean, default: false },

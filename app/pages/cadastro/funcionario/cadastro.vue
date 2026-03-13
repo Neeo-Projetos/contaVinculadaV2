@@ -1,19 +1,15 @@
 <template>
   <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in">
     
-    <div class="flex items-center gap-2 bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:px-6 shadow-sm text-gray-500 dark:text-gray-400 font-medium text-sm">
-      <Icon name="fa7-solid:users" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-      <span class="mx-1">/</span>
-      <NuxtLink to="/cadastro/funcionario" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors whitespace-nowrap">Funcionários</NuxtLink>
-      <span class="mx-1">/</span>
-      <span class="text-gray-800 dark:text-gray-200 font-bold px-2 py-1 bg-gray-50 dark:bg-gray-800/50 rounded-md truncate">
-        {{ editando ? form.nomeCompleto || 'Editando Registro' : 'Novo Registro' }}
-      </span>
-    </div>
+    <AppTrilhaNavegacao 
+      icone="fa7-solid:users" 
+      :links="[{ label: 'Funcionários', to: '/cadastro/funcionario' }]"
+      :paginaAtual="editando ? form.nomeCompleto || 'Editando Registro' : 'Novo Registro'"
+    />
 
-    <div class="flex-1 bg-white dark:bg-[#1e2029] rounded-3xl border border-gray-100 dark:border-gray-800 p-6 sm:p-8 shadow-sm relative overflow-hidden">
+    <div class="flex-1 bg-white dark:bg-[#1e2029] rounded-3xl border border-gray-100 dark:border-gray-800 p-6 sm:p-8 shadow-sm relative">
       
-      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-green-600"></div>
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-green-600 rounded-t-3xl"></div>
 
       <div v-if="carregandoTela" class="absolute inset-0 z-10 bg-white/80 dark:bg-[#1e2029]/90 backdrop-blur-sm flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-400 rounded-3xl">
         <Icon name="fa7-solid:spinner" class="animate-spin w-12 h-12 mb-4" />
@@ -29,129 +25,47 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-          <div class="md:col-span-4">
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-              Nome Completo <span class="text-red-500">*</span>
-            </label>
-            <input 
-              v-model="form.nomeCompleto" 
-              type="text" 
-              required
-              maxlength="60"
-              class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl px-4 py-3 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400" 
-              placeholder="Digite o nome..." 
-            />
+          <div class="md:col-span-6">
+            <AppInputTexto v-model="form.nomeCompleto" label="Nome Completo" placeholder="Digite o nome..." required maxlength="60" />
           </div>
           
           <div class="md:col-span-3">
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-              CPF <span class="text-red-500">*</span>
-            </label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                <Icon name="fa7-solid:id-card" />
-              </div>
-              <input 
-                v-model="form.cpf" 
-                v-maska data-maska="###.###.###-##"
-                type="text" 
-                required
-                class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl pl-11 pr-4 py-3 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400" 
-                placeholder="___.___.___-__" 
-              />
-            </div>
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-              Matrícula <span class="text-red-500">*</span>
-            </label>
-            <input 
-              v-model="form.matricula" 
-              type="text" 
-              required
-              class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl px-4 py-3 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400" 
-              placeholder="Ex: 12345"
-            />
+            <AppInputCpf v-model="form.cpf" required />
           </div>
 
           <div class="md:col-span-3">
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-              Email <span class="text-red-500">*</span>
-            </label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                <Icon name="fa7-solid:at" />
-              </div>
-              <input 
-                v-model="form.email" 
-                type="email" 
-                required
-                maxlength="50"
-                class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl pl-11 pr-4 py-3 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400" 
-                placeholder="email@exemplo.com" 
-              />
-            </div>
+            <AppInputTexto v-model="form.matricula" label="Matrícula" placeholder="Ex: 12345" required />
           </div>
 
-          <div class="md:col-span-12">
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-              Projeto Responsável <span class="text-red-500">*</span>
-            </label>
-            <select 
-              v-model="form.projeto" 
-              required
-              class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl px-4 py-3 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
-            >
-              <option value="" disabled class="dark:bg-gray-800">Selecione um projeto na lista...</option>
-              <option v-for="p in projetosAtivos" :key="p.codigo" :value="p.codigo" class="dark:bg-gray-800">
-                {{ p.apelido }} - {{ p.descricao }}
-              </option>
-            </select>
+          <div class="md:col-span-6">
+            <AppInputEmail v-model="form.email" required maxlength="50" />
+          </div>
+
+          <div class="md:col-span-6">
+            <AppSelect v-model="form.projeto" label="Projeto Responsável" placeholder="Selecione um projeto na lista..." :opcoes="projetosFormatados" itemValue="codigo" itemLabel="label" required />
           </div>
         </div>
 
         <div class="pt-6 mt-8 border-t border-gray-100 dark:border-gray-800/80 flex flex-col sm:flex-row gap-4 items-center justify-between">
           
           <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <button 
-              type="button" 
-              @click="voltarParaLista"
-              class="w-full sm:w-auto bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
-            >
-              <Icon name="fa7-solid:arrow-left" class="w-4 h-4 text-gray-400" />
+            <AppBotao variacao="padrao" icone="fa7-solid:arrow-left" @click="voltarParaLista">
               Voltar
-            </button>
+            </AppBotao>
 
-            <button 
-              v-if="editando" 
-              type="button" 
-              @click="abrirModalExclusao"
-              class="w-full sm:w-auto bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border border-red-200 dark:border-red-900/50 px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
-            >
-              <Icon name="fa7-solid:trash-can" class="w-4 h-4" />
+            <AppBotao v-if="editando" variacao="perigo" icone="fa7-solid:trash-can" @click="abrirModalExclusao">
               Excluir
-            </button>
+            </AppBotao>
           </div>
           
           <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <button 
-              type="button" 
-              @click="limparFormulario"
-              class="w-full sm:w-auto text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
-            >
-              <Icon name="fa7-solid:file" class="w-4 h-4 text-gray-400" />
+            <AppBotao variacao="padrao" icone="fa7-solid:file" @click="limparFormulario">
               Limpar / Novo
-            </button>
-            <button 
-              type="submit" 
-              :disabled="carregandoGravacao"
-              class="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-8 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 disabled:opacity-70 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
-            >
-              <Icon v-if="carregandoGravacao" name="fa7-solid:spinner" class="animate-spin w-5 h-5" />
-              <Icon v-else name="fa7-solid:floppy-disk" class="w-5 h-5" />
+            </AppBotao>
+            
+            <AppBotao nativeType="submit" variacao="primario" icone="fa7-solid:floppy-disk" :carregando="carregandoGravacao">
               Gravar Dados
-            </button>
+            </AppBotao>
           </div>
         </div>
       </form>
@@ -168,27 +82,50 @@
          <p class="text-sm text-center mt-2 opacity-80">Esta ação não poderá ser desfeita e removerá os dados do banco.</p>
       </div>
       <template #footer>
-        <button @click="fecharModal" class="px-5 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-bold rounded-xl transition-all shadow-sm">
+        <AppBotao variacao="padrao" @click="fecharModal">
           Cancelar
-        </button>
-        <button @click="excluirRegistro" :disabled="carregandoExclusao" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2 disabled:opacity-70">
-          <Icon v-if="carregandoExclusao" name="fa7-solid:spinner" class="animate-spin w-4 h-4" />
-          <Icon v-else name="fa7-solid:trash" class="w-4 h-4" />
+        </AppBotao>
+        
+        <AppBotao variacao="perigo" icone="fa7-solid:trash" :carregando="carregandoExclusao" @click="excluirRegistro">
           Sim, Excluir
-        </button>
+        </AppBotao>
+      </template>
+    </AppModal>
+    <AppModal 
+      :isOpen="modalAlertaAberto" 
+      :title="modalAlertaTitulo" 
+      icon="fa7-solid:circle-exclamation"
+      @close="fecharModalAlerta"
+    >
+      <div class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-300">
+         <p class="text-base text-center font-medium">{{ modalAlertaMensagem }}</p>
+      </div>
+      <template #footer>
+        <AppBotao variacao="primario" @click="fecharModalAlerta" class="w-full sm:w-auto">
+          Entendi
+        </AppBotao>
       </template>
     </AppModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 
 const {
   carregandoTela, carregandoGravacao, carregandoExclusao, modalExclusaoAberto, form, editando,
   projetosAtivos, carregarProjetos, carregarDados, voltarParaLista, limparFormulario,
-  abrirModalExclusao, fecharModal, gravarRegistro, excluirRegistro
+  abrirModalExclusao, fecharModal, gravarRegistro, excluirRegistro,
+  cpfInvalido, emailInvalido,
+  modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta 
 } = useFuncionarioFormulario()
+
+const projetosFormatados = computed(() => {
+  return projetosAtivos.value.map(p => ({
+    codigo: p.codigo,
+    label: `${p.apelido} - ${p.descricao}`
+  }))
+})
 
 onMounted(() => { 
   carregarProjetos()

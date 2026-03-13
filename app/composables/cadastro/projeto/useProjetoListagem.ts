@@ -1,6 +1,6 @@
 import { ref, reactive } from 'vue'
 
-export function useFuncionarioListagem() {
+export function useProjetoListagem() {
   const carregandoTela = ref(false)
   const buscaRealizada = ref(false)
   const visaoAtual = ref<'lista' | 'cards'>('lista')
@@ -8,30 +8,28 @@ export function useFuncionarioListagem() {
   const historicoSelecionado = ref<any[]>([])
   const carregandoHistorico = ref(false)
   const modalFiltroAvancadoAberto = ref(false)
-  const projetosAtivos = ref<any[]>([])
   const modalExibicaoAberto = ref(false)
 
   const filtro = reactive({
-    nomeParam: '',
-    cpfParam: '',
-    matriculaParam: '',
-    emailParam: '',
-    projetoParam: '',
+    apelidoParam: '', 
+    cnpjParam: '',
+    contaParam: '', 
+    verbaParam: '', 
     ativoParam: '1'
   })
 
   const colunasVisiveis = reactive({
-    cpf: true,
-    matricula: true,
-    projeto: true,
+    cnpj: true,
+    contas: true,
+    verbas: true,
     status: true,
     historico: true
   })
 
   const labelsColunas = {
-    cpf: 'Documento (CPF)',
-    matricula: 'Matrícula',
-    projeto: 'Projeto / Alocação',
+    cnpj: 'CNPJ do Projeto',
+    contas: 'Contas (Bancos)',
+    verbas: 'Verbas',
     status: 'Status',
     historico: 'Botão de Histórico'
   }
@@ -42,20 +40,20 @@ export function useFuncionarioListagem() {
   const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
   
   const filtrar = () => {
-    paginacao.mudarPagina(1)
-    buscarLista()
+    paginacao.mudarPagina(1) 
+    buscarProjetos()
   }
 
-  const sugestoesNome = ref<any[]>([])
+  const sugestoesProjeto = ref<any[]>([])
   const mostrandoSugestoes = ref(false)
   const buscandoSugestoes = ref(false)
   let timerDebounce: ReturnType<typeof setTimeout>
 
-  const buscarSugestoesNome = () => {
-    const texto = filtro.nomeParam
+  const buscarSugestoesProjeto = () => {
+    const texto = filtro.apelidoParam
     
     if (texto.length < 3) {
-      sugestoesNome.value = []
+      sugestoesProjeto.value = []
       mostrandoSugestoes.value = false
       return
     }
@@ -67,10 +65,10 @@ export function useFuncionarioListagem() {
       mostrandoSugestoes.value = true
       
       try {
-        const resposta = await $fetch<any>(`/api/cadastro/funcionario/autocomplete?q=${texto}`)
-        sugestoesNome.value = resposta?.data || [] 
+        const resposta = await $fetch<any>(`/api/cadastro/projeto/autocomplete?q=${texto}`)
+        sugestoesProjeto.value = resposta?.data || [] 
       } catch (e) {
-        console.error('Erro no autocomplete:', e)
+        console.error('Erro no autocomplete de projeto:', e)
       } finally {
         buscandoSugestoes.value = false
       }
@@ -78,7 +76,7 @@ export function useFuncionarioListagem() {
   }
 
   const selecionarSugestao = (sugestao: any) => {
-    filtro.nomeParam = sugestao.descricao
+    filtro.apelidoParam = sugestao.apelido || sugestao.descricao
     mostrandoSugestoes.value = false
     filtrar()
   }
@@ -95,16 +93,17 @@ export function useFuncionarioListagem() {
     return texto.replace(regex, '<span class="font-extrabold text-emerald-600 dark:text-emerald-400">$1</span>')
   }
 
-  const buscarLista = async () => {
+  const buscarProjetos = async () => {
     carregandoTela.value = true
     buscaRealizada.value = true
     try {
-      const data = await $fetch<any>('/api/cadastro/funcionario/listagem', {
+      const data = await $fetch<any>('/api/cadastro/projeto/listagem', {
         method: 'POST',
         body: filtro
       })
-      listaCompleta.value = data?.results || []
-      paginacao.mudarPagina(1)
+
+      listaCompleta.value = data?.results || data?.data || []
+      paginacao.mudarPagina(1) 
     } catch (err: any) {
       console.error(err)
     } finally {
@@ -117,10 +116,9 @@ export function useFuncionarioListagem() {
   }
 
   const limparFiltrosAvancados = () => {
-    filtro.cpfParam = ''
-    filtro.matriculaParam = ''
-    filtro.emailParam = ''
-    filtro.projetoParam = ''
+    filtro.cnpjParam = ''
+    filtro.contaParam = ''
+    filtro.verbaParam = ''
     modalFiltroAvancadoAberto.value = false
     filtrar()
   }
@@ -140,13 +138,16 @@ export function useFuncionarioListagem() {
     modalExibicaoAberto.value = false
   }
 
+  const abrirModalConta = (id: number) => { console.log('Abrir Contas do projeto', id) }
+  const abrirModalVerba = (id: number) => { console.log('Abrir Verbas do projeto', id) }
+
   const abrirModalHistorico = async (codigo: number) => {
     modalHistoricoAberto.value = true
     carregandoHistorico.value = true
     historicoSelecionado.value = [] 
 
     try {
-      const data = await $fetch<any>('/api/cadastro/funcionario/historico', {
+      const data = await $fetch<any>('/api/cadastro/projeto/historico', {
         method: 'POST',
         body: { codigo }
       })
@@ -163,45 +164,16 @@ export function useFuncionarioListagem() {
     }
   }
 
-  const carregarProjetos = async () => {
-    try {
-      const data = await $fetch<any>('/api/cadastro/projeto/ativos')
-      projetosAtivos.value = data?.data || data || []
-    } catch (erro) {
-      console.error('Erro ao buscar projetos para o filtro:', erro)
-    }
-  }
-
   return {
-    carregandoTela,
-    buscaRealizada,
-    filtro,
-    sugestoesNome,
-    mostrandoSugestoes,
-    buscandoSugestoes,
-    buscarSugestoesNome,
-    selecionarSugestao,
-    fecharSugestoesDelay,
-    destacarTexto,
-    buscarLista,
-    visaoAtual,
-    abrirModalFiltroAvancado,
-    abrirModalExibicao,
-    modalHistoricoAberto,
-    historicoSelecionado,
-    carregandoHistorico,
-    abrirModalHistorico,
-    modalFiltroAvancadoAberto,
-    aplicarFiltroAvancado,
-    projetosAtivos,
-    carregarProjetos,
-    modalExibicaoAberto,
-    colunasVisiveis,
-    limparFiltrosAvancados,
-    colunasTemp,
-    aplicarExibicao,
-    filtrar,
-    labelsColunas,
+    carregandoTela, buscaRealizada, visaoAtual, filtro,
+    sugestoesProjeto, mostrandoSugestoes, buscandoSugestoes,
+    buscarSugestoesProjeto, selecionarSugestao, fecharSugestoesDelay, destacarTexto,
+    buscarProjetos, filtrar,
+    modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
+    modalExibicaoAberto, colunasVisiveis, colunasTemp, abrirModalExibicao, aplicarExibicao,
+    labelsColunas, 
+    modalHistoricoAberto, historicoSelecionado, carregandoHistorico, abrirModalHistorico,
+    abrirModalConta, abrirModalVerba,
     
     listaRegistros: paginacao.listaPaginada,
     paginaAtual: paginacao.paginaAtual,
