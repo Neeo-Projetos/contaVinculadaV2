@@ -80,7 +80,6 @@ export function useFuncionarioListagem() {
   const selecionarSugestao = (sugestao: any) => {
     filtro.nomeParam = sugestao.descricao
     mostrandoSugestoes.value = false
-    filtrar()
   }
 
   const fecharSugestoesDelay = () => {
@@ -207,7 +206,6 @@ export function useFuncionarioListagem() {
     colunasTemp,
     aplicarExibicao,
     filtrar,
-    labelsColunas,
     
     dados: paginacao.listaPaginada,
     listaRegistros: paginacao.listaPaginada,

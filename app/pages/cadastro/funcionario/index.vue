@@ -15,7 +15,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto shrink-0">
-          <AppSelecaoStatus v-model="filtro.ativoParam" @change="buscarLista" />
+          <AppSelecaoStatus v-model="filtro.ativoParam" />
 
           <div
             class="flex items-center bg-gray-50 dark:bg-gray-900/50 p-1 rounded-xl border border-gray-100 dark:border-gray-800">
