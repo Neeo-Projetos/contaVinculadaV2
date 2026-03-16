@@ -196,9 +196,4 @@ const projetosFormatados = computed(() => {
     descricao: `${p.apelido} - ${p.descricao}`
   }))
 })
-
-onMounted(() => {
-  carregarProjetos()
-  buscarLista()
-})
 </script>

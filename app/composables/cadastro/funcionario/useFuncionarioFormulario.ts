@@ -20,7 +20,16 @@ export function useFuncionarioFormulario() {
   const modalAlertaTitulo = ref('')
   const modalAlertaMensagem = ref('')
 
-  const form = reactive({
+  interface FuncionarioForm {
+    codigo: number
+    nomeCompleto: string
+    cpf: string
+    matricula: string
+    email: string
+    projeto: string | number
+  }
+
+  const form = reactive<FuncionarioForm>({
     codigo: codigoRaw ? parseInt(codigoRaw as string) : 0,
     nomeCompleto: '',
     cpf: '',
@@ -59,8 +68,7 @@ export function useFuncionarioFormulario() {
           form.cpf = d.cpf
           form.matricula = d.matricula
           form.email = d.email
-          form.projeto = d.projeto
-          
+          form.projeto = d.projeto ? Number(d.projeto) : ''
           
           cpfInvalido.value = false
           emailInvalido.value = false
