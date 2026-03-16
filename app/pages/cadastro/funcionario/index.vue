@@ -127,11 +127,12 @@
           subtituloNome="E-mail"
           :subtituloValor="item.email"
           :ativo="Number(item.ativo) === 1 || item.ativo === true"
+          :mostrarStatus="colunas.status"
           :mostrarHistorico="colunas.historico"
           :detalhes="[
-            { icone: 'fa7-solid:id-badge', texto: `Matrícula: ${item.matricula}` },
-            { icone: 'fa7-solid:id-card', texto: `Projeto: ${item.projeto || 'Sem Projeto'}` },
-            { icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` }
+            ...(colunas.matricula ? [{ icone: 'fa7-solid:id-badge', texto: `Matrícula: ${item.matricula}` }] : []),
+            ...(colunas.projeto ? [{ icone: 'fa7-solid:id-card', texto: `Projeto: ${item.projeto || 'Sem Projeto'}` }] : []),
+            ...(colunas.cpf ? [{ icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` }] : [])
           ]"
           @ver-detalhes="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
           @ver-historico="abrirHistorico(item.codigo)"
@@ -165,7 +166,7 @@
 
     <AppModalExibicao 
       :aberto="modalExibicaoAberto" 
-      :colunas="colunas"
+      :colunas="colunasTemp"
       :labels="labels"
       @aplicar="aplicarExibicao"
       @close="modalExibicaoAberto = false" 
@@ -183,7 +184,7 @@ const {
   abrirHistorico, modalHistoricoAberto, codigoHistorico, historicoSelecionado, carregandoHistorico,
   modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
   modalExibicaoAberto, abrirModalExibicao, carregarProjetos, projetosAtivos,
-  colunas, labels, aplicarExibicao,
+  colunas, labels, aplicarExibicao, colunasTemp,
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = useFuncionarioListagem()
