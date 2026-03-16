@@ -10,9 +10,9 @@
     >
       <div v-if="aberto" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="$emit('close')"></div>
-        <div class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-100 dark:border-gray-800 flex flex-col animate-fade-in">
+        <div class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-100 dark:border-gray-800 flex flex-col animate-fade-in">
           
-          <div class="flex justify-between items-center p-5 border-b border-gray-100 dark:border-gray-800">
+          <div class="flex justify-between items-center p-5 border-b border-gray-100 dark:border-gray-800 rounded-t-2xl">
             <div class="flex items-center gap-3 text-emerald-600 dark:text-emerald-400">
               <Icon name="fa7-solid:filter" class="w-5 h-5" />
               <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">Filtros Avançados</h3>
@@ -28,7 +28,7 @@
             </div>
           </div>
 
-          <div class="p-5 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row justify-between items-center bg-gray-50 dark:bg-gray-900/30 gap-4">
+          <div class="p-5 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row justify-between items-center bg-gray-50 dark:bg-gray-900/30 gap-4 rounded-b-2xl">
             <button @click="$emit('limpar')" class="flex items-center gap-2 text-sm font-bold text-red-500 hover:text-red-400 transition-colors">
               <Icon name="fa7-solid:trash-can" /> Limpar Filtros
             </button>

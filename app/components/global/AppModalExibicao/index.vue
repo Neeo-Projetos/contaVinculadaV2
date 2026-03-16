@@ -10,9 +10,9 @@
     >
       <div v-if="aberto" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="$emit('close')"></div>
-        <div class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-100 dark:border-gray-800 flex flex-col">
+        <div class="relative bg-white dark:bg-[#1a1c23] rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-100 dark:border-gray-800 flex flex-col">
           
-          <div class="flex justify-between items-center p-5 border-b border-gray-100 dark:border-gray-800">
+          <div class="flex justify-between items-center p-5 border-b border-gray-100 dark:border-gray-800 rounded-t-2xl">
             <div class="flex items-center gap-3 text-emerald-600 dark:text-emerald-400">
               <Icon name="fa7-solid:table-columns" class="w-5 h-5" />
               <div>
@@ -42,7 +42,7 @@
             </div>
           </div>
 
-          <div class="p-5 border-t border-gray-100 dark:border-gray-800 flex justify-end bg-gray-50 dark:bg-gray-900/30">
+          <div class="p-5 border-t border-gray-100 dark:border-gray-800 flex justify-end bg-gray-50 dark:bg-gray-900/30 rounded-b-2xl">
             <AppBotao variacao="primario" icone="fa7-solid:check" @click="$emit('aplicar')">Pronto</AppBotao>
           </div>
 
