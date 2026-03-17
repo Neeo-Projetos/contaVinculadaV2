@@ -12,7 +12,7 @@ Este documento é a referência definitiva para a criação de novas telas no si
 Uma tela de listagem padrão deve seguir a anatomia do arquivo [funcionario/index.vue](file:///c:/inetpub/wwwroot/contaVinculadaV2/app/pages/cadastro/funcionario/index.vue).
 
 ### 1.1 Estrutura Visual (Top-Down)
-1. **Navegação**: Usar `AppBarraNavegacao` no topo (identidade breadcrumb).
+1. **Navegação**: Usar `AppTrilhaNavegacao` no topo (identidade breadcrumb).
 2. **Cabeçalho**: `AppCabecalhoPagina` com título fino/grosso e ícone representativo.
 3. **Barra de Filtros Principal**:
    - `AppInputAutocomplete`: Para busca textual com sugestões em tempo real.
@@ -48,6 +48,19 @@ Basear-se integralmente no arquivo [funcionario/cadastro.vue](file:///c:/inetpub
 - **Comunicação**: O botão de inativação no rodapé só deve aparecer se o registro já estiver salvo (`editando`) e estiver atualmente **Ativo**.
 - **Modal de Confirmação**: Usar `AppModal` com `tamanho="sm"`, `rodapeEntre` e `semScroll`. O texto deve informar que o dado permanecerá no histórico.
 
+### 2.3 Formulários Complexos (Multi-etapas)
+Para formulários com muitos campos ou divisões lógicas claras, use o padrão de passos:
+- **Componente**: `AppPassosFormulario`.
+- **Estrutura**:
+  ```vue
+  <AppTrilhaNavegacao class="mb-8" ... />
+  <div class="mb-8">
+    <AppPassosFormulario :passos="['Etapa 1', 'Etapa 2']" :passoAtual="passoAtual" />
+  </div>
+  <AppCartaoFormulario> ... </AppCartaoFormulario>
+  ```
+- **UX**: O rodapé deve alternar entre "Próxima Etapa" e "Finalizar Cadastro" conforme o `passoAtual`.
+
 ---
 
 ## 3. Camada de Lógica (Composables)
@@ -63,6 +76,12 @@ Toda a inteligência deve estar em composables dedicados.
 - Utilizar `reactive` para o objeto `form`.
 - Definir `interface` TypeScript clara para o formulário.
 - Centralizar o status `ativo` (status 0 ou 1) no estado do formulário para controle de UI.
+
+### 3.3 Navegação de Passos
+Em formulários multi-etapas, o composable deve gerenciar:
+- `passoAtual: number`: Índice da etapa ativa.
+- `avancarPasso()` / `voltarPasso()`: Funções de navegação com validação.
+- `totalPassos: number`: Constante para controle de fim de fluxo.
 
 ---
 
@@ -85,3 +104,8 @@ Toda a inteligência deve estar em composables dedicados.
 - **Z-Index**: O Modal global usa `z-[999]` para garantir visibilidade absoluta.
 - **Micro-interações**: Usar as animações `animate-fade-in` e `animate-modal-in` para suavidade.
 - **Iconografia**: Priorizar `fa7-solid` ou `fa6-solid` para consistência.
+- **Espaçamento Central**: Usar `md:p-10` no container principal para telas de cadastro.
+- **Grid de Formulários**:
+  - Usar `gap-6` entre campos.
+  - Alinhamento `items-end` para garantir que labels e inputs fiquem equilibrados visualmente.
+  - Labels sempre em caixa alta (uppercase) e com `tracking-wider` (através dos componentes de input).
