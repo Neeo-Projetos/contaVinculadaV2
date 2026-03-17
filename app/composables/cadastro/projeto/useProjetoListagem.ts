@@ -1,4 +1,5 @@
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
+import { useWindowSize } from '@vueuse/core'
 
 export function useProjetoListagem() {
   const carregandoTela = ref(false)
@@ -9,6 +10,13 @@ export function useProjetoListagem() {
   const carregandoHistorico = ref(false)
   const modalFiltroAvancadoAberto = ref(false)
   const modalExibicaoAberto = ref(false)
+  const { width } = useWindowSize()
+
+  const placeholderDinamico = computed(() => {
+    if (width.value < 640) return 'Digite o apelido...'
+    if (width.value < 1024) return 'Digite o apelido do proj...'
+    return 'Digite o apelido do projeto...'
+  })
 
   const filtro = reactive({
     apelidoParam: '', 
@@ -141,7 +149,7 @@ export function useProjetoListagem() {
   const abrirModalConta = (id: number) => { console.log('Abrir Contas do projeto', id) }
   const abrirModalVerba = (id: number) => { console.log('Abrir Verbas do projeto', id) }
 
-  const abrirModalHistorico = async (codigo: number) => {
+  const abrirHistorico = async (codigo: number) => {
     modalHistoricoAberto.value = true
     carregandoHistorico.value = true
     historicoSelecionado.value = [] 
@@ -168,11 +176,11 @@ export function useProjetoListagem() {
     carregandoTela, buscaRealizada, visaoAtual, filtro,
     sugestoesProjeto, mostrandoSugestoes, buscandoSugestoes,
     buscarSugestoesProjeto, selecionarSugestao, fecharSugestoesDelay, destacarTexto,
-    buscarProjetos, filtrar,
+    buscarProjetos, filtrar, placeholderDinamico,
     modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
     modalExibicaoAberto, colunasVisiveis, colunasTemp, abrirModalExibicao, aplicarExibicao,
     labelsColunas, 
-    modalHistoricoAberto, historicoSelecionado, carregandoHistorico, abrirModalHistorico,
+    modalHistoricoAberto, historicoSelecionado, carregandoHistorico, abrirHistorico,
     abrirModalConta, abrirModalVerba,
     
     listaRegistros: paginacao.listaPaginada,
@@ -186,4 +194,4 @@ export function useProjetoListagem() {
     mudarPagina: paginacao.mudarPagina,
     mudarItensPorPagina: paginacao.mudarItensPorPagina
   }
-}
+}

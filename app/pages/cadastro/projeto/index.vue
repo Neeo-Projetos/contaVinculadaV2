@@ -1,149 +1,171 @@
 <template>
-  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in">
+  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
 
     <AppCabecalhoPagina tituloFino="Gestão de" tituloGrosso="Projetos"
       descricao="Gerenciamento de projetos, contas e verbas do sistema" icone="fa7-solid:briefcase" />
 
-    <AppBarraFerramentas v-model:visaoAtual="visaoAtual">
+    <div
+      class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm space-y-5">
+      <div class="flex flex-col xl:flex-row items-center gap-4">
+        <div class="flex-1 w-full text-left">
+          <AppInputAutocomplete v-model="filtro.apelidoParam" :sugestoes="sugestoesProjeto" :buscando="buscandoSugestoes"
+            :mostrarMenu="mostrandoSugestoes" :placeholder="placeholderDinamico"
+            @buscar="buscarSugestoesProjeto" @selecionar="selecionarSugestao" @fechar="fecharSugestoesDelay"
+            @enter="buscarProjetos" />
+        </div>
 
-      <template #entradas>
-        <AppInputAutocomplete v-model="filtro.apelidoParam" :sugestoes="sugestoesProjeto" :buscando="buscandoSugestoes"
-          :mostrarMenu="mostrandoSugestoes" placeholder="Digite o apelido do projeto..." @buscar="buscarSugestoesProjeto"
-          @selecionar="selecionarSugestao" @fechar="fecharSugestoesDelay" @enter="buscarProjetos" />
+        <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto shrink-0">
+          <AppSelecaoStatus v-model="filtro.ativoParam" />
 
-        <AppDropdownStatus v-model="filtro.ativoParam" @change="buscarProjetos" />
-      </template>
+          <div
+            class="flex items-center bg-gray-50 dark:bg-gray-900/50 p-1 rounded-xl border border-gray-100 dark:border-gray-800">
+            <button @click="visaoAtual = 'lista'"
+              :class="visaoAtual === 'lista' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 font-bold'"
+              class="px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2">
+              <Icon name="fa7-solid:list-ul" class="w-4 h-4" /> Lista
+            </button>
+            <button @click="visaoAtual = 'cards'"
+              :class="visaoAtual === 'cards' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 font-bold'"
+              class="px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2">
+              <Icon name="fa7-solid:border-all" class="w-4 h-4" /> Cards
+            </button>
+          </div>
 
-      <template #acoes-secundarias>
-        <button @click="abrirModalExibicao"
-          class="flex items-center gap-2 px-4 h-11 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all shadow-sm">
-          <Icon name="fa7-solid:table-columns" class="w-4 h-4 opacity-70" /> Exibição
-        </button>
+          <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden xl:block mx-1"></div>
 
-        <button @click="abrirModalFiltroAvancado"
-          class="flex items-center gap-2 px-4 h-11 bg-gray-100 dark:bg-gray-800/80 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700/50 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all shadow-sm">
-          <Icon name="fa7-solid:filter" class="w-4 h-4 text-gray-500 dark:text-gray-400" /> Filtros Avançados
-        </button>
-      </template>
+          <AppBotao variacao="padrao" icone="fa7-solid:table-columns" @click="abrirModalExibicao">Exibição</AppBotao>
+          <AppBotao variacao="padrao" icone="fa7-solid:filter" @click="abrirModalFiltroAvancado">Filtros Avançados
+          </AppBotao>
+        </div>
+      </div>
 
-      <template #acoes-principais>
-        <NuxtLink to="/cadastro/projeto/cadastro?id=0"
-          class="w-full sm:w-auto flex items-center justify-center gap-3 px-6 h-11 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white rounded-xl text-sm font-bold transition-all shadow-md">
-          <Icon name="fa7-solid:plus" class="w-5 h-5" /> Novo Projeto
-        </NuxtLink>
-        <button @click="buscarProjetos"
-          class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 h-11 bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white rounded-xl text-sm font-bold transition-all shadow-md">
-          <Icon name="fa7-solid:magnifying-glass" class="w-5 h-5" /> Pesquisar Projetos
-        </button>
-      </template>
+      <div class="w-full h-px bg-gray-100 dark:bg-gray-800/80"></div>
 
-    </AppBarraFerramentas>
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <AppBotao variacao="primario" icone="fa7-solid:plus" @click="navigateTo('/cadastro/projeto/cadastro?id=0')">
+          Novo Projeto
+        </AppBotao>
+        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarProjetos">
+          Pesquisar Projetos
+        </AppBotao>
+      </div>
+    </div>
 
-    <AppContainerListagem :carregando="carregandoTela" :busca-realizada="buscaRealizada" :lista="listaRegistros"
-      :visao-atual="visaoAtual" :registro-inicial="registroInicial" :registro-final="registroFinal"
-      :total-registros="totalRegistros" :itens-por-pagina="itensPorPagina" :total-paginas="totalPaginas"
-      :pagina-atual="paginaAtual" :paginas-exibidas="paginasExibidas" @mudar-pagina="mudarPagina"
-      @mudar-itens-por-pagina="mudarItensPorPagina">
+    <AppContainerListagem :carregando="carregandoTela" :buscaRealizada="buscaRealizada" :lista="listaRegistros"
+      :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
+      :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
+      :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
+      @mudarItensPorPagina="mudarItensPorPagina">
 
       <template #cabecalho-tabela>
-        <th class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Projeto</th>
-        <th v-show="colunasVisiveis.cnpj" class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">CNPJ</th>
-        <th v-show="colunasVisiveis.contas" class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Contas</th>
-        <th v-show="colunasVisiveis.verbas" class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Verbas</th>
-        <th v-show="colunasVisiveis.status" class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
-        <th v-show="colunasVisiveis.historico" class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Histórico</th>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          Projeto</th>
+        <th v-if="colunasVisiveis.cnpj" scope="col"
+          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          CNPJ</th>
+        <th v-if="colunasVisiveis.contas" scope="col"
+          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          Contas</th>
+        <th v-if="colunasVisiveis.verbas" scope="col"
+          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          Verbas</th>
+        <th v-if="colunasVisiveis.status" scope="col"
+          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          Status</th>
+        <th v-if="colunasVisiveis.historico" scope="col"
+          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          Histórico</th>
       </template>
 
       <template #linhas-tabela="{ item }">
-        <td class="px-6 py-2 max-w-[250px] whitespace-normal">
-          <NuxtLink :to="`/cadastro/projeto/cadastro?id=${item.codigo}`" class="flex flex-col group cursor-pointer">
-            <span class="font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors break-words">
-              {{ item.apelido }}
-            </span>
-            <span class="text-xs text-gray-500 dark:text-gray-500 break-words">{{ item.descricao }}</span>
+        <td class="px-6 py-4 max-w-[300px]">
+          <NuxtLink :to="`/cadastro/projeto/cadastro?id=${item.codigo}`" class="flex items-center gap-3 group">
+            <div
+              class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all">
+              {{ item.apelido.charAt(0).toUpperCase() }}
+            </div>
+            <div class="flex flex-col min-w-0">
+              <span
+                class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{
+                  item.apelido }}</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ item.descricao }}</span>
+            </div>
           </NuxtLink>
         </td>
-        
-        <td v-show="colunasVisiveis.cnpj" class="px-6 py-2 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ item.cnpj }}</td>
-        
-        <td v-show="colunasVisiveis.contas" class="px-6 py-2 text-center whitespace-nowrap">
-          <button @click="abrirModalConta(item.codigo)" title="Ver Contas"
-            class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800/50">
-            <Icon name="fa7-solid:building-columns" class="w-4 h-4" />
+        <td v-if="colunasVisiveis.cnpj" class="px-6 py-4 text-center">
+          <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ item.cnpj }}</span>
+        </td>
+        <td v-if="colunasVisiveis.contas" class="px-6 py-4 text-center">
+          <button @click="abrirModalConta(item.codigo)"
+            class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
+            title="Ver Contas">
+            <Icon name="fa7-solid:building-columns" class="w-5 h-5" />
           </button>
         </td>
-        
-        <td v-show="colunasVisiveis.verbas" class="px-6 py-2 text-center whitespace-nowrap">
-          <button @click="abrirModalVerba(item.codigo)" title="Ver Verbas"
-            class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800/50">
-            <Icon name="fa7-solid:sack-dollar" class="w-4 h-4" />
+        <td v-if="colunasVisiveis.verbas" class="px-6 py-4 text-center">
+          <button @click="abrirModalVerba(item.codigo)"
+            class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
+            title="Ver Verbas">
+            <Icon name="fa7-solid:sack-dollar" class="w-5 h-5" />
           </button>
         </td>
-        
-        <td v-show="colunasVisiveis.status" class="px-6 py-2 text-center whitespace-nowrap">
+        <td v-if="colunasVisiveis.status" class="px-6 py-4 text-center">
           <AppAtivo :ativo="item.ativo" />
         </td>
-        
-        <td v-show="colunasVisiveis.historico" class="px-6 py-2 text-center whitespace-nowrap">
-          <button @click="abrirModalHistorico(item.codigo)" title="Ver Histórico"
-            class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800/50">
-            <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" />
+        <td v-if="colunasVisiveis.historico" class="px-6 py-4 text-center">
+          <button @click="abrirHistorico(item.codigo)"
+            class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
+            title="Ver Histórico">
+            <Icon name="fa6-solid:clock-rotate-left" class="w-5 h-5" />
           </button>
         </td>
       </template>
 
       <template #cards="{ item }">
-        <AppCardListagem :titulo="item.apelido" subtituloNome="CNPJ" :subtituloValor="item.cnpj"
-          :ativo="item.ativo" :categoriaTexto="item.descricao" categoriaIcone="fa7-solid:file-signature"
-          :mostrarSubtitulo="colunasVisiveis.cnpj" :mostrarStatus="colunasVisiveis.status"
-          :mostrarCategoria="true" :mostrarHistorico="colunasVisiveis.historico" 
-          :detalhes="[]" 
-          @clique-titulo="navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}`)"
-          @ver-detalhes="navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}`)"
-          @ver-historico="abrirModalHistorico(item.codigo)" />
+        <AppCardListagem :titulo="item.apelido" subtituloNome="Descrição" :subtituloValor="item.descricao"
+          :ativo="item.ativo" :mostrarStatus="colunasVisiveis.status"
+          :mostrarHistorico="colunasVisiveis.historico" :detalhes="[
+            ...(colunasVisiveis.cnpj ? [{ icone: 'fa7-solid:address-card', texto: `CNPJ: ${item.cnpj}` }] : [])
+          ]" @ver-detalhes="navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}`)"
+          @ver-historico="abrirHistorico(item.codigo)"
+          @clique-titulo="navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}`)" />
       </template>
 
     </AppContainerListagem>
 
-    <AppModalHistorico :aberto="modalHistoricoAberto" titulo="Histórico do Projeto"
-      :historico="historicoSelecionado" @close="modalHistoricoAberto = false" />
-      
-    <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" 
-      @close="modalFiltroAvancadoAberto = false" @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
-      
+    <AppModalHistorico :aberto="modalHistoricoAberto" :historico="historicoSelecionado"
+      :carregando="carregandoHistorico" @close="modalHistoricoAberto = false" />
+
+    <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" @close="modalFiltroAvancadoAberto = false"
+      @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
+
       <AppInputCnpj v-model="filtro.cnpjParam" label="CNPJ do Projeto" />
-      
+
       <AppSelect v-model="filtro.contaParam" label="Conta Vinculada (Banco)" 
         :opcoes="[{ codigo: '1', descricao: 'Banco do Brasil' }, { codigo: '2', descricao: 'Caixa' }]" />
         
       <AppSelect v-model="filtro.verbaParam" label="Verba" 
         :opcoes="[{ codigo: '1', descricao: 'Verba CLT' }, { codigo: '2', descricao: 'Verba Estágio' }]" />
-        
+
     </AppModalFiltroAvancado>
-      
-    <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labelsColunas"
-      @close="modalExibicaoAberto = false" @aplicar="aplicarExibicao" />
+
+    <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labelsColunas" @aplicar="aplicarExibicao"
+      @close="modalExibicaoAberto = false" />
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-
 const {
   filtro, listaRegistros, carregandoTela, buscaRealizada,
   visaoAtual, registroInicial, registroFinal, totalRegistros,
   itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   colunasVisiveis, colunasTemp, modalExibicaoAberto, aplicarExibicao, abrirModalExibicao,
-  labelsColunas, // PUXA O DICIONÁRIO AQUI!
-  modalHistoricoAberto, historicoSelecionado, abrirModalHistorico,
+  labelsColunas, placeholderDinamico,
+  modalHistoricoAberto, historicoSelecionado, carregandoHistorico, abrirHistorico,
   modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
   sugestoesProjeto, mostrandoSugestoes, buscandoSugestoes, buscarSugestoesProjeto, selecionarSugestao, fecharSugestoesDelay,
   buscarProjetos, mudarPagina, mudarItensPorPagina,
   abrirModalConta, abrirModalVerba
 } = useProjetoListagem()
-
-onMounted(() => {
-  // buscarProjetos()
-})
-</script>
+</script>

@@ -20,6 +20,6 @@ export default defineEventHandler(async (event) => {
     return { status: 'success', data: result.recordset }
   } catch (erro) {
     console.error('Erro ao listar projetos:', erro)
-    return { status: 'failed', message: 'Erro ao buscar projetos no banco.' }
+    return { status: 'failed', mensagem: 'Erro ao buscar projetos no banco.' }
   }
 })

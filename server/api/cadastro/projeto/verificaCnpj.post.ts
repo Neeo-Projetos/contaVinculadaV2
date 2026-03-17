@@ -18,6 +18,6 @@ export default defineEventHandler(async (event) => {
     return { status: 'failed' }
   } catch (erro) {
     console.error('Erro ao verificar CNPJ:', erro)
-    return { status: 'failed', message: 'Erro ao verificar CNPJ.' }
+    return { status: 'failed', mensagem: 'Erro ao verificar CNPJ.' }
   }
 })
