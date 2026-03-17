@@ -5,6 +5,15 @@ Este documento é a referência definitiva para a criação de novas telas no si
 > [!IMPORTANT]
 > O módulo de **Funcionário** (`app/pages/cadastro/funcionario/`) é o **Padrão Ouro**. Qualquer nova tela de CRUD deve ser baseada rigorosamente na estrutura deste módulo.
 
+## 0. Regras de Ouro (Invioláveis)
+
+1. **Referência Absoluta**: O módulo de **Funcionário** (`app/pages/cadastro/funcionario/`) é a base. Se houver dúvida, siga o que está lá.
+2. **Navegação Distinta**: 
+   - Telas de **Listagem** (`index.vue`): **NÃO** usam barra de navegação no topo. Usam apenas `AppCabecalhoPagina`.
+   - Telas de **Cadastro** (`cadastro.vue`): **OBRIGATÓRIO** o uso de `AppBarraNavegacao` no topo.
+   - Telas de **Processo/Wizards**: Usam `AppTrilhaNavegacao` (ex: telas que não são CRUDs puros).
+3. **Grid System**: Sempre usar `md:grid-cols-12` com `gap-x-6 gap-y-8`. Nunca use grids genéricos (`cols-3`) para manter o alinhamento vertical dos labels.
+
 ---
 
 ## 1. Telas de Listagem (Ex: `index.vue`)
@@ -12,7 +21,7 @@ Este documento é a referência definitiva para a criação de novas telas no si
 Uma tela de listagem padrão deve seguir a anatomia do arquivo [funcionario/index.vue](file:///c:/inetpub/wwwroot/contaVinculadaV2/app/pages/cadastro/funcionario/index.vue).
 
 ### 1.1 Estrutura Visual (Top-Down)
-1. **Navegação**: Usar `AppTrilhaNavegacao` no topo (identidade breadcrumb).
+1. **Navegação**: O index não possui barra de navegação no topo, apenas o cabeçalho.
 2. **Cabeçalho**: `AppCabecalhoPagina` com título fino/grosso e ícone representativo.
 3. **Barra de Filtros Principal**:
    - `AppInputAutocomplete`: Para busca textual com sugestões em tempo real.
@@ -53,7 +62,7 @@ Para formulários com muitos campos ou divisões lógicas claras, use o padrão 
 - **Componente**: `AppPassosFormulario`.
 - **Estrutura**:
   ```vue
-  <AppTrilhaNavegacao class="mb-8" ... />
+  <AppBarraNavegacao class="mb-8" ... />
   <div class="mb-8">
     <AppPassosFormulario :passos="['Etapa 1', 'Etapa 2']" :passoAtual="passoAtual" />
   </div>
@@ -114,4 +123,11 @@ Em formulários multi-etapas, o composable deve gerenciar:
   - Usar `gap-6` entre campos.
   - Alinhamento `items-end` para garantir que labels e inputs fiquem equilibrados visualmente.
   - Labels sempre em caixa alta (uppercase) e com `tracking-wider` (através dos componentes de input).
-- **Feedback de Erro**: O efeito de shake deve ser aplicado no container do campo (através da classe `:class="{ 'animate-shake': erros.has('campo') }"`) para garantir que o usuário identifique o problema sem a necessidade de alertas intrusivos.
+- **Labels**: Sempre em caixa alta (uppercase), com `tracking-wider` e cinza médio/claro (`text-gray-400`).
+- **Animações**:
+  - `animate-fade-in`: Em todos os containers principais das páginas.
+  - `animate-shake`: Aplicado ao container do input quando houver erro de validação.
+  - `animate-success-pop`: Usado no ícone principal de modais de conclusão.
+- **Z-Index**:
+  - `AppModal`: `z-[999]`.
+  - `AppSobreposicaoCarregamento`: Deve cobrir o formulário mas permitir ver o cabeçalho.

@@ -14,17 +14,18 @@ export default defineEventHandler(async (event) => {
       `
       
     const result = await pool.request().query(query)
+    let data = { motivo: '', usuarioCadastro: '', dataCadastro: '' }
+    
     if (result.recordset.length > 0) {
-      const row = result.recordset[0]
-      if(row.dataCadastro) {
-         const d = new Date(row.dataCadastro)
-         row.dataCadastro = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+      data = result.recordset[0]
+      if(data.dataCadastro) {
+         const d = new Date(data.dataCadastro)
+         data.dataCadastro = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
       }
-      return row
     }
-    return { motivo: '', usuarioCadastro: '', dataCadastro: '' }
+    return { status: 'success', data }
   } catch (erro) {
     console.error('Erro ao buscar detalhe:', erro)
-    return { motivo: '', usuarioCadastro: '', dataCadastro: '' }
+    return { status: 'failed', mensagem: 'Erro ao buscar detalhes no banco.' }
   }
 })

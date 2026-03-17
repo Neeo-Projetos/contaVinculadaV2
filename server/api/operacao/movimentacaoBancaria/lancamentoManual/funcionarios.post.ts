@@ -13,9 +13,9 @@ export default defineEventHandler(async (event) => {
       WHERE LM.lancamentoManual = ${id}
       `
     const result = await pool.request().query(query)
-    return result.recordset
+    return { status: 'success', data: result.recordset }
   } catch (erro) {
     console.error('Erro ao buscar funcionarios:', erro)
-    return []
+    return { status: 'failed', mensagem: 'Erro ao buscar funcionários vinculados.' }
   }
 })

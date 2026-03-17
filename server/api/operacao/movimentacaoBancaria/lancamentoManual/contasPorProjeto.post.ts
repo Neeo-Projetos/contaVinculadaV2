@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const projeto = Number(body.projeto)
 
-  if (!projeto) return []
+  if (!projeto) return { status: 'success', data: [] }
 
   try {
     const pool = await useDb()
@@ -15,9 +15,9 @@ export default defineEventHandler(async (event) => {
       WHERE CP.projeto = ${projeto} ORDER BY B.nomeBanco
     `
     const result = await pool.request().query(query)
-    return result.recordset
+    return { status: 'success', data: result.recordset }
   } catch (erro) {
     console.error('Erro ao buscar contas:', erro)
-    return []
+    return { status: 'failed', mensagem: 'Erro ao buscar contas vinculadas.' }
   }
 })

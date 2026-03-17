@@ -1,291 +1,244 @@
 <template>
-  <div class="p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">
-        <Icon name="fa-solid:pencil-square-o" class="mr-2" />
-        Lançamento Manual - Cadastro
-      </h1>
+  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
+    
+    <AppBarraNavegacao 
+      icone="fa7-solid:file-invoice-dollar" 
+      :links="[{ label: 'Lançamento Manual', to: '/operacao/movimentacaoBancaria/lancamentoManual' }]"
+      :paginaAtual="editando ? 'Editando Lançamento' : 'Novo Lançamento'"
+    />
+
+    <div class="mb-4">
+      <AppPassosFormulario :passos="passos" :passoAtual="passoAtual" />
     </div>
 
-    <div class="bg-white rounded-lg shadow-md mb-6 p-4">
-      <h2 class="text-lg font-semibold mb-4 border-b pb-2">Informações do lançamento</h2>
+    <AppCartaoFormulario>
+      <AppSobreposicaoCarregamento :carregando="carregandoTela || salvando" :mensagem="salvando ? 'Gravando lançamento...' : 'Carregando dados...'" />
 
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Projeto <span
-              class="text-red-500">*</span></label>
-          <select v-model="form.projeto" @change="carregarContas(form.projeto)"
-            class="w-full border rounded-md p-2 bg-white">
-            <option value=""></option>
-            <option v-for="proj in projetos" :key="proj.codigo" :value="proj.codigo">
-              {{ proj.apelido }} - {{ proj.descricao }}
-            </option>
-          </select>
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Conta Vinculada <span
-              class="text-red-500">*</span></label>
-          <select v-model="form.contaVinculada" @change="carregarProjetoDaConta(form.contaVinculada)"
-            class="w-full border rounded-md p-2 bg-white">
-            <option value=""></option>
-            <option v-for="conta in contasVinculadas" :key="conta.codigo" :value="conta.codigo">
-              {{ conta.conta }} - {{ conta.banco }}
-            </option>
-          </select>
-        </div>
-      </div>
+      <form v-if="!carregandoTela" @submit.prevent class="space-y-8 relative z-0">
+        
+        <!-- PASSO 0: DADOS DO LANÇAMENTO -->
+        <div v-show="passoAtual === 0" class="space-y-8 animate-fade-in">
+          <AppFormularioSecao icone="fa7-solid:circle-info">
+            Dados do Lançamento
+          </AppFormularioSecao>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo da Movimentação <span
-              class="text-red-500">*</span></label>
-          <select v-model="form.tipoMovimentacao" class="w-full border rounded-md p-2 bg-white">
-            <option value=""></option>
-            <option v-for="tipo in tiposMovimentacao" :key="tipo.codigo" :value="tipo.codigo">
-              {{ tipo.descricao }}
-            </option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Valor da Movimentação <span
-              class="text-red-500">*</span></label>
-          <div class="relative">
-            <Icon name="fa-solid:usd" class="absolute left-3 top-3 text-gray-400" />
-            <input v-model="form.valorMovimentacao" @input="formatarValor" type="text"
-              class="w-full border rounded-md p-2 pl-10" />
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8">
+            <div class="md:col-span-6" :class="{ 'animate-shake': erros.has('projeto') }">
+              <AppSelect 
+                v-model="form.projeto" 
+                label="Projeto" 
+                placeholder="Selecione o projeto..." 
+                :opcoes="combos.projetos.map(p => ({ codigo: p.codigo, descricao: `${p.apelido} - ${p.descricao}` }))"
+                required 
+                @change="carregarContas(form.projeto)"
+              />
+            </div>
+
+            <div class="md:col-span-6" :class="{ 'animate-shake': erros.has('contaVinculada') }">
+              <AppSelect 
+                v-model="form.contaVinculada" 
+                label="Conta Vinculada" 
+                placeholder="Selecione a conta..." 
+                :opcoes="combos.contasVinculadas.map(c => ({ codigo: c.codigo, descricao: `${c.conta} - ${c.banco}` }))"
+                required 
+                @change="carregarProjetoDaConta(form.contaVinculada)"
+              />
+            </div>
+
+            <div class="md:col-span-4" :class="{ 'animate-shake': erros.has('tipoMovimentacao') }">
+              <AppSelect 
+                v-model="form.tipoMovimentacao" 
+                label="Tipo de Movimentação" 
+                :opcoes="combos.tiposMovimentacao.map(t => ({ codigo: t.codigo, descricao: t.descricao }))"
+                placeholder="Selecione..."
+                required 
+              />
+            </div>
+
+            <div class="md:col-span-4" :class="{ 'animate-shake': erros.has('valorMovimentacao') }">
+              <AppInputMoeda 
+                v-model="form.valorMovimentacao" 
+                label="Valor" 
+                required 
+              />
+            </div>
+
+            <div class="md:col-span-4" :class="{ 'animate-shake': erros.has('dataMovimentacao') }">
+              <AppInputTexto 
+                v-model="form.dataMovimentacao" 
+                label="Data" 
+                placeholder="DD/MM/AAAA"
+                v-maska data-maska="##/##/####"
+                icone="fa7-solid:calendar-day"
+                required 
+              />
+            </div>
+
+            <div class="md:col-span-4" :class="{ 'animate-shake': erros.has('classificacao') }">
+              <AppSelect 
+                v-model="form.classificacao" 
+                label="Classificação" 
+                :opcoes="combos.classificacoes.map(c => ({ codigo: c.codigo, descricao: c.descricao }))"
+                placeholder="Selecione..."
+                required 
+              />
+            </div>
+
+            <div class="md:col-span-8" :class="{ 'animate-shake': erros.has('motivo') }">
+              <AppInputTexto 
+                v-model="form.motivo" 
+                label="Motivo / Observação" 
+                placeholder="Digite o motivo..."
+                icone="fa7-solid:comment-dots"
+                required 
+                maxlength="200"
+              />
+            </div>
           </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Data da Movimentação <span
-              class="text-red-500">*</span></label>
-          <div class="relative">
-            <Icon name="fa-solid:calendar" class="absolute left-3 top-3 text-gray-400" />
-            <input v-model="form.dataMovimentacao" v-maska data-maska="##/##/####" placeholder="dd/mm/aaaa" type="text"
-              class="w-full border rounded-md p-2 pl-10 text-center" />
+
+        <!-- PASSO 1: VINCULAR FUNCIONÁRIOS -->
+        <div v-show="passoAtual === 1" class="space-y-8 animate-fade-in">
+          <AppFormularioSecao icone="fa7-solid:users-gear">
+            Vincular Funcionários (Opcional)
+          </AppFormularioSecao>
+
+          <div class="space-y-6">
+            <div class="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-4 items-end">
+              <div class="flex-1 w-full">
+                <AppSelect 
+                  v-model="funcionarioTemp" 
+                  label="Funcionário" 
+                  placeholder="Selecione para adicionar..."
+                  :opcoes="combos.funcionariosAtivos.map(f => ({ codigo: f, descricao: f.nomeCompleto }))"
+                  returnObject
+                />
+              </div>
+              <div class="flex gap-2 w-full md:w-auto">
+                <AppBotao variacao="primario" @click="addFuncionario" class="flex-1 md:flex-none h-12">
+                  <Icon name="fa7-solid:plus" class="mr-2" /> Adicionar
+                </AppBotao>
+                <AppBotao variacao="perigo" @click="removerFuncionariosSelecionados" class="flex-1 md:flex-none h-12">
+                  <Icon name="fa7-solid:trash-can" />
+                </AppBotao>
+              </div>
+            </div>
+
+            <div v-if="form.funcionarios.filter(f => f.tipoAlteracao !== 2).length > 0" class="border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-[#1e2029]">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-gray-50 dark:bg-gray-800/50">
+                    <th class="p-4 w-12 text-center border-b border-gray-100 dark:border-gray-800">
+                       <Icon name="fa7-solid:check-double" class="text-gray-300" />
+                    </th>
+                    <th class="p-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-800">Funcionário</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                  <tr v-for="(item, index) in form.funcionarios.filter(f => f.tipoAlteracao !== 2)" :key="index" class="hover:bg-gray-50/50 transition-colors">
+                    <td class="p-4 text-center">
+                      <input type="checkbox" v-model="item.selecionadoParaRemover" class="w-5 h-5 rounded-lg border-gray-200 text-emerald-500 focus:ring-emerald-500 cursor-pointer" />
+                    </td>
+                    <td class="p-4 font-bold text-sm text-gray-700 dark:text-gray-300">{{ item.funcionarioNome }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-else class="text-center py-12 bg-gray-50/30 dark:bg-gray-900/10 rounded-3xl border-2 border-dashed border-gray-100 dark:border-gray-800">
+              <Icon name="fa7-solid:users-slash" class="w-12 h-12 text-gray-200 mb-4" />
+              <p class="text-base text-gray-400 font-medium">Nenhum funcionário vinculado.</p>
+              <p class="text-xs text-gray-300 mt-1">O lançamento será aplicado a todos do projeto por padrão.</p>
+            </div>
           </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Classificação <span
-              class="text-red-500">*</span></label>
-          <select v-model="form.classificacao" class="w-full border rounded-md p-2 bg-white">
-            <option value=""></option>
-            <option v-for="classe in classificacoes" :key="classe.codigo" :value="classe.codigo">
-              {{ classe.descricao }}
-            </option>
-          </select>
+
+        <AppRodapeFormulario 
+          :editando="editando" 
+          :carregandoGravar="salvando"
+          :labelGravar="passoAtual === 0 ? 'Próximo Passo' : (editando ? 'Atualizar Lançamento' : 'Finalizar Cadastro')"
+          :iconeGravar="passoAtual === 0 ? 'fa7-solid:arrow-right' : 'fa7-solid:check'"
+          @voltar="voltarPasso"
+          @gravar="passoAtual === 0 ? avancarPasso() : tentarGravar()"
+          @limpar="novoRegistro"
+        />
+      </form>
+    </AppCartaoFormulario>
+
+    <!-- Modal Confirmação Geral -->
+    <AppModal :isOpen="modalConfirmaTodosAberto" title="Atenção: Lançamento Geral" icon="fa7-solid:circle-nodes" tamanho="sm" @close="modalConfirmaTodosAberto = false" rodapeEntre semScroll>
+      <div class="flex flex-col items-center py-2 text-center">
+        <div class="relative mb-6">
+          <div class="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full"></div>
+          <div class="relative w-20 h-20 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-xl">
+            <Icon name="fa7-solid:users" class="w-10 h-10 text-white" />
+          </div>
         </div>
+        <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-[300px]">
+          Deseja aplicar este lançamento para **TODOS** os funcionários deste projeto?
+        </p>
       </div>
-
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Motivo <span class="text-red-500">*</span></label>
-        <textarea v-model="form.motivo" rows="4"
-          class="w-full border rounded-md p-2 bg-yellow-50 resize-none"></textarea>
-      </div>
-
-      <h2 class="text-lg font-semibold mb-4 border-b pb-2">Em caso de lançamento por funcionário(s), preencher a
-        listagem</h2>
-
-      <div class="flex gap-4 mb-4 items-end">
-        <div class="flex-grow">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Funcionário</label>
-          <select v-model="funcionarioTemp" class="w-full border rounded-md p-2 bg-white">
-            <option value=""></option>
-            <option v-for="func in funcionariosAtivos" :key="func.codigo" :value="func">
-              {{ func.nomeCompleto }}
-            </option>
-          </select>
-        </div>
-        <button @click="addFuncionario"
-          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center">
-          <span>Adicionar</span>
-          <Icon name="fa-solid:plus" class="ml-2" />
-        </button>
-        <button @click="removerFuncionario"
-          class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 flex items-center">
-          <span>Remover</span>
-          <Icon name="fa-solid:minus" class="ml-2" />
-        </button>
-      </div>
-
-      <div class="border rounded-md max-h-48 overflow-y-auto w-1/2">
-        <table class="w-full text-left border-collapse">
-          <thead class="bg-gray-100 sticky top-0">
-            <tr>
-              <th class="p-2 border-b w-10 text-center"></th>
-              <th class="p-2 border-b">Funcionário</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in form.funcionarios.filter(f => f.tipoAlteracao !== 2)" :key="index"
-              class="hover:bg-gray-50 border-b">
-              <td class="p-2 text-center">
-                <input type="checkbox" v-model="item.selecionadoParaRemover" class="w-4 h-4 cursor-pointer" />
-              </td>
-              <td class="p-2">{{ item.funcionarioNome }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="flex gap-3 mt-4">
-      <button @click="tentarGravar" :disabled="salvando"
-        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50">
-        {{ salvando ? 'Aguarde...' : 'Gravar' }}
-        <Icon v-if="!salvando" name="fa-solid:save" class="ml-1" />
-      </button>
-      <button @click="novo" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-        Novo
-        <Icon name="fa-solid:file" class="ml-1" />
-      </button>
-      <button @click="voltar" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-        Retornar
-        <Icon name="fa-solid:backward" class="ml-1" />
-      </button>
-    </div>
-
-    <AppModal :isOpen="modalConfirmaProjeto" title="Atenção" @close="modalConfirmaProjeto = false">
-      <div class="p-4 text-center">
-        <p class="text-lg mb-6">Tem certeza que deseja aplicar esse lançamento para <strong>todos</strong> os
-          funcionários do projeto?</p>
-        <div class="flex justify-center gap-4">
-          <button @click="gravar" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Sim</button>
-          <button @click="modalConfirmaProjeto = false"
-            class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700">Não</button>
-        </div>
-      </div>
+      <template #footer>
+        <AppBotao variacao="padrao" @click="modalConfirmaTodosAberto = false">Cancelar</AppBotao>
+        <AppBotao variacao="primario" @click="gravar">Sim, Confirmar</AppBotao>
+      </template>
     </AppModal>
+
+    <!-- Modal Sucesso -->
+    <AppModal :isOpen="modalSucessoAberto" title="Tudo Certo!" icon="fa7-solid:circle-check" @close="voltarParaLista" semScroll>
+      <div class="flex flex-col items-center py-6 text-center">
+        <div class="relative mb-8">
+          <div class="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
+          <div class="relative w-24 h-24 bg-gradient-to-tr from-emerald-500 to-teal-600 rounded-full flex items-center justify-center shadow-2xl animate-success-pop">
+            <Icon name="fa7-solid:check" class="w-12 h-12 text-white" />
+          </div>
+        </div>
+        <p class="text-gray-500 dark:text-gray-400 text-lg mb-8">Lançamento registrado com sucesso!</p>
+      </div>
+      <template #footer>
+        <AppBotao variacao="primario" @click="voltarParaLista" class="w-full">
+          Voltar para Lista
+        </AppBotao>
+      </template>
+    </AppModal>
+
+    <!-- Modal Alerta -->
+    <AppModal :isOpen="modalAlertaAberto" title="Atenção" icon="fa7-solid:circle-exclamation" @close="modalAlertaAberto = false" tamanho="sm">
+      <div class="p-6 text-center">
+         <p class="text-gray-700 dark:text-gray-300 font-medium">{{ modalAlertaMensagem }}</p>
+      </div>
+      <template #footer>
+        <AppBotao variacao="primario" @click="modalAlertaAberto = false" class="w-full">Entendi</AppBotao>
+      </template>
+    </AppModal>
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-
-const router = useRouter()
-const salvando = ref(false)
-const modalConfirmaProjeto = ref(false)
-
-const form = ref({
-  codigo: '0',
-  projeto: '',
-  contaVinculada: '',
-  tipoMovimentacao: '',
-  valorMovimentacao: '',
-  dataMovimentacao: '',
-  classificacao: '',
-  motivo: '',
-  funcionarios: [] as any[] // Array para XML
-})
-
-const projetos = ref<any[]>([])
-const contasVinculadas = ref<any[]>([])
-const tiposMovimentacao = ref<any[]>([])
-const classificacoes = ref<any[]>([])
-const funcionariosAtivos = ref<any[]>([])
-const funcionarioTemp = ref<any>('')
-
-const formatarValor = () => {
-  form.value.valorMovimentacao = String(form.value.valorMovimentacao).replace(/[^0-9.,]/g, "")
-}
-
-const carregarCombos = async () => {
-  const [resProj, resTipo, resClass, resFunc] = await Promise.all([
-    $fetch<{ data: any[] }>('/api/cadastro/projeto/ativos'),
-    $fetch<any[]>('/api/tabelaBasica/tipoMovimentacao/ativos'),
-    $fetch<{ data: any[] }>('/api/tabelaBasica/classificacao/ativos'), // Supondo q você criou
-    $fetch<{ data: any[] }>('/api/cadastro/funcionario/ativos')
-  ])
-  projetos.value = resProj.data || []
-  tiposMovimentacao.value = resTipo || []
-  classificacoes.value = resClass.data || []
-  funcionariosAtivos.value = resFunc.data || []
-}
-
-const carregarContas = async (idProjeto: string) => {
-  try {
-    const res = await $fetch<any[]>('/api/operacao/movimentacaoBancaria/lancamentoManual/contasPorProjeto', {
-      method: 'POST', body: { projeto: idProjeto }
-    })
-    contasVinculadas.value = res || []
-    if (res.length === 1) form.value.contaVinculada = res[0].codigo
-  } catch (e) { console.error(e) }
-}
-
-const carregarProjetoDaConta = async (idConta: string) => {
-  try {
-    const res = await $fetch<{ projeto: number }>('/api/operacao/movimentacaoBancaria/lancamentoManual/projetoPorConta', {
-      method: 'POST', body: { conta: idConta }
-    })
-    if (res.projeto) form.value.projeto = String(res.projeto)
-  } catch (e) { console.error(e) }
-}
-
-const addFuncionario = () => {
-  if (!funcionarioTemp.value) return alert("Selecione um funcionário.")
-
-  const existe = form.value.funcionarios.some(f => f.funcionarioId === funcionarioTemp.value.codigo && f.tipoAlteracao !== 2)
-  if (existe) return alert("Funcionário já listado.")
-
-  form.value.funcionarios.push({
-    codigoFuncionario: 0,
-    funcionarioId: funcionarioTemp.value.codigo,
-    funcionarioNome: funcionarioTemp.value.nomeCompleto,
-    tipoAlteracao: 1,
-    selecionadoParaRemover: false
-  })
-  funcionarioTemp.value = ''
-}
-
-const removerFuncionario = () => {
-  form.value.funcionarios.forEach(f => {
-    if (f.selecionadoParaRemover) f.tipoAlteracao = 2
-  })
-}
-
-const tentarGravar = () => {
-  if (!form.value.projeto) return alert("Informe o Projeto")
-  if (!form.value.contaVinculada) return alert("Informe a Conta vinculada")
-  if (!form.value.tipoMovimentacao) return alert("Informe o Tipo de movimentação")
-  if (!form.value.valorMovimentacao) return alert("Informe o Valor de movimentação")
-  if (!form.value.dataMovimentacao) return alert("Informe a Data de movimentação")
-  if (!form.value.classificacao) return alert("Informe a Classificação")
-  if (!form.value.motivo) return alert("Informe o Motivo")
-
-  const temFuncionario = form.value.funcionarios.some(f => f.tipoAlteracao !== 2)
-  if (!temFuncionario) {
-    modalConfirmaProjeto.value = true
-  } else {
-    gravar()
-  }
-}
-
-const gravar = async () => {
-  modalConfirmaProjeto.value = false
-  salvando.value = true
-  try {
-    const res = await $fetch<{ status: string, mensagem: string }>('/api/operacao/movimentacaoBancaria/lancamentoManual/gravar', {
-      method: 'POST', body: form.value
-    })
-    if (res.status === 'success') {
-      alert('Operação realizada com sucesso!')
-      voltar()
-    } else {
-      alert(res.mensagem)
-    }
-  } catch (error) {
-    console.error('Erro ao gravar:', error)
-    alert('Erro ao gravar dados.')
-  } finally {
-    salvando.value = false
-  }
-}
-
-const novo = () => {
-  router.push('/operacao/movimentacaoBancaria/lancamentoManual/cadastro?id=0')
-  form.value = { codigo: '0', projeto: '', contaVinculada: '', tipoMovimentacao: '', valorMovimentacao: '', dataMovimentacao: '', classificacao: '', motivo: '', funcionarios: [] }
-}
-
-const voltar = () => router.push('/operacao/movimentacaoBancaria/lancamentoManual')
-
-carregarCombos()
+const {
+  form, combos, salvando, carregandoTela, editando, erros,
+  passoAtual, passos, avancarPasso, voltarPasso,
+  modalConfirmaTodosAberto, modalSucessoAberto, modalAlertaAberto, modalAlertaMensagem,
+  funcionarioTemp, carregarContas, carregarProjetoDaConta, tentarGravar, gravar,
+  addFuncionario, removerFuncionariosSelecionados, voltarParaLista, novoRegistro
+} = useLancamentoManualFormulario()
 </script>
+
+<style scoped>
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+  75% { transform: translateX(-4px); }
+}
+.animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+.animate-shake :deep(input), .animate-shake :deep(select) { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
+
+@keyframes success-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-success-pop { animation: success-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.dark .animate-shake :deep(input) { background-color: rgba(239, 68, 68, 0.05) !important; }
+</style>

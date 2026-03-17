@@ -1,214 +1,199 @@
 <template>
-  <div class="p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">
-        <Icon name="fa-solid:pencil-square-o" class="mr-2" />
-        Lançamento Manual
-      </h1>
+  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
+
+    <AppCabecalhoPagina tituloFino="Lançamento" tituloGrosso="Manual"
+      descricao="Gerencie movimentações bancárias manuais e vinculações com funcionários" icone="fa7-solid:file-invoice-dollar" />
+
+    <div
+      class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm space-y-5">
+      <div class="flex flex-col xl:flex-row items-center gap-4">
+        <div class="flex-1 w-full text-left">
+          <!-- Main Search (Autocomplete) -->
+          <AppInputAutocomplete v-model="filtro.nomeParam" :sugestoes="sugestoesBusca" :buscando="buscandoSugestoes"
+            :mostrarMenu="mostrandoSugestoes" :placeholder="placeholderDinamico"
+            @buscar="buscarSugestoes" @selecionar="selecionarSugestao" @fechar="fecharSugestoesDelay"
+            @enter="buscarLista" />
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto shrink-0">
+          <AppSelecaoStatus v-model="filtro.ativoParam" />
+
+          <div
+            class="flex items-center bg-gray-50 dark:bg-gray-900/50 p-1 rounded-xl border border-gray-100 dark:border-gray-800">
+            <button @click="visaoAtual = 'lista'"
+              :class="visaoAtual === 'lista' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 font-bold'"
+              class="px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2">
+              <Icon name="fa7-solid:list-ul" class="w-4 h-4" /> Lista
+            </button>
+            <button @click="visaoAtual = 'cards'"
+              :class="visaoAtual === 'cards' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 font-bold'"
+              class="px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2">
+              <Icon name="fa7-solid:border-all" class="w-4 h-4" /> Cards
+            </button>
+          </div>
+
+          <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden xl:block mx-1"></div>
+
+          <AppBotao variacao="padrao" icone="fa7-solid:table-columns" @click="abrirModalExibicao">Exibição</AppBotao>
+          <AppBotao variacao="padrao" icone="fa7-solid:filter" @click="abrirModalFiltroAvancado">Filtros Avançados
+          </AppBotao>
+        </div>
+      </div>
+
+      <div class="w-full h-px bg-gray-100 dark:bg-gray-800/80"></div>
+
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <AppBotao variacao="primario" icone="fa7-solid:plus" @click="novoRegistro">
+          Novo Lançamento
+        </AppBotao>
+        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarLista">
+          Pesquisar Lançamentos
+        </AppBotao>
+      </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow-md mb-6 p-4">
-      <h2 class="text-lg font-semibold mb-4 border-b pb-2 cursor-pointer" @click="filtroAberto = !filtroAberto">
-        Filtro <Icon :name="filtroAberto ? 'fa-solid:angle-up' : 'fa-solid:angle-down'" class="float-right mt-1" />
-      </h2>
-      
-      <div v-show="filtroAberto" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Projeto</label>
-          <select v-model="filtro.projeto" class="w-full border rounded-md p-2 bg-white">
-            <option value="">Todos</option>
-            <option v-for="proj in projetos" :key="proj.codigo" :value="proj.codigo">
-              {{ proj.apelido }} - {{ proj.descricao }}
-            </option>
-          </select>
+    <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
+      :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
+      :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
+      :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
+      @mudarItensPorPagina="mudarItensPorPagina">
+
+      <template #cabecalho-tabela>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">
+          Projeto / Conta
+        </th>
+        <th v-if="colunas.valor" scope="col"
+          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          Valor</th>
+        <th v-if="colunas.tipo" scope="col"
+          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">
+          Movimentação</th>
+        <th v-if="colunas.data" scope="col"
+          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          Data</th>
+        <th v-if="colunas.funcionarios" scope="col"
+          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          Funcionários</th>
+        <th v-if="colunas.detalhes" scope="col"
+          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          Detalhes</th>
+      </template>
+
+      <template #linhas-tabela="{ item }">
+        <td class="px-6 py-4">
+          <NuxtLink :to="`/operacao/movimentacaoBancaria/lancamentoManual/cadastro?id=${item.codigo}`" class="flex flex-col group">
+            <span class="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors">{{ item.projeto }}</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">{{ item.contaVinculada }}</span>
+          </NuxtLink>
+        </td>
+        <td v-if="colunas.valor" class="px-6 py-4 text-center">
+          <span class="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-lg">
+            R$ {{ formatarMoeda(item.valorMovimentacao) }}
+          </span>
+        </td>
+        <td v-if="colunas.tipo" class="px-6 py-4">
+          <div class="flex flex-col">
+            <span class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ item.tipoMovimentacao }}</span>
+            <span v-if="colunas.classificacao" class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{{ item.classificacao }}</span>
+          </div>
+        </td>
+        <td v-if="colunas.data" class="px-6 py-4 text-center">
+          <span class="text-xs font-bold text-gray-600 dark:text-gray-400">{{ item.dataMovimentacao }}</span>
+        </td>
+        <td v-if="colunas.funcionarios" class="px-6 py-4 text-center">
+          <button @click="abrirModalFuncionarios(item.codigo)"
+            class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
+            :class="{ 'text-emerald-500 bg-emerald-50': item.funcionario === 1 }">
+            <Icon name="fa7-solid:users" class="w-5 h-5" />
+          </button>
+        </td>
+        <td v-if="colunas.detalhes" class="px-6 py-4 text-center">
+          <button @click="abrirModalDetalhes(item.codigo)"
+            class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all">
+            <Icon name="fa7-solid:list-ul" class="w-5 h-5" />
+          </button>
+        </td>
+      </template>
+
+      <template #cards="{ item }">
+        <AppCardListagem :titulo="item.projeto" subtituloNome="Conta" :subtituloValor="item.contaVinculada"
+          :ativo="true" :mostrarStatus="false" :mostrarHistorico="false"
+          :detalhes="[
+            { icone: 'fa7-solid:money-bill-transfer', texto: `R$ ${formatarMoeda(item.valorMovimentacao)}` },
+            { icone: 'fa7-solid:calendar-day', texto: item.dataMovimentacao },
+            { icone: 'fa7-solid:tag', texto: item.tipoMovimentacao }
+          ]" @ver-detalhes="abrirModalDetalhes(item.codigo)"
+          @clique-titulo="navigateTo(`/operacao/movimentacaoBancaria/lancamentoManual/cadastro?id=${item.codigo}`)" />
+      </template>
+
+    </AppContainerListagem>
+
+    <AppModal :isOpen="modalDetalhesAberto" title="Datalhes do Lançamento" icon="fa7-solid:circle-info" @close="modalDetalhesAberto = false" tamanho="md">
+       <div class="space-y-6">
+        <div class="p-5 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
+          <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Motivo do Lançamento</label>
+          <p class="text-gray-700 dark:text-gray-300 font-medium leading-relaxed">{{ detalhes.motivo }}</p>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo da Movimentação</label>
-          <select v-model="filtro.tipoMovimentacao" class="w-full border rounded-md p-2 bg-white">
-            <option value="">Todos</option>
-            <option v-for="tipo in tiposMovimentacao" :key="tipo.codigo" :value="tipo.codigo">
-              {{ tipo.descricao }}
-            </option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Data da Movimentação</label>
-          <div class="relative">
-            <Icon name="fa-solid:calendar" class="absolute left-3 top-3 text-gray-400" />
-            <input 
-              v-model="filtro.dataMovimentacao" 
-              v-maska data-maska="##/##/####" 
-              placeholder="dd/mm/aaaa" 
-              type="text" 
-              class="w-full border rounded-md p-2 pl-10 text-center" 
-            />
+        <div class="grid grid-cols-2 gap-4">
+          <div class="p-4 bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800">
+            <span class="text-[9px] font-black uppercase text-gray-400 block mb-1">Usuário</span>
+            <span class="font-bold text-gray-700 dark:text-gray-300">{{ detalhes.usuarioCadastro }}</span>
+          </div>
+          <div class="p-4 bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800">
+            <span class="text-[9px] font-black uppercase text-gray-400 block mb-1">Data Registro</span>
+            <span class="font-bold text-gray-700 dark:text-gray-300">{{ detalhes.dataCadastro }}</span>
           </div>
         </div>
       </div>
-      
-      <div v-show="filtroAberto" class="mt-4 flex justify-between">
-        <button @click="novoRegistro" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center">
-          <span>Novo</span>
-          <Icon name="fa-solid:file" class="ml-2" />
-        </button>
-        <button @click="buscarLancamentos" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center">
-          <span>Filtrar</span>
-          <Icon name="fa-solid:search" class="ml-2" />
-        </button>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-lg shadow-md overflow-hidden overflow-x-auto">
-      <table class="w-full text-left border-collapse whitespace-nowrap">
-        <thead class="bg-gray-100">
-          <tr>
-            <th class="p-3 border-b">Projeto</th>
-            <th class="p-3 border-b">Conta Vinculada</th>
-            <th class="p-3 border-b text-center">Valor da Movimentação</th>
-            <th class="p-3 border-b">Tipo da Movimentação</th>
-            <th class="p-3 border-b text-center">Classificação</th>
-            <th class="p-3 border-b text-center">Data da Movimentação</th>
-            <th class="p-3 border-b text-center">Funcionários</th>
-            <th class="p-3 border-b text-center">Detalhes</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="lista.length === 0">
-            <td colspan="8" class="p-4 text-center text-gray-500 font-bold">Nenhum lançamento manual encontrado</td>
-          </tr>
-          <tr v-for="item in lista" :key="item.codigo" class="hover:bg-gray-50 border-b">
-            <td class="p-3">{{ item.projeto }}</td>
-            <td class="p-3">{{ item.contaVinculada }}</td>
-            <td class="p-3 text-center font-semibold text-blue-800">R$ {{ formatarMoeda(item.valorMovimentacao) }}</td>
-            <td class="p-3">{{ item.tipoMovimentacao }}</td>
-            <td class="p-3 text-center">{{ item.classificacao }}</td>
-            <td class="p-3 text-center">{{ item.dataMovimentacao }}</td>
-            <td class="p-3 text-center">
-              <button @click="abrirModalFuncionarios(item.codigo)" :class="item.funcionario === 1 ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-400'" class="text-white p-2 rounded">
-                <Icon name="fa-solid:users" />
-              </button>
-            </td>
-            <td class="p-3 text-center">
-              <button @click="abrirModalDetalhes(item.codigo)" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                <Icon name="fa-solid:list" />
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <AppModal :isOpen="modalDetalhesAberto" title="Detalhes" @close="modalDetalhesAberto = false" size="lg">
-      <div class="p-4">
-        <div class="mb-4">
-          <label class="font-bold block mb-1">- Motivo:</label>
-          <textarea v-model="detalhes.motivo" class="w-full bg-gray-100 border p-2 rounded resize-none" rows="4" readonly></textarea>
-        </div>
-        <div class="mb-4">
-          <label class="font-bold block mb-1">- Usuário Cadastro:</label>
-          <input v-model="detalhes.usuarioCadastro" class="w-full bg-gray-100 border p-2 rounded" readonly />
-        </div>
-        <div>
-          <label class="font-bold block mb-1">- Data Cadastro:</label>
-          <input v-model="detalhes.dataCadastro" class="w-full bg-gray-100 border p-2 rounded" readonly />
-        </div>
-        <div class="mt-6 flex justify-center">
-          <button @click="modalDetalhesAberto = false" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Fechar</button>
-        </div>
-      </div>
+      <template #footer>
+        <AppBotao variacao="padrao" @click="modalDetalhesAberto = false" class="w-full">Fechar</AppBotao>
+      </template>
     </AppModal>
 
-    <AppModal :isOpen="modalFuncionarioAberto" title="Funcionários" @close="modalFuncionarioAberto = false">
-      <div class="p-4">
-        <table class="w-full text-center border-collapse">
-          <tbody v-if="listaFuncionariosModal.length > 0">
-            <tr v-for="(func, index) in listaFuncionariosModal" :key="index" class="border-b">
-              <td class="p-3">{{ func.funcionario }}</td>
-            </tr>
-          </tbody>
-          <tbody v-else>
-            <tr>
-              <td class="p-8 text-lg font-bold text-gray-500">Lançamento feito para todos funcionários do projeto.</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="mt-6 flex justify-center">
-          <button @click="modalFuncionarioAberto = false" class="bg-gray-300 text-gray-800 px-6 py-2 rounded hover:bg-gray-400">Fechar</button>
+    <AppModal :isOpen="modalFuncionarioAberto" title="Funcionários Vinculados" icon="fa7-solid:users" @close="modalFuncionarioAberto = false" tamanho="sm">
+      <div class="p-2">
+        <div v-if="listaFuncionariosModal.length > 0" class="divide-y divide-gray-50 dark:divide-gray-800">
+          <div v-for="(func, index) in listaFuncionariosModal" :key="index" class="py-4 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
+              <Icon name="fa7-solid:user-check" class="w-3 h-3 text-emerald-600" />
+            </div>
+            <span class="font-bold text-gray-700 dark:text-gray-300 text-sm">{{ func.funcionario }}</span>
+          </div>
+        </div>
+        <div v-else class="py-12 flex flex-col items-center text-center gap-4 text-gray-500 dark:text-gray-400">
+           <Icon name="fa7-solid:circle-exclamation" class="w-12 h-12 text-amber-500" />
+           <p class="font-bold">Lançamento feito para todos funcionários do projeto.</p>
         </div>
       </div>
+      <template #footer>
+        <AppBotao variacao="padrao" @click="modalFuncionarioAberto = false" class="w-full">Fechar</AppBotao>
+      </template>
     </AppModal>
+
+    <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" @close="modalFiltroAvancadoAberto = false"
+      @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
+      <AppSelect v-model="filtro.projetoParam" label="Projeto" :opcoes="projetosAtivos.map(p => ({ codigo: p.codigo, descricao: `${p.apelido} - ${p.descricao}` }))" />
+      <AppSelect v-model="filtro.tipoMovimentacaoParam" label="Tipo de Movimentação" :opcoes="tiposMovimentacao.map(t => ({ codigo: t.codigo, descricao: t.descricao }))" />
+      <AppInputTexto v-model="filtro.dataMovimentacaoParam" label="Data da Movimentação" placeholder="DD/MM/AAAA" v-maska data-maska="##/##/####" icone="fa7-solid:calendar-days" />
+    </AppModalFiltroAvancado>
+
+    <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labels" @aplicar="aplicarExibicao"
+      @close="modalExibicaoAberto = false" />
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-
-const router = useRouter()
-const filtroAberto = ref(true)
-
-const filtro = ref({ projeto: '', tipoMovimentacao: '', dataMovimentacao: '' })
-
-const lista = ref<any[]>([])
-const projetos = ref<any[]>([])
-const tiposMovimentacao = ref<any[]>([])
-
-const modalDetalhesAberto = ref(false)
-const detalhes = ref({ motivo: '', usuarioCadastro: '', dataCadastro: '' })
-
-const modalFuncionarioAberto = ref(false)
-const listaFuncionariosModal = ref<any[]>([])
-
-const formatarMoeda = (valor: number) => Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
-
-const carregarCombos = async () => {
-  try {
-    const resProj = await $fetch<{ data: any[] }>('/api/cadastro/projeto/ativos')
-    projetos.value = resProj.data || []
-    
-    const resTipo = await $fetch<any[]>('/api/tabelaBasica/tipoMovimentacao/recupera')
-    tiposMovimentacao.value = resTipo || []
-  } catch (error) {
-    console.error("Erro combos", error)
-  }
-}
-
-const buscarLancamentos = async () => {
-  try {
-    const response = await $fetch<{ data: any[] }>('/api/operacao/movimentacaoBancaria/lancamentoManual/listagem', {
-      method: 'POST', body: filtro.value
-    })
-    lista.value = response.data || []
-  } catch (error) {
-    console.error('Erro listagem', error)
-  }
-}
-
-const abrirModalDetalhes = async (id: number) => {
-  try {
-    const response = await $fetch<any>('/api/operacao/movimentacaoBancaria/lancamentoManual/detalhes', {
-      method: 'POST', body: { lancamentoManual: id }
-    })
-    detalhes.value = response
-    modalDetalhesAberto.value = true
-  } catch (error) {
-    console.error("Erro detalhes", error)
-  }
-}
-
-const abrirModalFuncionarios = async (id: number) => {
-  try {
-    const response = await $fetch<any[]>('/api/operacao/movimentacaoBancaria/lancamentoManual/funcionarios', {
-      method: 'POST', body: { lancamentoManual: id }
-    })
-    listaFuncionariosModal.value = response || []
-    modalFuncionarioAberto.value = true
-  } catch (error) {
-    console.error("Erro func", error)
-  }
-}
-
-const novoRegistro = () => router.push('/operacao/movimentacaoBancaria/lancamentoManual/cadastro?id=0')
-
-carregarCombos()
-buscarLancamentos()
+const {
+  carregando, buscaRealizada, visaoAtual, dados, filtro, sugestoesBusca, buscandoSugestoes, mostrandoSugestoes,
+  buscarSugestoes, selecionarSugestao, fecharSugestoesDelay, buscarLista,
+  abrirModalFiltroAvancado, modalFiltroAvancadoAberto, limparFiltrosAvancados, aplicarFiltroAvancado,
+  abrirModalExibicao, modalExibicaoAberto, colunas, labels, aplicarExibicao, colunasTemp,
+  placeholderDinamico, projetosAtivos, tiposMovimentacao,
+  modalDetalhesAberto, detalhes, modalFuncionarioAberto, listaFuncionariosModal,
+  abrirModalDetalhes, abrirModalFuncionarios,
+  formatarMoeda, novoRegistro,
+  registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
+  mudarPagina, mudarItensPorPagina
+} = useLancamentoManualListagem()
 </script>
