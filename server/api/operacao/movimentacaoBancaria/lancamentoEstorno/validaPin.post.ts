@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const { pin } = body
   const usuarioLogadoId = 1
 
-  if (!pin) return { status: 'failed' }
+  if (!pin) return { status: 'failed', mensagem: 'PIN não informado.' }
 
   const pinCripto = crypto.createHash('md5').update(pin).digest('hex')
 
@@ -16,11 +16,11 @@ export default defineEventHandler(async (event) => {
     const query = `SELECT codigo FROM configuracao.usuario WHERE pin = '${pinCripto}' AND codigo = ${usuarioLogadoId}`
     const result = await pool.request().query(query)
 
-    if (result.recordset.length > 0) return { status: 'success' }
+    if (result.recordset.length > 0) return { status: 'success', mensagem: 'PIN validado.' }
     
-    return { status: 'failed' }
+    return { status: 'failed', mensagem: 'PIN incorreto.' }
   } catch (erro) {
     console.error('Erro ao validar PIN:', erro)
-    return { status: 'failed' }
+    return { status: 'failed', mensagem: 'Erro ao validar PIN.' }
   }
 })

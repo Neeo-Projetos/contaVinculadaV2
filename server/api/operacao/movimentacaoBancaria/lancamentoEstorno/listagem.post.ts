@@ -85,6 +85,6 @@ export default defineEventHandler(async (event) => {
     return { status: 'success', data: dataFormatada }
   } catch (erro) {
     console.error('Erro ao listar estornos:', erro)
-    return { status: 'failed', message: 'Erro ao buscar dados.' }
+    return { status: 'failed', mensagem: 'Erro ao buscar dados.' }
   }
 })

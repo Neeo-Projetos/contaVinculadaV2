@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { codigoLancamento, tipoLancamento } = body
 
-  if (!codigoLancamento || !tipoLancamento) return []
+  if (!codigoLancamento || !tipoLancamento) return { status: 'failed', data: [], mensagem: 'Parâmetros inválidos.' }
 
   try {
     const pool = await useDb()
@@ -25,12 +25,12 @@ export default defineEventHandler(async (event) => {
         `
     }
 
-    if (!query) return []
+    if (!query) return { status: 'failed', data: [], mensagem: 'Tipo de lançamento não suportado.' }
 
     const result = await pool.request().query(query)
-    return result.recordset
+    return { status: 'success', data: result.recordset, mensagem: 'Funcionários carregados.' }
   } catch (erro) {
     console.error('Erro ao buscar funcionarios estorno:', erro)
-    return []
+    return { status: 'failed', data: [], mensagem: 'Erro interno ao buscar funcionários.' }
   }
 })
