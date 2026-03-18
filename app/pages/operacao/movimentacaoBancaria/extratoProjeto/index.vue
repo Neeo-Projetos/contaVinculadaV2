@@ -98,10 +98,11 @@
 
     </AppContainerListagem>
 
-    <ExtratoProjetoModal 
-      :isOpen="modalExtratoAberto" 
-      :projetoId="projetoSelecionado" 
-      @close="modalExtratoAberto = false" 
+    <AppExtratoDetalhadoModal
+      :isOpen="modalExtratoAberto"
+      :id="projetoSelecionado"
+      tipo="projeto"
+      @close="modalExtratoAberto = false"
     />
 
     <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labels" @aplicar="aplicarExibicao"

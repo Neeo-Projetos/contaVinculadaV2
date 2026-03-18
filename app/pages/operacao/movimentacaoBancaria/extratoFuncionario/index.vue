@@ -102,9 +102,10 @@
 
     </AppContainerListagem>
 
-    <ExtratoFuncionarioModal 
+    <AppExtratoDetalhadoModal 
       :isOpen="modalExtratoAberto" 
-      :funcionarioId="funcionarioSelecionado" 
+      :id="funcionarioSelecionado" 
+      tipo="funcionario"
       @close="modalExtratoAberto = false" 
     />
 
