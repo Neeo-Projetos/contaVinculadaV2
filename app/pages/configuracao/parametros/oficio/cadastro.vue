@@ -1,171 +1,135 @@
 <template>
-  <div class="p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">
-        <Icon name="fa-solid:file-text" class="mr-2" />
-        Parâmetros de Ofício - Cadastro
-      </h1>
+  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
+    
+    <AppBarraNavegacao 
+      icone="fa7-solid:file-signature" 
+      :links="[{ label: 'Parâmetros de Ofício', to: '/configuracao/parametros/oficio' }]"
+      :paginaAtual="ehEdicao ? 'Edição de Parâmetros' : 'Novo Parâmetro de Ofício'"
+    />
+
+    <div class="mb-2">
+      <AppPassosFormulario 
+        :passos="['Vincular Projeto', 'Redigir Conteúdo']" 
+        :passoAtual="passoAtual - 1" 
+      />
     </div>
 
-    <div class="bg-white rounded-lg shadow-md mb-6 p-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Projeto <span class="text-red-500">*</span></label>
-          <select v-model="form.projeto" @change="buscarModeloPadrao" class="w-full border rounded-md p-2 bg-white">
-            <option value="">Selecione um projeto...</option>
-            <option v-for="proj in projetos" :key="proj.codigo" :value="proj.codigo">
-              {{ proj.apelido }} - {{ proj.descricao }}
-            </option>
-          </select>
+    <AppCartaoFormulario>
+      <AppSobreposicaoCarregamento :carregando="carregandoTela || salvando" :mensagem="salvando ? 'Gravando dados...' : 'Carregando informações...'" />
+
+      <form v-if="!carregandoTela" @submit.prevent="avancarPasso" class="space-y-12 relative z-0">
+        
+        <!-- PASSO 1: PROJETO -->
+        <div v-if="passoAtual === 1" class="animate-fade-in">
+            <AppFormularioSecao icone="fa7-solid:diagram-project">
+                Seleção do Projeto
+            </AppFormularioSecao>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8 mt-6">
+                <div class="md:col-span-12 lg:col-span-8">
+                    <AppSelect 
+                        v-model="form.projeto" 
+                        label="Projeto Correspondente" 
+                        placeholder="Selecione o projeto na lista..." 
+                        :opcoes="projetos" 
+                        itemValue="codigo" 
+                        itemLabel="apelido" 
+                        required 
+                        @change="buscarModeloPadrao"
+                    />
+                    <div class="mt-4 p-4 bg-emerald-50 dark:bg-emerald-500/5 rounded-2xl border border-emerald-500/10 flex items-start gap-3">
+                        <Icon name="fa7-solid:wand-magic-sparkles" class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                        <div class="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
+                            <p class="font-bold uppercase tracking-wider mb-1">Carga Inteligente</p>
+                            <p>Ao selecionar um projeto pela primeira vez, o sistema carregará automaticamente a redação padrão para agilizar seu trabalho.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <div class="mt-4">
-         <label class="block text-sm font-medium text-gray-700 mb-1">Redação do Ofício <span class="text-red-500">*</span></label>
-         <textarea v-model="form.texto" rows="12" class="w-full border rounded-md p-2" placeholder="Digite a redação do ofício..."></textarea>
-      </div>
-      
-      <div class="mt-4">
-          <p class="text-sm text-gray-600"><strong>Dica:</strong> Utilize as variáveis abaixo para preenchimento automático no PDF:</p>
-          <p class="text-xs text-gray-500 mt-1">
-            $nomeOrgao$, $cnpj$, $enderecoCompleto$, $numContrato$, $numeroOficio$, $anoOficio$, $assunto$, $periodoReferencia$, $valor$, $valorExtenso$, $cidadeData$
-          </p>
-      </div>
-    </div>
+        <!-- PASSO 2: REDAÇÃO -->
+        <div v-if="passoAtual === 2" class="animate-fade-in">
+            <AppFormularioSecao icone="fa7-solid:align-left">
+                Redação do Ofício
+            </AppFormularioSecao>
 
-    <div class="flex gap-3 mt-4">
-      <button v-if="ehEdicao" @click="confirmarExclusao" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-        Excluir <Icon name="fa-solid:trash" class="ml-1" />
-      </button>
-      <button @click="gravar" :disabled="salvando" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50">
-        {{ salvando ? 'Aguarde...' : 'Gravar' }} <Icon v-if="!salvando" name="fa-solid:save" class="ml-1" />
-      </button>
-      <button @click="novo" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-        Novo <Icon name="fa-solid:file" class="ml-1" />
-      </button>
-      <button @click="voltar" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-        Retornar <Icon name="fa-solid:backward" class="ml-1" />
-      </button>
-    </div>
+            <div class="mt-6 space-y-6">
+                <textarea 
+                    v-model="form.texto" 
+                    rows="15" 
+                    class="w-full bg-gray-50/50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 rounded-2xl p-8 text-sm text-gray-800 dark:text-gray-200 leading-relaxed shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-serif"
+                    placeholder="Digite aqui o texto do ofício..."
+                    required>
+                </textarea>
 
-    <AppModal :isOpen="modalExclusao" title="Atenção" @close="modalExclusao = false">
-      <div class="p-4 text-center">
-        <p class="text-lg mb-6">Tem certeza que deseja excluir este registro?</p>
-        <div class="flex justify-center gap-4">
-          <button @click="excluir" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700">Sim, Excluir</button>
-          <button @click="modalExclusao = false" class="bg-gray-300 text-gray-800 px-6 py-2 rounded hover:bg-gray-400">Cancelar</button>
+                <!-- Dica Variaveis -->
+                <div class="bg-white dark:bg-[#1e2029] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
+                    <h5 class="flex items-center gap-2 text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-4">
+                        <Icon name="fa7-solid:lightbulb" class="w-4 h-4" />
+                        Variáveis Dinâmicas
+                    </h5>
+                    <div class="flex flex-wrap gap-2">
+                        <code v-for="v in variaveis" :key="v" class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-lg text-emerald-600 dark:text-emerald-400 text-[10px] font-bold font-mono shadow-sm">
+                            {{ v }}
+                        </code>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <AppRodapeFormulario 
+          :editando="ehEdicao" 
+          :carregandoGravar="salvando"
+          :labelVoltar="passoAtual === 1 ? 'Retornar' : 'Etapa Anterior'"
+          :labelGravar="passoAtual === totalPassos ? 'Finalizar Cadastro' : 'Próxima Etapa'"
+          :iconeGravar="passoAtual === totalPassos ? 'fa7-solid:check-double' : 'fa7-solid:arrow-right'"
+          @voltar="voltarPasso"
+          @excluir="modalExclusaoAberto = true"
+          @limpar="limpar"
+          @gravar="avancarPasso"
+        />
+      </form>
+    </AppCartaoFormulario>
+
+    <!-- Modal de Exclusão -->
+    <AppModal 
+      :isOpen="modalExclusaoAberto" 
+      title="Atenção: Exclusão" 
+      icon="fa7-solid:trash-can"
+      tamanho="sm"
+      rodapeEntre
+      @close="modalExclusaoAberto = false"
+    >
+      <div class="flex flex-col items-center py-4 text-center">
+        <div class="relative mb-6">
+            <div class="absolute inset-0 bg-red-500/20 blur-2xl rounded-full"></div>
+            <div class="relative w-20 h-20 bg-gradient-to-tr from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-xl">
+                <Icon name="fa7-solid:file-circle-xmark" class="w-10 h-10 text-white" />
+            </div>
+        </div>
+        
+        <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-3">
+          Remover Parâmetro?
+        </h4>
+        
+        <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-[280px]">
+          Deseja realmente remover a configuração de ofício deste projeto?
+        </p>
       </div>
+      <template #footer>
+        <AppBotao variacao="padrao" @click="modalExclusaoAberto = false">Cancelar</AppBotao>
+        <AppBotao variacao="perigo" icone="fa7-solid:trash-can" @click="excluir">Sim, remover</AppBotao>
+      </template>
     </AppModal>
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-
-const route = useRoute()
-const router = useRouter()
-
-// Puxando o ID via query na URL (?id=123)
-const registroId = route.query.id as string
-const ehEdicao = computed(() => registroId !== '0' && registroId !== undefined && registroId !== '')
-
-const salvando = ref(false)
-const modalExclusao = ref(false)
-
-const projetos = ref<any[]>([])
-
-const form = ref({
-  codigo: registroId || '0',
-  projeto: '',
-  texto: ''
-})
-
-const carregarDados = async () => {
-  try {
-    const projResponse = await $fetch<{ data: any[] }>('/api/tabelaBasica/projeto/listarAtivos')
-    projetos.value = projResponse.data || []
-
-    if (ehEdicao.value) {
-      const { data } = await $fetch<{ data: any }>('/api/configuracao/parametros/oficio/recupera', {
-        method: 'POST',
-        body: { id: registroId }
-      })
-      if (data) {
-        form.value.projeto = data.projeto
-        form.value.texto = data.texto
-      }
-    }
-  } catch (error) {
-    console.error('Erro ao carregar dados', error)
-  }
-}
-
-// Busca a redação padrão quando seleciona um projeto novo
-const buscarModeloPadrao = async () => {
-    if(!form.value.projeto || ehEdicao.value) return;
-    
-    try {
-        const { data } = await $fetch<{ data: any }>('/api/configuracao/parametros/oficio/recuperaModelo', {
-            method: 'POST',
-            body: { projeto: form.value.projeto }
-        });
-        if(data && data.texto) {
-            form.value.texto = data.texto;
-        }
-    } catch (error) {
-        console.error('Erro ao buscar modelo padrão', error)
-    }
-}
-
-const gravar = async () => {
-  if (!form.value.projeto) return alert("Informe o Projeto")
-  if (!form.value.texto) return alert("A redação não pode estar vazia")
-
-  salvando.value = true
-  try {
-    const res = await $fetch<{ status: string, mensagem: string }>('/api/configuracao/parametros/oficio/gravar', {
-      method: 'POST',
-      body: form.value
-    })
-    if (res.status === 'success') {
-      alert('Operação realizada com sucesso!')
-      voltar()
-    } else {
-      alert(res.mensagem)
-    }
-  } catch (error) {
-    alert('Erro ao gravar dados.')
-  } finally {
-    salvando.value = false
-  }
-}
-
-const confirmarExclusao = () => {
-  modalExclusao.value = true
-}
-
-const excluir = async () => {
-  try {
-    await $fetch('/api/configuracao/parametros/oficio/excluir', {
-      method: 'POST',
-      body: { codigo: form.value.codigo }
-    })
-    alert('Registro excluído com sucesso!')
-    voltar()
-  } catch (error) {
-    alert('Erro ao excluir.')
-  }
-}
-
-const novo = () => {
-  router.push('/configuracao/parametros/oficio/cadastro?id=0')
-  form.value = { codigo: '0', projeto: '', texto: '' }
-}
-
-const voltar = () => {
-  router.push('/configuracao/parametros/oficio')
-}
-
-carregarDados()
+const {
+  carregandoTela, salvando, modalExclusaoAberto, form, projetos, ehEdicao, variaveis,
+  carregarProjetos, carregarDados, buscarModeloPadrao, gravar, excluir, limpar, voltar,
+  passoAtual, totalPassos, avancarPasso, voltarPasso
+} = useParametrosOficioFormulario()
 </script>
