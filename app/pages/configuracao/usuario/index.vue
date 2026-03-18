@@ -1,139 +1,149 @@
 <template>
-  <div class="h-full flex flex-col gap-6">
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-normal text-gray-700 dark:text-gray-200 flex items-center gap-2">
-        <Icon name="fa7-solid:user" class="w-6 h-6 text-[#3276b1] dark:text-[#539ce0]" />
-        Usuários
-      </h1>
-      <NuxtLink 
-        to="/configuracao/usuario/detalhe"
-        class="bg-[#3276b1] dark:bg-[#539ce0] hover:bg-[#275b89] dark:hover:bg-[#3276b1] text-white px-4 py-2 rounded-sm font-medium transition flex items-center gap-2 shadow-sm"
-      >
-        <Icon name="fa7-solid:plus" class="w-4 h-4" />
-        Novo
-      </NuxtLink>
+  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
+
+    <AppCabecalhoPagina 
+      tituloFino="Gestão de" 
+      tituloGrosso="Usuários"
+      descricao="Administração de acessos e permissões do sistema" 
+      icone="fa7-solid:users-gear" 
+    />
+
+    <div class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm space-y-5">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+        <div class="md:col-span-3">
+          <AppInputTexto 
+            v-model="filtro.login" 
+            label="Login" 
+            placeholder="Digite o login..." 
+            icone="fa7-solid:user"
+          />
+        </div>
+        <div class="md:col-span-4">
+          <AppInputTexto 
+            v-model="filtro.nome" 
+            label="Nome do Usuário" 
+            placeholder="Digite o nome..." 
+            icone="fa7-solid:user-tag"
+          />
+        </div>
+        <div class="md:col-span-3">
+          <AppInputCpf 
+            v-model="filtro.cpf" 
+            label="CPF" 
+          />
+        </div>
+        <div class="md:col-span-2">
+          <AppSelecaoStatus v-model="filtro.ativo" />
+        </div>
+      </div>
+
+      <div class="w-full h-px bg-gray-100 dark:bg-gray-800/80"></div>
+
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <AppBotao variacao="primario" icone="fa7-solid:user-plus" @click="navigateTo('/configuracao/usuario/cadastro')">
+          Novo Usuário
+        </AppBotao>
+        
+        <div class="flex items-center gap-3">
+          <AppBotao variacao="padrao" icone="fa7-solid:table-columns" @click="abrirModalExibicao">Exibição</AppBotao>
+          <div class="flex items-center bg-gray-50 dark:bg-gray-900/50 p-1 rounded-xl border border-gray-100 dark:border-gray-800">
+            <button @click="visaoAtual = 'lista'"
+              :class="visaoAtual === 'lista' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 font-bold'"
+              class="px-4 py-2 rounded-lg text-sm transition-all flex items-center justify-center">
+              <Icon name="fa7-solid:list-ul" class="w-4 h-4" />
+            </button>
+            <button @click="visaoAtual = 'cards'"
+              :class="visaoAtual === 'cards' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 font-bold'"
+              class="px-4 py-2 rounded-lg text-sm transition-all flex items-center justify-center">
+              <Icon name="fa7-solid:border-all" class="w-4 h-4" />
+            </button>
+          </div>
+          <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="filtrar">
+            Pesquisar
+          </AppBotao>
+        </div>
+      </div>
     </div>
 
-    <!-- Filtro -->
-    <div class="bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700 p-5 shadow-sm transition-colors duration-300">
-      <div class="flex items-center gap-2 mb-4 border-b border-gray-200 dark:border-gray-700 pb-3">
-        <Icon name="fa7-solid:filter" class="text-gray-500 dark:text-gray-400" />
-        <h2 class="font-semibold text-gray-700 dark:text-gray-200">Filtros de Pesquisa</h2>
-      </div>
+    <AppContainerListagem 
+      :carregando="carregando" 
+      :buscaRealizada="buscaRealizada" 
+      :lista="dados || []"
+      :visaoAtual="visaoAtual" 
+      :registroInicial="registroInicial" 
+      :registroFinal="registroFinal"
+      :totalRegistros="totalRegistros" 
+      :itensPorPagina="itensPorPagina" 
+      :totalPaginas="totalPaginas"
+      :paginaAtual="paginaAtual" 
+      :paginasExibidas="paginasExibidas" 
+      @mudarPagina="mudarPagina"
+      @mudarItensPorPagina="mudarItensPorPagina"
+    >
+      <template #cabecalho-tabela>
+        <th v-if="colunas.login" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Login</th>
+        <th v-if="colunas.nome" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nome do Usuário</th>
+        <th v-if="colunas.cpf" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">CPF</th>
+        <th v-if="colunas.status" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
+        <th v-if="colunas.acoes" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Ações</th>
+      </template>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Login</label>
-          <input v-model="filter.login" type="text" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-sm px-3 py-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#3276b1] dark:focus:border-[#539ce0] transition placeholder-gray-400 dark:placeholder-gray-500" placeholder="Digite o login..." />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Nome do Usuário</label>
-          <input v-model="filter.nome" type="text" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-sm px-3 py-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#3276b1] dark:focus:border-[#539ce0] transition placeholder-gray-400 dark:placeholder-gray-500" placeholder="Digite o nome..." />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">CPF</label>
-          <input v-model="filter.cpf" v-maska data-maska="###.###.###-##" type="text" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-sm px-3 py-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#3276b1] dark:focus:border-[#539ce0] transition placeholder-gray-400 dark:placeholder-gray-500" placeholder="___.___.___-__" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Status Ativo</label>
-          <select v-model="filter.ativo" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-sm px-3 py-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-[#3276b1] dark:focus:border-[#539ce0] transition">
-            <option value="" class="dark:bg-gray-800">Todos</option>
-            <option value="1" class="dark:bg-gray-800">Ativo</option>
-            <option value="0" class="dark:bg-gray-800">Inativo</option>
-          </select>
-        </div>
-      </div>
+      <template #linhas-tabela="{ item }">
+        <td v-if="colunas.login" class="px-6 py-4">
+          <NuxtLink :to="`/configuracao/usuario/cadastro?codigo=${item.codigo}`" class="text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:underline transition-all">
+            {{ item.login }}
+          </NuxtLink>
+        </td>
+        <td v-if="colunas.nome" class="px-6 py-4">
+          <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ item.nomeUsuario }}</span>
+        </td>
+        <td v-if="colunas.cpf" class="px-6 py-4">
+            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ item.cpf }}</span>
+        </td>
+        <td v-if="colunas.status" class="px-6 py-4 text-center">
+          <AppAtivo :ativo="Number(item.ativo) === 1 || item.ativo === true" />
+        </td>
+        <td v-if="colunas.acoes" class="px-6 py-4 text-right">
+          <div class="flex items-center justify-end gap-2">
+            <NuxtLink :to="`/configuracao/usuario/cadastro?codigo=${item.codigo}`" class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Editar">
+              <Icon name="fa7-solid:pen-to-square" class="w-5 h-5" />
+            </NuxtLink>
+          </div>
+        </td>
+      </template>
 
-      <div class="mt-5 flex justify-end">
-        <button 
-          @click="fetchList"
-          :disabled="loading"
-          class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-5 py-2 rounded-sm font-medium transition flex items-center gap-2 disabled:opacity-50"
-        >
-          <Icon v-if="loading" name="fa7-solid:spinner" class="animate-spin w-4 h-4 text-gray-500 dark:text-gray-400" />
-          <Icon v-else name="fa7-solid:magnifying-glass" class="w-4 h-4 text-gray-500 dark:text-gray-400" />
-          Buscar
-        </button>
-      </div>
-    </div>
+      <template #cards="{ item }">
+        <AppCardListagem 
+          :titulo="item.nomeUsuario" 
+          :subtituloNome="item.login" 
+          :subtituloValor="item.email || ''"
+          :ativo="Number(item.ativo) === 1 || item.ativo === true"
+          :detalhes="[
+            { icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` },
+          ]" 
+          @ver-detalhes="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}`)" 
+          @clique-titulo="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}`)" 
+        />
+      </template>
+    </AppContainerListagem>
 
-    <!-- Tabela de Resultados -->
-    <div class="flex-1 bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700 shadow-sm min-h-[400px] transition-colors duration-300">
-      <div v-if="loading && !users.length" class="flex flex-col items-center justify-center p-12 text-gray-500 dark:text-gray-400">
-        <Icon name="fa7-solid:spinner" class="animate-spin w-10 h-10 mb-4 text-[#3276b1] dark:text-[#539ce0]" />
-        Buscando dados...
-      </div>
-      
-      <div v-else-if="users.length === 0" class="flex flex-col items-center justify-center p-12 text-gray-500 dark:text-gray-400">
-        <Icon name="fa7-solid:folder-open" class="w-12 h-12 mb-3 opacity-50" />
-        <p>Nenhum resultado encontrado.</p>
-      </div>
-
-      <div v-else class="overflow-x-auto">
-        <table class="w-full text-left font-sans text-sm text-gray-700 dark:text-gray-300">
-          <thead class="text-xs text-gray-600 dark:text-gray-400 uppercase bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-            <tr>
-              <th scope="col" class="px-4 py-3 font-semibold">Login</th>
-              <th scope="col" class="px-4 py-3 font-semibold">Nome</th>
-              <th scope="col" class="px-4 py-3 font-semibold">CPF</th>
-              <th scope="col" class="px-4 py-3 font-semibold">Status</th>
-              <th scope="col" class="px-4 py-3 text-right font-semibold">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="user in users" :key="user.codigo" class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-              <td class="px-4 py-3 font-medium text-[#3276b1] dark:text-[#539ce0]"><NuxtLink :to="`/configuracao/usuario/detalhe?codigo=${user.codigo}`" class="hover:underline">{{ user.login }}</NuxtLink></td>
-              <td class="px-4 py-3 text-gray-800 dark:text-gray-200">{{ user.nomeUsuario }}</td>
-              <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ user.cpf }}</td>
-              <td class="px-4 py-3">
-                <span :class="user.ativo ? 'text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/40' : 'text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/40'" class="px-2 py-1 rounded-sm text-xs font-semibold">
-                  {{ user.ativo ? 'Ativo' : 'Inativo' }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-right flex justify-end">
-                  <NuxtLink :to="`/configuracao/usuario/detalhe?codigo=${user.codigo}`" class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 p-1.5 rounded transition">
-                    <Icon name="fa7-solid:pen-to-square" class="w-4 h-4 block" />
-                  </NuxtLink>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <AppModalExibicao 
+      :aberto="modalExibicaoAberto" 
+      :colunas="colunasTemp" 
+      :labels="labels" 
+      @aplicar="aplicarExibicao"
+      @close="modalExibicaoAberto = false" 
+    />
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-
-const loading = ref(false)
-const users = ref<any[]>([])
-
-const filter = reactive({
-  login: '',
-  nome: '',
-  cpf: '',
-  ativo: '1'
-})
-
-const fetchList = async () => {
-  loading.value = true
-  try {
-    const data = await $fetch('/api/configuracao/usuario/filtro', {
-      method: 'POST',
-      body: filter
-    })
-    users.value = data?.results || []
-  } catch (err: any) {
-    console.error(err)
-    alert('Erro ao buscar usuários')
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => {
-  fetchList()
-})
+const {
+  carregando, buscaRealizada, visaoAtual, dados, filtro,
+  filtrar, placeholderDinamico,
+  modalExibicaoAberto, abrirModalExibicao, aplicarExibicao, colunas, labels, colunasTemp,
+  registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
+  mudarPagina, mudarItensPorPagina
+} = useUsuarioListagem()
 </script>
