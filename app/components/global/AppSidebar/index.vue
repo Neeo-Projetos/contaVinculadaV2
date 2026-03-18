@@ -6,12 +6,15 @@
     ]"
   >
     <nav class="flex-1 overflow-y-auto py-6 space-y-1 overflow-x-hidden scrollbar-hide w-64">
-      <NuxtLink to="/" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Home' : ''">
+      
+      <!-- DASHBOARD -->
+      <NuxtLink to="/" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Dashboard' : ''">
         <Icon name="fa7-solid:house" class="menu-icon" />
-        <span v-if="!collapsed" class="menu-text">Início</span>
+        <span v-if="!collapsed" class="menu-text">Dashboard</span>
       </NuxtLink>
 
-      <div v-if="!collapsed" class="menu-header">Cadastros</div>
+      <!-- GESTÃO DE CADASTROS -->
+      <div v-if="!collapsed" class="menu-header">Gestão de Cadastros</div>
       <div v-else class="menu-divider"></div>
       
       <NuxtLink to="/cadastro/funcionario" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Funcionários' : ''">
@@ -24,48 +27,65 @@
         <span v-if="!collapsed" class="menu-text">Projetos</span>
       </NuxtLink>
 
-      <div v-if="!collapsed" class="menu-header">Operações</div>
+      <!-- ROTINAS DE FOLHA -->
+      <div v-if="!collapsed" class="menu-header mt-2">Rotinas de Folha</div>
       <div v-else class="menu-divider"></div>
 
-      <NuxtLink to="/operacao/contracheque/processamento" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Contracheques' : ''">
-        <Icon name="fa7-solid:file-invoice-dollar" class="menu-icon" />
-        <span v-if="!collapsed" class="menu-text">Contracheques</span>
+      <NuxtLink to="/operacao/contracheque/importacao" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Importação TXT' : ''">
+        <Icon name="fa7-solid:file-arrow-up" class="menu-icon" />
+        <span v-if="!collapsed" class="menu-text">Importação TXT</span>
       </NuxtLink>
+
+      <NuxtLink to="/operacao/contracheque/processamento" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Processamento' : ''">
+        <Icon name="fa7-solid:gears" class="menu-icon" />
+        <span v-if="!collapsed" class="menu-text">Processamento</span>
+      </NuxtLink>
+
+      <NuxtLink to="/operacao/contracheque/detalhes" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Histórico' : ''">
+        <Icon name="fa7-solid:clock-rotate-left" class="menu-icon" />
+        <span v-if="!collapsed" class="menu-text">Histórico</span>
+      </NuxtLink>
+
+      <!-- FINANCEIRO & REEMBOLSO -->
+      <div v-if="!collapsed" class="menu-header mt-2">Financeiro & Reembolso</div>
+      <div v-else class="menu-divider"></div>
 
       <NuxtLink to="/operacao/oficio/lancamentoReembolso" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Lançamento Reembolso' : ''">
         <Icon name="fa7-solid:hand-holding-dollar" class="menu-icon" />
-        <span v-if="!collapsed" class="menu-text">Lanc. Reembolso</span>
+        <span v-if="!collapsed" class="menu-text">Lançamento Reembolso</span>
       </NuxtLink>
-
-      <div v-if="!collapsed" class="menu-header mt-2">Movimentação Bancária</div>
-      <div v-else class="menu-divider"></div>
 
       <NuxtLink to="/operacao/movimentacaoBancaria/lancamentoManual" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Lançamento Manual' : ''">
         <Icon name="fa7-solid:cash-register" class="menu-icon" />
         <span v-if="!collapsed" class="menu-text">Lançamento Manual</span>
       </NuxtLink>
 
-      <NuxtLink to="/operacao/movimentacaoBancaria/lancamentoEstorno" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Lançamento Estorno' : ''">
+      <NuxtLink to="/operacao/movimentacaoBancaria/lancamentoEstorno" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Estornos' : ''">
         <Icon name="fa7-solid:rotate-left" class="menu-icon" />
-        <span v-if="!collapsed" class="menu-text">Lançamento Estorno</span>
+        <span v-if="!collapsed" class="menu-text">Estornos</span>
       </NuxtLink>
 
-      <NuxtLink to="/operacao/movimentacaoBancaria/extratoProjeto" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Extrato por Projeto' : ''">
-        <Icon name="fa7-solid:list-check" class="menu-icon" />
-        <span v-if="!collapsed" class="menu-text">Extrato por Projeto</span>
-      </NuxtLink>
-
-      <NuxtLink to="/operacao/movimentacaoBancaria/extratoFuncionario" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Extrato por Funcionário' : ''">
-        <Icon name="fa7-solid:list" class="menu-icon" />
-        <span v-if="!collapsed" class="menu-text">Extrato por Funcionário</span>
-      </NuxtLink>
-
-      <div v-if="!collapsed" class="menu-header mt-2">Ajustes & Configurações</div>
+      <!-- RELATÓRIOS & EXTRATOS -->
+      <div v-if="!collapsed" class="menu-header mt-2">Relatórios & Extratos</div>
       <div v-else class="menu-divider"></div>
 
-      <NuxtLink to="/configuracao" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Configurações' : ''">
-        <Icon name="fa7-solid:gears" class="menu-icon text-emerald-500" />
-        <span v-if="!collapsed" class="menu-text font-bold">Configurações</span>
+      <NuxtLink to="/operacao/movimentacaoBancaria/extratoProjeto" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Extrato Projeto' : ''">
+        <Icon name="fa7-solid:list-check" class="menu-icon" />
+        <span v-if="!collapsed" class="menu-text">Extrato Projeto</span>
+      </NuxtLink>
+
+      <NuxtLink to="/operacao/movimentacaoBancaria/extratoFuncionario" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Extrato Funcionário' : ''">
+        <Icon name="fa7-solid:list" class="menu-icon" />
+        <span v-if="!collapsed" class="menu-text">Extrato Funcionário</span>
+      </NuxtLink>
+
+      <!-- CONFIGURAÇÕES -->
+      <div v-if="!collapsed" class="menu-header mt-2">Configurações</div>
+      <div v-else class="menu-divider"></div>
+
+      <NuxtLink to="/configuracao" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Ajustes do Sistema' : ''">
+        <Icon name="fa7-solid:screwdriver-wrench" class="menu-icon text-emerald-500" />
+        <span v-if="!collapsed" class="menu-text font-bold">Central de Ajustes</span>
       </NuxtLink>
 
       <NuxtLink to="/tabelaBasica" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Tabelas Básicas' : ''">
@@ -73,17 +93,6 @@
         <span v-if="!collapsed" class="menu-text">Tabelas Básicas</span>
       </NuxtLink>
 
-      <span class="block px-7 pt-4 pb-2 text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500" v-if="!collapsed">Atalhos Rápidos</span>
-
-      <NuxtLink to="/configuracao/usuario" class="menu-link group !py-2 opacity-80" active-class="menu-active" :title="collapsed ? 'Usuários' : ''">
-        <Icon name="fa7-solid:user-gear" class="menu-icon !w-4 !h-4" />
-        <span v-if="!collapsed" class="menu-text !text-xs">Usuários</span>
-      </NuxtLink>
-
-      <NuxtLink to="/configuracao/permissaoUsuario" class="menu-link group !py-2 opacity-80" active-class="menu-active" :title="collapsed ? 'Permissões' : ''">
-        <Icon name="fa7-solid:shield-halved" class="menu-icon !w-4 !h-4" />
-        <span v-if="!collapsed" class="menu-text !text-xs">Permissões</span>
-      </NuxtLink>
     </nav>
 
     <div class="p-4 border-t border-gray-100 dark:border-gray-800/80 bg-white/50 dark:bg-[#1a1c23]/50 backdrop-blur-md">
