@@ -4,7 +4,7 @@
     <AppCabecalhoPagina tituloFino="Gestão de" tituloGrosso="Projetos"
       descricao="Gerenciamento de projetos, contas e verbas do sistema" icone="fa7-solid:briefcase" />
 
-    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
+    <AppBarraFerramentas v-model:visao-atual="visaoAtual" mostrar-relatorio @excel="gerarExcel" @pdf="gerarPdf">
       <template #entradas>
         <AppInputAutocomplete 
           v-model="filtro.apelidoParam" 
@@ -26,10 +26,13 @@
       </template>
 
       <template #acoes-principais>
-        <AppBotao variacao="primario" icone="fa7-solid:plus" @click="navigateTo('/cadastro/projeto/cadastro?id=0')">
+        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/cadastro/projeto/cadastro?id=0')">
           Novo Projeto
         </AppBotao>
-        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarProjetos">
+      </template>
+
+      <template #acoes-pesquisa>
+        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarProjetos">
           Pesquisar Projetos
         </AppBotao>
       </template>
@@ -152,4 +155,12 @@ const {
   buscarProjetos, mudarPagina, mudarItensPorPagina,
   abrirModalConta, abrirModalVerba
 } = useProjetoListagem()
-</script>
+
+const gerarExcel = () => {
+    alert('📊 Gerando relatório Excel dos Projetos...')
+}
+
+const gerarPdf = () => {
+    alert('📄 Gerando PDF da Base de Projetos...')
+}
+</script>

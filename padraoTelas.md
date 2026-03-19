@@ -12,7 +12,9 @@ Este documento é a referência definitiva para a criação de novas telas no si
    - Telas de **Listagem** (`index.vue`): **NÃO** usam barra de navegação no topo. Usam apenas `AppCabecalhoPagina`.
    - Telas de **Cadastro** (`cadastro.vue`): **OBRIGATÓRIO** o uso de `AppBarraNavegacao` no topo.
    - Telas de **Processo/Wizards**: Usam `AppTrilhaNavegacao` (ex: telas que não são CRUDs puros).
-3. **Barra de Ferramentas Obrigatória**: Em telas de **Listagem**, é **PROIBIDO** escrever o HTML manual para a área de busca e filtros. Deve-se usar obrigatoriamente o componente `AppBarraFerramentas` para garantir a padronização e o funcionamento idêntico do alternador de visão (Lista/Cards) e botões de ação secundária.
+3. **Barra de Ferramentas Obrigatória**: Em telas de **Listagem**, é **PROIBIDO** escrever o HTML manual para a área de busca e filtros. Deve-se usar obrigatoriamente o componente `AppBarraFerramentas`. A linha inferior deve ser dividida em dois slots:
+   - `#acoes-principais`: Para botões de criação (ex: "Novo Registro") à esquerda. O botão de **Relatório** aparecerá automaticamente ao lado destes se habilitado.
+   - `#acoes-pesquisa`: Para o botão de "Pesquisar" à direita, garantindo o equilíbrio visual da barra.
 4. **Grid System**: Sempre usar `md:grid-cols-12` com `gap-x-6 gap-y-8`. Nunca use grids genéricos (`cols-3`) para manter o alinhamento vertical dos labels.
 5. **Reuso de Componentes**: O desenvolvedor (IA ou Humano) deve **SEMPRE** analisar a pasta `app/components/global/` antes de criar qualquer elemento visual. É proibido usar tags HTML puras (`input`, `select`, `button`) quando houver um componente `App` correspondente (ex: `AppInputTexto`, `AppSelect`, `AppBotao`).
 
@@ -133,3 +135,18 @@ Em formulários multi-etapas, o composable deve gerenciar:
 - **Z-Index**:
   - `AppModal`: `z-[999]`.
   - `AppSobreposicaoCarregamento`: Deve cobrir o formulário mas permitir ver o cabeçalho.
+
+---
+
+## 6. Padronização de Cores (Ações)
+Para garantir a clareza semântica, os botões devem seguir rigorosamente as cores abaixo baseadas em sua função:
+
+- **Azul (`variacao="acao"`)**: Ações de sistema que não alteram dados permanentemente de imediato ou servem para navegação/busca.
+  - Exemplos: *Novo Registro, Pesquisar, Aplicar Filtros, Gerar Relatório.*
+- **Verde (`variacao="primario"`)**: Ações de confirmação, salvamento ou conclusão positiva.
+  - Exemplos: *Gravar Dados, Confirmar, Sim (em modais).*
+- **Vermelho (`variacao="perigo"`)**: Ações destrutivas, críticas ou de recusa.
+  - Exemplos: *Inativar, Excluir, Remover, Não (em modais).*
+- **Amarelo (`variacao="aviso"`)**: Alertas ou ações que exigem atenção redobrada.
+- **Cinza (`variacao="padrao"`)**: Ações secundárias ou de cancelamento.
+  - Exemplos: *Voltar, Cancelar, Fechar, Limpar.*

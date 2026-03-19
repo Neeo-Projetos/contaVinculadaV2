@@ -4,7 +4,7 @@
     <AppCabecalhoPagina tituloFino="Base de" tituloGrosso="Funcionários"
       descricao="Gestão e listagem de colaboradores do sistema" icone="fa7-solid:users" />
 
-    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
+    <AppBarraFerramentas v-model:visao-atual="visaoAtual" mostrar-relatorio @excel="gerarExcel" @pdf="gerarPdf">
       <template #entradas>
         <AppInputAutocomplete 
           v-model="filtro.nomeParam" 
@@ -26,10 +26,13 @@
       </template>
 
       <template #acoes-principais>
-        <AppBotao variacao="primario" icone="fa7-solid:user-plus" @click="navigateTo('/cadastro/funcionario/cadastro')">
+        <AppBotao variacao="acao" icone="fa7-solid:user-plus" @click="navigateTo('/cadastro/funcionario/cadastro')">
           Novo Funcionário
         </AppBotao>
-        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarLista">
+      </template>
+
+      <template #acoes-pesquisa>
+        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarLista">
           Pesquisar Funcionários
         </AppBotao>
       </template>
@@ -152,4 +155,12 @@ const {
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = useFuncionarioListagem()
+
+const gerarExcel = () => {
+    alert('📊 Gerando relatório Excel dos Funcionários...')
+}
+
+const gerarPdf = () => {
+    alert('📄 Gerando PDF da Base de Funcionários...')
+}
 </script>

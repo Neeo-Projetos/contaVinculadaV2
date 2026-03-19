@@ -15,8 +15,8 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  variacao: { type: String, default: 'padrao' }, // primario, perigo, padrao
-  nativeType: { type: String, default: 'button' as 'button' | 'submit' | 'reset' },
+  variacao: { type: String, default: 'padrao' }, // primario, acao, aviso, perigo, padrao
+  nativeType: { type: String as () => 'button' | 'submit' | 'reset', default: 'button' },
   icone: { type: String, default: '' },
   carregando: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false }
@@ -26,6 +26,10 @@ const classesVariacao = computed(() => {
   switch (props.variacao) {
     case 'primario':
       return 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transform hover:-translate-y-0.5 px-8'
+    case 'acao':
+      return 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transform hover:-translate-y-0.5 px-8'
+    case 'aviso':
+      return 'bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 transform hover:-translate-y-0.5 px-8'
     case 'perigo':
       return 'bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border border-red-200 dark:border-red-900/50'
     case 'padrao':
