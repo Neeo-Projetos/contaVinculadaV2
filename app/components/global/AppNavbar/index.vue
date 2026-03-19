@@ -30,7 +30,7 @@
         </div>
       </Transition>
       
-      <div class="relative" @blur="menuOpen = false" tabindex="0">
+      <div class="relative" ref="menuRef">
         <button @click="menuOpen = !menuOpen" class="flex items-center gap-3 p-1 pr-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600 rounded-full transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
           <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center text-white font-bold shadow-inner">
             {{ userInitial }}
@@ -47,7 +47,7 @@
               <p class="text-xs text-gray-500 dark:text-gray-400">Logado como</p>
               <p class="text-sm font-bold text-gray-800 dark:text-white truncate">{{ userName }}</p>
             </div>
-            <NuxtLink to="/configuracao/usuario" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-700/50 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+            <NuxtLink to="/configuracao" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-700/50 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
               <Icon name="fa7-solid:gear" class="w-4 h-4 opacity-70" /> Configurações
             </NuxtLink>
             <div class="border-t border-gray-100 dark:border-gray-700/50 my-1"></div>
@@ -65,6 +65,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { onClickOutside } from '@vueuse/core'
 import { useCookie } from '#app'
 
 const router = useRouter()
@@ -75,6 +76,10 @@ const isHome = computed(() => route.path === '/')
 
 const userName = ref('Usuário')
 const menuOpen = ref(false)
+const menuRef = ref(null)
+
+// Fecha o menu ao clicar fora
+onClickOutside(menuRef, () => (menuOpen.value = false))
 
 // Lógica de tempo para o relógio da Navbar
 const horaAtual = ref('')
