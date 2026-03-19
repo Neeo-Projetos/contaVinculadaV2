@@ -8,12 +8,13 @@
       icone="fa7-solid:info-circle" 
     />
 
-    <div class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm space-y-5">
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-        <div class="md:col-span-2">
+    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
+      <template #entradas>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end w-full">
+          <div class="md:col-span-2">
             <AppInputTexto v-model="filtro.mesAno" label="Mês/Ano" placeholder="MM/AAAA" v-maska="'##/####'" icone="fa7-solid:calendar-check" />
-        </div>
-        <div class="md:col-span-4">
+          </div>
+          <div class="md:col-span-3">
             <AppSelect 
                 v-model="filtro.projeto" 
                 label="Projeto" 
@@ -21,9 +22,10 @@
                 :opcoes="projetos" 
                 itemValue="codigo" 
                 itemLabel="apelido"
+                icone="fa7-solid:building-user"
             />
-        </div>
-        <div class="md:col-span-4">
+          </div>
+          <div class="md:col-span-4">
             <AppSelect 
                 v-model="filtro.funcionarioId" 
                 label="Funcionário" 
@@ -31,9 +33,10 @@
                 :opcoes="funcionarios" 
                 itemValue="codigo" 
                 itemLabel="nomeCompleto"
+                icone="fa7-solid:user-tie"
             />
-        </div>
-        <div class="md:col-span-2">
+          </div>
+          <div class="md:col-span-3">
             <AppSelect 
                 v-model="filtro.status" 
                 label="Situação Final" 
@@ -41,41 +44,27 @@
                 :opcoes="[{codigo: '1', descricao: 'Aprovados'}, {codigo: '0', descricao: 'Reprovados'}]" 
                 itemValue="codigo" 
                 itemLabel="descricao"
+                icone="fa7-solid:shield-check"
             />
-        </div>
-      </div>
-
-      <div class="w-full h-px bg-gray-100 dark:bg-gray-800/80"></div>
-
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-             <AppBotao variacao="padrao" icone="fa7-solid:gears" @click="navigateTo('/operacao/contracheque/processamento')">
-                Processamento
-            </AppBotao>
-             <AppBotao variacao="padrao" icone="fa7-solid:file-arrow-up" @click="navigateTo('/operacao/contracheque/importacao')">
-                Importação
-            </AppBotao>
-        </div>
-        
-        <div class="flex items-center gap-3">
-          <div class="flex items-center bg-gray-50 dark:bg-gray-900/50 p-1 rounded-xl border border-gray-100 dark:border-gray-800">
-            <button @click="visaoAtual = 'lista'"
-              :class="visaoAtual === 'lista' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'"
-              class="px-4 py-2 rounded-lg text-sm transition-all">
-              <Icon name="fa7-solid:list" class="w-4 h-4" />
-            </button>
-            <button @click="visaoAtual = 'cards'"
-              :class="visaoAtual === 'cards' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'"
-              class="px-4 py-2 rounded-lg text-sm transition-all">
-              <Icon name="fa7-solid:border-all" class="w-4 h-4" />
-            </button>
           </div>
-          <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarRegistros">
-            Consultar Histórico
-          </AppBotao>
         </div>
-      </div>
-    </div>
+      </template>
+
+      <template #acoes-secundarias>
+        <AppBotao variacao="padrao" icone="fa7-solid:gears" @click="navigateTo('/operacao/contracheque/processamento')">
+            Processamento
+        </AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:file-arrow-up" @click="navigateTo('/operacao/contracheque/importacao')">
+            Importação
+        </AppBotao>
+      </template>
+
+      <template #acoes-principais>
+        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarRegistros">
+          Consultar
+        </AppBotao>
+      </template>
+    </AppBarraFerramentas>
 
     <AppContainerListagem 
       :carregando="carregando" 

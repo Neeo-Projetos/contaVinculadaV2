@@ -8,17 +8,17 @@
       icone="fa7-solid:gears" 
     />
 
-    <!-- Barra de Filtros Padrão Ouro -->
-    <div class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm space-y-5">
-      <div class="flex flex-col xl:flex-row items-center gap-4">
-        <div class="w-full xl:w-48 shrink-0">
+    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
+      <template #entradas>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end w-full">
+          <div class="md:col-span-3">
             <AppInputTexto v-model="filtro.mesAno" label="Mês/Ano" placeholder="MM/AAAA" v-maska="'##/####'" icone="fa7-solid:calendar-circle-exclamation" />
-        </div>
-        <div class="flex-1 w-full text-left">
+          </div>
+          <div class="md:col-span-9">
             <AppInputAutocomplete 
                 v-model="nomeFuncionarioSearch" 
                 label="Buscar Funcionário" 
-                placeholder="Digite o nome do colaborador para refinar a busca..." 
+                placeholder="Digite o nome do colaborador..." 
                 :sugestoes="sugestoesFuncionarios" 
                 :buscando="buscandoFuncionarios"
                 :mostrarMenu="mostrarMenuFuncionarios"
@@ -27,56 +27,37 @@
                 @fechar="mostrarMenuFuncionarios = false"
                 icone="fa7-solid:user-magnifying-glass"
             />
+          </div>
         </div>
+      </template>
 
-        <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto shrink-0 pt-6">
-            <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 icon-glow p-1 rounded-xl border border-gray-100 dark:border-gray-800">
-                <button @click="visaoAtual = 'lista'"
-                    :class="visaoAtual === 'lista' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 font-bold'"
-                    class="px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2">
-                    <Icon name="fa7-solid:list-ul" class="w-4 h-4" />
-                </button>
-                <button @click="visaoAtual = 'cards'"
-                    :class="visaoAtual === 'cards' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 font-bold'"
-                    class="px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2">
-                    <Icon name="fa7-solid:grid-2" class="w-full h-4" />
-                </button>
-            </div>
+      <template #acoes-secundarias>
+        <AppBotao variacao="padrao" icone="fa7-solid:filter-list" @click="modalFiltroAvancadoAberto = true">Avançado</AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:file-import" @click="navigateTo('/operacao/contracheque/importacao')">
+            Importar
+        </AppBotao>
+      </template>
 
-            <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden xl:block mx-1"></div>
-            
-            <AppBotao variacao="padrao" icone="fa7-solid:filter-list" @click="modalFiltroAvancadoAberto = true">Avançado</AppBotao>
-            <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarProcessamentos" class="shadow-lg shadow-emerald-500/10">Consultar</AppBotao>
-        </div>
-      </div>
-
-      <div class="w-full h-px bg-gray-100 dark:bg-gray-800/80"></div>
-
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-            <AppBotao variacao="padrao" icone="fa7-solid:file-import" @click="navigateTo('/operacao/contracheque/importacao')">
-                Realizar Nova Importação
-            </AppBotao>
-            
-            <template v-if="filtro.status === '2' && dados.length > 0">
-                <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-2 hidden sm:block"></div>
-                
-                <div class="flex items-center gap-2 bg-emerald-500/5 p-1 rounded-2xl border border-emerald-500/10">
-                    <AppBotao variacao="sucesso" icone="fa7-solid:check-double" @click="processarContracheque(1)" class="h-10 px-5 text-[10px] uppercase font-black tracking-widest">
-                        Aprovar
-                    </AppBotao>
-                    <AppBotao variacao="perigo" icone="fa7-solid:ban" @click="processarContracheque(0)" class="h-10 px-5 text-[10px] uppercase font-black tracking-widest">
-                        Reprovar
-                    </AppBotao>
-                </div>
-            </template>
-        </div>
+      <template #acoes-principais>
+        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarProcessamentos">Consultar</AppBotao>
         
-        <div class="hidden sm:flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
+        <template v-if="filtro.status === '2' && dados.length > 0">
+            <div class="h-8 w-px bg-gray-200 dark:bg-gray-700 mx-1 hidden sm:block"></div>
+            <AppBotao variacao="sucesso" icone="fa7-solid:check-double" @click="processarContracheque(1)">
+                Aprovar
+            </AppBotao>
+            <AppBotao variacao="perigo" icone="fa7-solid:ban" @click="processarContracheque(0)">
+                Reprovar
+            </AppBotao>
+        </template>
+      </template>
+    </AppBarraFerramentas>
+
+    <div class="flex items-center justify-between px-2" v-if="totalRegistros > 0">
+        <div class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
             <Icon name="fa7-solid:circle-info" class="w-4 h-4 text-emerald-500" />
-            <span>Processando {{ totalRegistros }} registros encontrados</span>
+            <span>{{ totalRegistros }} registros encontrados</span>
         </div>
-      </div>
     </div>
 
     <!-- Modal de Filtro Avançado Padrão -->

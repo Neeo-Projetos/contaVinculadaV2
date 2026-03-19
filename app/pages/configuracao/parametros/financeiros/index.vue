@@ -1,121 +1,127 @@
 <template>
-  <div class="p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">
-        <Icon name="fa-solid:percent" class="mr-2" />
-        Parâmetros Financeiros
-      </h1>
-    </div>
+  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
+    <AppCabecalhoPagina 
+      tituloFino="Parâmetros" 
+      tituloGrosso="Financeiros"
+      descricao="Gerencie as alíquotas e percentuais de retenção por projeto" 
+      icone="fa7-solid:percent" 
+    />
 
-    <div class="bg-white rounded-lg shadow-md mb-6 p-4">
-      <h2 class="text-lg font-semibold mb-4 border-b pb-2 cursor-pointer" @click="filtroAberto = !filtroAberto">
-        Filtro <Icon :name="filtroAberto ? 'fa-solid:angle-up' : 'fa-solid:angle-down'" class="float-right mt-1" />
-      </h2>
-      
-      <div v-show="filtroAberto" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Projeto</label>
-          <input v-model="filtro.projetoNome" type="text" placeholder="Digite o projeto..." class="w-full border rounded-md p-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Ativo</label>
-          <select v-model="filtro.ativo" class="w-full border rounded-md p-2 bg-white">
-            <option value="">Todos</option>
-            <option value="1">Sim</option>
-            <option value="0">Não</option>
-          </select>
-        </div>
-      </div>
-      
-      <div v-show="filtroAberto" class="mt-4 flex justify-between">
-        <button @click="novoRegistro" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center">
-          <span>Novo</span>
-          <Icon name="fa-solid:file" class="ml-2" />
-        </button>
-        <button @click="buscarFinanceiros" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center">
-          <span>Filtrar</span>
-          <Icon name="fa-solid:search" class="ml-2" />
-        </button>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-      <table class="w-full text-left border-collapse">
-        <thead class="bg-gray-100">
-          <tr>
-            <th class="p-3 border-b">Projeto</th>
-            <th class="p-3 border-b text-center">Parâmetros</th>
-            <th class="p-3 border-b text-center">Ativo</th>
-            <th class="p-3 border-b text-center">Histórico</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="financeiros.length === 0">
-            <td colspan="4" class="p-4 text-center text-gray-500 font-bold">Nenhum parâmetro encontrado</td>
-          </tr>
-          <tr v-for="item in financeiros" :key="item.codigo" class="hover:bg-gray-50 border-b">
-            <td class="p-3">
-              <NuxtLink :to="`/configuracao/parametros/financeiros/cadastro?id=${item.codigo}`" class="text-blue-600 hover:underline">
-                {{ item.apelido }} - {{ item.projeto }}
-              </NuxtLink>
-            </td>
-            <td class="p-3 text-center">
-              <button @click="abrirModalParametros(item)" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                <Icon name="fa-solid:percent" />
-              </button>
-            </td>
-            <td class="p-3 text-center">
-              <span :class="item.ativo === 1 ? 'text-green-600 font-bold' : 'text-red-600 font-bold'">
-                {{ item.ativo === 1 ? 'Sim' : 'Não' }}
-              </span>
-            </td>
-            <td class="p-3 text-center">
-              <button @click="abrirHistorico(item.codigo)" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                <Icon name="fa-solid:history" />
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <AppModal :isOpen="modalParametroAberto" title="Parâmetros Financeiros" @close="modalParametroAberto = false">
-      <div class="border rounded-md overflow-hidden mt-4">
-        <table class="w-full text-center border-collapse">
-          <thead class="bg-gray-100 border-b">
-            <tr>
-              <th class="p-3 border-r">Décimo Terceiro</th>
-              <th class="p-3 border-r">Férias 1/3</th>
-              <th class="p-3 border-r">Multa FGTS</th>
-              <th class="p-3">Submódulo</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="parametroSelecionado">
-              <td class="p-3 border-r">{{ parametroSelecionado.decimoTerceiro }}%</td>
-              <td class="p-3 border-r">{{ parametroSelecionado.feriasConstitucional }}%</td>
-              <td class="p-3 border-r">{{ parametroSelecionado.multaFgts }}%</td>
-              <td class="p-3">{{ parametroSelecionado.submodulo }}%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="mt-6 flex justify-center">
-        <button @click="modalParametroAberto = false" class="bg-gray-300 text-gray-800 px-6 py-2 rounded hover:bg-gray-400">Fechar</button>
-      </div>
-    </AppModal>
-
-    <AppModal :isOpen="modalHistoricoAberto" title="Histórico de alterações do Financeiro" @close="modalHistoricoAberto = false">
-      <div class="max-h-96 overflow-y-auto p-4">
-        <div v-for="hist in historicoData" :key="hist.codigo" class="mb-4 border rounded">
-          <div class="bg-gray-100 p-3 font-semibold border-b cursor-pointer flex justify-between">
-            {{ hist.dataAlteracao }} - {{ hist.usuarioAlteracao }}
+    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
+      <template #entradas>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end w-full">
+          <div class="md:col-span-8">
+            <AppInputTexto v-model="filtro.projetoNome" label="Projeto" placeholder="Digite o projeto..." icone="fa7-solid:briefcase" />
           </div>
-          <div class="p-3">
-            <p v-for="(alt, idx) in hist.alteracoes" :key="idx" class="font-bold mb-1" v-html="alt"></p>
+          <div class="md:col-span-4">
+            <AppSelecaoStatus v-model="filtro.ativo" />
           </div>
         </div>
+      </template>
+
+      <template #acoes-principais>
+        <AppBotao variacao="primario" icone="fa7-solid:plus" @click="novoRegistro">
+          Novo Registro
+        </AppBotao>
+        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarFinanceiros">
+          Pesquisar
+        </AppBotao>
+      </template>
+    </AppBarraFerramentas>
+
+    <AppContainerListagem 
+      :carregando="carregando" 
+      :buscaRealizada="true" 
+      :lista="financeiros"
+      :visaoAtual="visaoAtual" 
+      @mudarPagina="() => {}"
+    >
+      <template #cabecalho-tabela>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Projeto</th>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Taxas</th>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Histórico</th>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Ações</th>
+      </template>
+
+      <template #linhas-tabela="{ item }">
+        <td class="px-6 py-4 font-bold text-sm text-gray-900 dark:text-white">
+            <div class="flex flex-col">
+                <span>{{ item.apelido }}</span>
+                <span class="text-xs text-gray-500 font-medium">{{ item.projeto }}</span>
+            </div>
+        </td>
+        <td class="px-6 py-4 text-center">
+          <button @click="abrirModalParametros(item)" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-all" title="Ver Alíquotas">
+            <Icon name="fa7-solid:percent" class="w-5 h-5" />
+          </button>
+        </td>
+        <td class="px-6 py-4 text-center">
+            <AppAtivo :ativo="item.ativo === 1" />
+        </td>
+        <td class="px-6 py-4 text-center">
+          <button @click="abrirHistorico(item.codigo)" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-all" title="Ver Histórico">
+            <Icon name="fa7-solid:clock-rotate-left" class="w-5 h-5" />
+          </button>
+        </td>
+        <td class="px-6 py-4 text-right">
+          <NuxtLink :to="`/configuracao/parametros/financeiros/cadastro?id=${item.codigo}`" class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all inline-block" title="Editar">
+            <Icon name="fa7-solid:pen-to-square" class="w-5 h-5" />
+          </NuxtLink>
+        </td>
+      </template>
+
+      <template #cards="{ item }">
+        <AppCardListagem 
+          :titulo="item.apelido" 
+          :subtituloNome="'Projeto'" 
+          :subtituloValor="item.projeto"
+          :ativo="item.ativo === 1"
+          @ver-detalhes="navigateTo(`/configuracao/parametros/financeiros/cadastro?id=${item.codigo}`)"
+          @clique-titulo="navigateTo(`/configuracao/parametros/financeiros/cadastro?id=${item.codigo}`)"
+        >
+            <template #actions-extra>
+                <button @click="abrirModalParametros(item)" class="p-2 text-gray-400 hover:text-blue-500 rounded-lg transition-colors border border-gray-100 dark:border-gray-800" title="Alíquotas">
+                    <Icon name="fa7-solid:percent" class="w-4 h-4" />
+                </button>
+                <button @click="abrirHistorico(item.codigo)" class="p-2 text-gray-400 hover:text-blue-500 rounded-lg transition-colors border border-gray-100 dark:border-gray-800" title="Histórico">
+                    <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" />
+                </button>
+            </template>
+        </AppCardListagem>
+      </template>
+    </AppContainerListagem>
+
+    <AppModalHistorico 
+      :aberto="modalHistoricoAberto" 
+      :historico="historicoData" 
+      @close="modalHistoricoAberto = false" 
+    />
+
+    <AppModal :isOpen="modalParametroAberto" title="Detalhamento de Alíquotas" @close="modalParametroAberto = false">
+      <div class="grid grid-cols-2 gap-4 p-4" v-if="parametroSelecionado">
+          <div class="bg-gray-50 dark:bg-gray-900/40 p-4 rounded-2xl border border-gray-100 dark:border-white/5">
+              <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">13º Salário</span>
+              <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400">{{ parametroSelecionado.decimoTerceiro }}%</span>
+          </div>
+          <div class="bg-gray-50 dark:bg-gray-900/40 p-4 rounded-2xl border border-gray-100 dark:border-white/5">
+              <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">Férias 1/3</span>
+              <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400">{{ parametroSelecionado.feriasConstitucional }}%</span>
+          </div>
+          <div class="bg-gray-50 dark:bg-gray-900/40 p-4 rounded-2xl border border-gray-100 dark:border-white/5">
+              <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">Multa FGTS</span>
+              <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400">{{ parametroSelecionado.multaFgts }}%</span>
+          </div>
+          <div class="bg-gray-50 dark:bg-gray-900/40 p-4 rounded-2xl border border-gray-100 dark:border-white/5">
+              <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">Submódulo</span>
+              <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400">{{ parametroSelecionado.submodulo }}%</span>
+          </div>
       </div>
+      <template #footer>
+          <div class="flex justify-end p-4">
+              <AppBotao variacao="padrao" @click="modalParametroAberto = false">Fechar</AppBotao>
+          </div>
+      </template>
     </AppModal>
   </div>
 </template>
@@ -124,6 +130,8 @@
 import { ref } from 'vue'
 
 const router = useRouter()
+const visaoAtual = ref('lista')
+const carregando = ref(false)
 const filtroAberto = ref(true)
 
 const filtro = ref({
@@ -156,6 +164,7 @@ const modalHistoricoAberto = ref(false)
 const historicoData = ref<Historico[]>([])
 
 const buscarFinanceiros = async () => {
+  carregando.value = true
   try {
     const response = await $fetch<{ data: Financeiro[] }>('/api/configuracao/parametros/financeiros/listagem', {
       method: 'POST',
@@ -164,6 +173,8 @@ const buscarFinanceiros = async () => {
     financeiros.value = response.data || []
   } catch (error) {
     console.error('Erro ao buscar parâmetros financeiros:', error)
+  } finally {
+    carregando.value = false
   }
 }
 

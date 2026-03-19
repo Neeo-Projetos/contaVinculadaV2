@@ -1,104 +1,97 @@
 <template>
-  <div class="p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">
-        <Icon name="fa-solid:random" class="mr-2" />
-        Tipo Movimentação
-      </h1>
-    </div>
+  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
+    <AppCabecalhoPagina 
+      tituloFino="Tabela Básica de" 
+      tituloGrosso="Tipo de Movimentação"
+      descricao="Gerencie as categorias de crédito e débito do sistema" 
+      icone="fa7-solid:shuffle" 
+    />
 
-    <div class="bg-white rounded-lg shadow-md mb-6 p-4">
-      <h2 class="text-lg font-semibold mb-4 border-b pb-2 cursor-pointer" @click="filtroAberto = !filtroAberto">
-        Filtro <Icon :name="filtroAberto ? 'fa-solid:angle-up' : 'fa-solid:angle-down'" class="float-right mt-1" />
-      </h2>
-      
-      <div v-show="filtroAberto" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-          <input v-model="filtro.descricao" type="text" placeholder="Digite a descrição..." class="w-full border rounded-md p-2" />
+    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
+      <template #entradas>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end w-full">
+          <div class="md:col-span-6">
+            <AppInputTexto v-model="filtro.descricao" label="Descrição" placeholder="Digite a descrição..." icone="fa7-solid:tag" />
+          </div>
+          <div class="md:col-span-3">
+            <AppSelect v-model="filtro.tipo" label="Tipo" :opcoes="[{ codigo: '', descricao: 'Todos' }, { codigo: '1', descricao: 'Crédito' }, { codigo: '0', descricao: 'Débito' }]" />
+          </div>
+          <div class="md:col-span-3">
+            <AppSelecaoStatus v-model="filtro.ativo" />
+          </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-          <select v-model="filtro.tipo" class="w-full border rounded-md p-2 bg-white">
-            <option value="">Todos</option>
-            <option value="1">Crédito</option>
-            <option value="0">Débito</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Ativo</label>
-          <select v-model="filtro.ativo" class="w-full border rounded-md p-2 bg-white">
-            <option value="">Todos</option>
-            <option value="1">Sim</option>
-            <option value="0">Não</option>
-          </select>
-        </div>
-      </div>
-      
-      <div v-show="filtroAberto" class="mt-4 flex justify-between">
-        <button @click="novoRegistro" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center">
-          <span>Novo</span>
-          <Icon name="fa-solid:file" class="ml-2" />
-        </button>
-        <button @click="buscarTipos" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center">
-          <span>Filtrar</span>
-          <Icon name="fa-solid:search" class="ml-2" />
-        </button>
-      </div>
-    </div>
+      </template>
 
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-      <table class="w-full text-left border-collapse">
-        <thead class="bg-gray-100">
-          <tr>
-            <th class="p-3 border-b">Descrição</th>
-            <th class="p-3 border-b">Tipo</th>
-            <th class="p-3 border-b text-center">Ativo</th>
-            <th class="p-3 border-b text-center">Histórico</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="tipos.length === 0">
-            <td colspan="4" class="p-4 text-center text-gray-500 font-bold">Nenhum tipo de movimentação encontrado</td>
-          </tr>
-          <tr v-for="item in tipos" :key="item.codigo" class="hover:bg-gray-50 border-b">
-            <td class="p-3">
-              <NuxtLink :to="`/tabelaBasica/tipoMovimentacao/cadastro?id=${item.codigo}`" class="text-blue-600 hover:underline">
-                {{ item.descricao }}
-              </NuxtLink>
-            </td>
-            <td class="p-3">
-              <span :class="item.tipo === 1 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'">
+      <template #acoes-principais>
+        <AppBotao variacao="primario" icone="fa7-solid:plus" @click="novoRegistro">
+          Novo Registro
+        </AppBotao>
+        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarTipos">
+          Pesquisar
+        </AppBotao>
+      </template>
+    </AppBarraFerramentas>
+
+    <AppContainerListagem 
+      :carregando="carregando" 
+      :buscaRealizada="true" 
+      :lista="tipos"
+      :visaoAtual="visaoAtual" 
+      @mudarPagina="() => {}"
+    >
+      <template #cabecalho-tabela>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Descrição</th>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tipo</th>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Histórico</th>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Ações</th>
+      </template>
+
+      <template #linhas-tabela="{ item }">
+        <td class="px-6 py-4 font-bold text-sm text-gray-900 dark:text-white">{{ item.descricao }}</td>
+        <td class="px-6 py-4">
+            <span :class="item.tipo === 1 ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10' : 'text-amber-600 bg-amber-50 dark:bg-amber-500/10'" class="px-2 py-1 rounded-lg text-xs font-bold uppercase tracking-wider">
                 {{ item.tipo === 1 ? 'Crédito' : 'Débito' }}
-              </span>
-            </td>
-            <td class="p-3 text-center">
-              <span :class="item.ativo === 1 ? 'text-green-600 font-bold' : 'text-red-600 font-bold'">
-                {{ item.ativo === 1 ? 'Sim' : 'Não' }}
-              </span>
-            </td>
-            <td class="p-3 text-center">
-              <button @click="abrirHistorico(item.codigo)" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                <Icon name="fa-solid:history" />
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            </span>
+        </td>
+        <td class="px-6 py-4 text-center">
+            <AppAtivo :ativo="item.ativo === 1" />
+        </td>
+        <td class="px-6 py-4 text-center">
+          <button @click="abrirHistorico(item.codigo)" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-all" title="Ver Histórico">
+            <Icon name="fa7-solid:clock-rotate-left" class="w-5 h-5" />
+          </button>
+        </td>
+        <td class="px-6 py-4 text-right">
+          <NuxtLink :to="`/tabelaBasica/tipoMovimentacao/cadastro?id=${item.codigo}`" class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all inline-block" title="Editar">
+            <Icon name="fa7-solid:pen-to-square" class="w-5 h-5" />
+          </NuxtLink>
+        </td>
+      </template>
 
-    <AppModal :isOpen="modalHistoricoAberto" title="Histórico de alterações de Tipo Movimentação" @close="modalHistoricoAberto = false">
-      <div class="max-h-96 overflow-y-auto p-4">
-        <div v-for="hist in historicoData" :key="hist.codigo" class="mb-4 border rounded">
-          <div class="bg-gray-100 p-3 font-semibold border-b cursor-pointer flex justify-between">
-            {{ hist.dataAlteracao }} - {{ hist.usuarioAlteracao }}
-          </div>
-          <div class="p-3">
-            <p v-for="(alt, idx) in hist.alteracoes" :key="idx" class="font-bold mb-1" v-html="alt"></p>
-          </div>
-        </div>
-      </div>
-    </AppModal>
+      <template #cards="{ item }">
+        <AppCardListagem 
+          :titulo="item.descricao" 
+          :subtituloNome="'Tipo'" 
+          :subtituloValor="item.tipo === 1 ? 'Crédito' : 'Débito'"
+          :ativo="item.ativo === 1"
+          @ver-detalhes="navigateTo(`/tabelaBasica/tipoMovimentacao/cadastro?id=${item.codigo}`)"
+          @clique-titulo="navigateTo(`/tabelaBasica/tipoMovimentacao/cadastro?id=${item.codigo}`)"
+        >
+            <template #actions-extra>
+                <button @click="abrirHistorico(item.codigo)" class="p-2 text-gray-400 hover:text-blue-500 rounded-lg transition-colors border border-gray-100 dark:border-gray-800" title="Histórico">
+                    <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" />
+                </button>
+            </template>
+        </AppCardListagem>
+      </template>
+    </AppContainerListagem>
+
+    <AppModalHistorico 
+      :aberto="modalHistoricoAberto" 
+      :historico="historicoData" 
+      @close="modalHistoricoAberto = false" 
+    />
   </div>
 </template>
 
@@ -106,6 +99,8 @@
 import { ref } from 'vue'
 
 const router = useRouter()
+const visaoAtual = ref('lista')
+const carregando = ref(false)
 const filtroAberto = ref(true)
 
 const filtro = ref({
@@ -121,18 +116,12 @@ interface TipoMovimentacao {
   ativo: number
 }
 
-interface Historico {
-  codigo: number
-  dataAlteracao: string
-  usuarioAlteracao: string
-  alteracoes: string[]
-}
-
 const tipos = ref<TipoMovimentacao[]>([])
 const modalHistoricoAberto = ref(false)
-const historicoData = ref<Historico[]>([])
+const historicoData = ref<any[]>([])
 
 const buscarTipos = async () => {
+  carregando.value = true
   try {
     const response = await $fetch<{ data: TipoMovimentacao[] }>('/api/tabelaBasica/tipoMovimentacao/listagem', {
       method: 'POST',
@@ -141,16 +130,28 @@ const buscarTipos = async () => {
     tipos.value = response.data || []
   } catch (error) {
     console.error('Erro ao buscar tipos de movimentação:', error)
+  } finally {
+    carregando.value = false
   }
 }
 
 const abrirHistorico = async (id: number) => {
   try {
-    const response = await $fetch<{ data: Historico[] }>('/api/tabelaBasica/tipoMovimentacao/historico', {
+    const response = await $fetch<{ data: any[] }>('/api/tabelaBasica/tipoMovimentacao/historico', {
       method: 'POST',
       body: { tipoMovimentacao: id }
     })
-    historicoData.value = response.data || []
+    
+    // Mapeio os dados para o formato esperado pelo componente AppModalHistorico
+    historicoData.value = (response.data || []).map(h => ({
+      dataHora: h.dataAlteracao,
+      usuario: h.usuarioAlteracao,
+      alteracoes: h.alteracoes.map((st: string) => ({
+        tipo: 'texto',
+        mensagem: st
+      }))
+    }))
+    
     modalHistoricoAberto.value = true
   } catch (error) {
     console.error('Erro ao buscar histórico:', error)

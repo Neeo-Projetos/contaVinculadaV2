@@ -12,8 +12,9 @@ Este documento é a referência definitiva para a criação de novas telas no si
    - Telas de **Listagem** (`index.vue`): **NÃO** usam barra de navegação no topo. Usam apenas `AppCabecalhoPagina`.
    - Telas de **Cadastro** (`cadastro.vue`): **OBRIGATÓRIO** o uso de `AppBarraNavegacao` no topo.
    - Telas de **Processo/Wizards**: Usam `AppTrilhaNavegacao` (ex: telas que não são CRUDs puros).
-3. **Grid System**: Sempre usar `md:grid-cols-12` com `gap-x-6 gap-y-8`. Nunca use grids genéricos (`cols-3`) para manter o alinhamento vertical dos labels.
-4. **Reuso de Componentes**: O desenvolvedor (IA ou Humano) deve **SEMPRE** analisar a pasta `app/components/global/` antes de criar qualquer elemento visual. É proibido usar tags HTML puras (`input`, `select`, `button`) quando houver um componente `App` correspondente (ex: `AppInputTexto`, `AppSelect`, `AppBotao`).
+3. **Barra de Ferramentas Obrigatória**: Em telas de **Listagem**, é **PROIBIDO** escrever o HTML manual para a área de busca e filtros. Deve-se usar obrigatoriamente o componente `AppBarraFerramentas` para garantir a padronização e o funcionamento idêntico do alternador de visão (Lista/Cards) e botões de ação secundária.
+4. **Grid System**: Sempre usar `md:grid-cols-12` com `gap-x-6 gap-y-8`. Nunca use grids genéricos (`cols-3`) para manter o alinhamento vertical dos labels.
+5. **Reuso de Componentes**: O desenvolvedor (IA ou Humano) deve **SEMPRE** analisar a pasta `app/components/global/` antes de criar qualquer elemento visual. É proibido usar tags HTML puras (`input`, `select`, `button`) quando houver um componente `App` correspondente (ex: `AppInputTexto`, `AppSelect`, `AppBotao`).
 
 ---
 
@@ -24,11 +25,11 @@ Uma tela de listagem padrão deve seguir a anatomia do arquivo [funcionario/inde
 ### 1.1 Estrutura Visual (Top-Down)
 1. **Navegação**: O index não possui barra de navegação no topo, apenas o cabeçalho.
 2. **Cabeçalho**: `AppCabecalhoPagina` com título fino/grosso e ícone representativo.
-3. **Barra de Filtros Principal**:
-   - `AppInputAutocomplete`: Para busca textual com sugestões em tempo real.
-   - `AppSelecaoStatus`: Para alternar entre registros ativos/inativos.
-   - **Lado Direito**: Alternador de visão (Lista/Cards), botões de `Exibição` e `Filtros Avançados`.
-4. **Barra de Ações**: Linha com botões `Novo Registro` (primário) e `Pesquisar`.
+3. **Barra de Ferramentas**: Usar obrigatoriamente `AppBarraFerramentas` passando as props e slots necessários:
+   - `v-model:visaoAtual`: Para sincronizar o alternador Lista/Cards.
+   - `#entradas`: `AppInputAutocomplete` e `AppSelecaoStatus`.
+   - `#acoes-secundarias`: Botões de `Exibição` e `Filtros Avançados`.
+   - `#acoes-principais`: Botões `Novo Registro` (primário) e `Pesquisar`.
 
 ### 1.2 Componentes de Exibição
 - **Tabela**:
