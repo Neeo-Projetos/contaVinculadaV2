@@ -57,7 +57,8 @@ export default defineNuxtConfig({
 
   css: [
     '@/assets/css/tailwind.css',
-    '@/assets/global/animacoesGlobais.css'
+    '@/assets/global/animacoesGlobais.css',
+    '@/assets/css/acessibilidade.css'
   ],
 
   runtimeConfig: {

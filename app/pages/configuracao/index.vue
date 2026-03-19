@@ -97,6 +97,17 @@ const itensConfig = ref([
     bgShape: 'bg-emerald-500/10',
     bgTag: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300',
     borderHover: 'hover:border-emerald-500/40'
+  },
+  {
+    titulo: 'Interface e Acessibilidade',
+    desc: 'Personalização do tema, escala visual e filtros de inclusão para daltonismo.',
+    icone: 'fa7-solid:universal-access',
+    rota: '/configuracao/interface',
+    bgLight: 'bg-purple-50 dark:bg-purple-900/20',
+    textIcon: 'text-purple-600 dark:text-purple-400',
+    bgShape: 'bg-purple-500/10',
+    bgTag: 'bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300',
+    borderHover: 'hover:border-purple-500/40'
   }
 ])
 </script>

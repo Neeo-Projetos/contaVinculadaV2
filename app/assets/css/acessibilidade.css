@@ -1,0 +1,38 @@
+/* 
+  Fiz a centralização dos estilos de acessibilidade 
+  "Estes estilos garantem que as preferências do usuário reflitam em todo o sistema de forma consistente."
+*/
+
+/* 1. Daltonismo */
+html.mode-protanopia { filter: url(#protanopia-filter) !important; }
+html.mode-deuteranopia { filter: url(#deuteranopia-filter) !important; }
+html.mode-tritanopia { filter: url(#tritanopia-filter) !important; }
+
+/* 2. Reduzir Movimento */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* 3. Alto Contraste */
+html.high-contrast {
+  filter: contrast(1.2) brightness(1.05) !important;
+}
+
+html.high-contrast .bg-white, 
+html.high-contrast .dark\:bg-\[\#1e2029\] {
+  border: 1px solid currentColor !important;
+}
+
+/* 4. Escala de Fonte (Variável controlada via JS no root) */
+:root {
+  --cv-font-scale: 100%;
+}
+
+html {
+  font-size: var(--cv-font-scale) !important;
+}
