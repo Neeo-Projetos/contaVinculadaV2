@@ -3,155 +3,135 @@
 Este documento é a referência definitiva para a criação de novas telas no sistema. Ele define a arquitetura, os padrões visuais e as regras de negócio que garantem a consistência e a qualidade premium da experiência do usuário.
 
 > [!IMPORTANT]
-> O módulo de **Funcionário** (`app/pages/cadastro/funcionario/`) é o **Padrão Ouro**. Qualquer nova tela de CRUD deve ser baseada rigorosamente na estrutura deste módulo.
+> Os módulos de **Funcionário** (`app/pages/cadastro/funcionario/`) e **Projeto** (`app/pages/cadastro/projeto/`) são os **Padrões Ouro**. 
+> - **Funcionário**: Referência para cadastros simples (única tela).
+> - **Projeto**: Referência para cadastros complexos (múltiplas etapas/steps).
+
+---
 
 ## 0. Regras de Ouro (Invioláveis)
 
-1. **Referência Absoluta**: O módulo de **Funcionário** (`app/pages/cadastro/funcionario/`) é a base. Se houver dúvida, siga o que está lá.
+1. **Referência Absoluta**: Se o cadastro for simples, siga **Funcionário**. Se for complexo (muitos campos), siga **Projeto**.
 2. **Navegação Distinta**: 
    - Telas de **Listagem** (`index.vue`): **NÃO** usam barra de navegação no topo. Usam apenas `AppCabecalhoPagina`.
-   - Telas de **Cadastro** (`cadastro.vue`): **OBRIGATÓRIO** o uso de `AppBarraNavegacao` no topo.
-   - Telas de **Processo/Wizards**: Usam `AppTrilhaNavegacao` (ex: telas que não são CRUDs puros).
-3. **Barra de Ferramentas Obrigatória (Layout Bipartido)**: Em telas de **Listagem**, é **PROIBIDO** escrever o HTML manual para a área de busca e filtros. Deve-se usar obrigatoriamente o componente `AppBarraFerramentas`. A linha inferior deve ser dividida em **dois polos de ação**:
-   - `#acoes-principais`: Lado **ESQUERDO**. Aqui ficam os botões de **"Criação e Extração"**. O botão de **Novo Registro** (`variacao="acao"`) é obrigatório aqui e o botão de **Relatório** (também em azul) deve ser posicionado obrigatoriamente **ao lado do botão Novo**.
-   - `#acoes-pesquisa`: Lado **DIREITO**. Reservado exclusivamente para o botão de **Pesquisar** (`variacao="acao"`), garantindo o equilíbrio visual "nas extremidades" da barra.
-4. **Grid System**: Sempre usar `md:grid-cols-12` com `gap-x-6 gap-y-8`. Nunca use grids genéricos (`cols-3`) para manter o alinhamento vertical dos labels.
-5. **Reuso de Componentes**: O desenvolvedor (IA ou Humano) deve **SEMPRE** analisar a pasta `app/components/global/` antes de criar qualquer elemento visual. É proibido usar tags HTML puras (`input`, `select`, `button`) quando houver um componente `App` correspondente (ex: `AppInputTexto`, `AppSelect`, `AppBotao`).
-6. **Regra de Busca Ativa (Zero Auto-Load)**: É **PROIBIDO** que as telas de listagem carreguem dados automaticamente (`onMounted`) sem filtros definidos. A listagem deve iniciar vazia e só exibir resultados após:
-   - O usuário digitar no `AppInputAutocomplete` e **selecionar um item** da lista.
-   - O usuário preencher filtros e clicar explicitamente no botão **Pesquisar**.
-   - **Exceção**: Apenas se o usuário vier de um link direto com parâmetros de busca na URL (`route.query`).
+   - Telas de **Cadastro** (`cadastro.vue`): **OBRIGATÓRIO** o uso de `AppBarraNavegacao` (Simples) ou `AppTrilhaNavegacao` (Complexo/Processos) no topo.
+3. **Barra de Ferramentas Obrigatória**: Em listagens, use `AppBarraFerramentas`. 
+   - `#acoes-principais` (Esquerda): Botões de "Novo" e "Relatórios".
+   - `#acoes-pesquisa` (Direita): Botão "Pesquisar".
+4. **Regra de Busca Ativa (Zero Auto-Load)**: Listagens começam vazias. Só carregam dados após interação explícita do usuário (pesquisa ou seleção no autocomplete).
+5. **Grid System**: Use `md:grid-cols-12` com `gap-x-6 gap-y-8`. Alinhamento vertical é crucial.
+6. **Inativação Lógica**: Nunca "Excluir". Sempre "Inativar". Use `AppModal` (tamanho `sm`) para confirmação.
 
 ---
 
-## 1. Telas de Listagem (Ex: `index.vue`)
+## 1. Arquitetura de Telas (Frontend)
 
-Uma tela de listagem padrão deve seguir a anatomia do arquivo [funcionario/index.vue](file:///c:/inetpub/wwwroot/contaVinculadaV2/app/pages/cadastro/funcionario/index.vue).
+### 1.1 Listagem (`index.vue`)
+Use o composable `use...Listagem.ts` para gerenciar o estado.
+- **Cabeçalho**: `AppCabecalhoPagina`.
+- **Filtros**: `AppInputAutocomplete` para busca rápida + `AppSelecaoStatus`.
+- **Modais**: `AppModalExibicao` (colunas dinâmicas), `AppModalFiltroAvancado` e `AppModalHistorico`.
+- **Visão**: Alternância entre Tabela e Cards via `AppContainerListagem`.
 
-### 1.1 Estrutura Visual (Top-Down)
-1. **Navegação**: O index não possui barra de navegação no topo, apenas o cabeçalho.
-2. **Cabeçalho**: `AppCabecalhoPagina` com título fino/grosso e ícone representativo.
-3. **Barra de Ferramentas**: Usar obrigatoriamente `AppBarraFerramentas` passando as props e slots necessários:
-   - `v-model:visaoAtual`: Para sincronizar o alternador Lista/Cards.
-   - `#entradas`: `AppInputAutocomplete`, `AppInputTexto` e `AppSelecaoStatus`.
-   - `#acoes-secundarias`: Botões de `Exibição` e `Filtros Avançados`.
-   - `#acoes-principais`: Botão `Novo Registro` (`variacao="acao"`).
-   - `#acoes-pesquisa`: Botão `Pesquisar` (`variacao="acao"`).
+### 1.2 Cadastro Simples (`funcionario/cadastro.vue`)
+Ideal para formulários que cabem em uma única visualização sem cansar o usuário.
+- **Estrutura**: `AppBarraNavegacao` -> `AppCartaoFormulario` -> `AppFormularioSecao` -> `AppRodapeFormulario`.
+- **Lógica**: Carregamento direto dos dados no `onMounted` via composable.
 
-### 1.2 Componentes de Exibição
-- **Tabela**:
-  - Headers (`th`) vinculados ao objeto `labels` do Composable.
-  - Link de edição no campo principal usando `NuxtLink`.
-  - Ícone de histórico padronizado: `fa6-solid:history`.
-  - Colunas com visibilidade dinâmica controlada pelo objeto `colunas`.
-- **Cards**:
-  - Usar `AppCardListagem` injetado no slot `#cards`.
-  - Manter paridade de informações com a tabela.
-
----
-
-## 2. Telas de Cadastro e Edição (Ex: `cadastro.vue`)
-
-Basear-se integralmente no arquivo [funcionario/cadastro.vue](file:///c:/inetpub/wwwroot/contaVinculadaV2/app/pages/cadastro/funcionario/cadastro.vue).
-
-### 2.1 Componentes Essenciais
-- **AppCartaoFormulario**: Container principal que envolve o formulário.
-- **AppSobreposicaoCarregamento**: Obrigatório para feedback de carregamento de dados e salvamento.
-- **AppFormularioSecao**: Divide campos por contexto com ícones dedicados.
-- **Rodapé Padronizado**: Usar `AppRodapeFormulario` com as props corretas para refletir o status do registro.
-
-### 2.2 Regra de "Exclusão" (Inativação)
-- **NUNCA** excluir dados fisicamente do banco de dados (salvo exceções raras).
-- **Inativação Lógica**: Usar o termo "Inativar" em vez de "Excluir".
-- **Comunicação**: O botão de inativação no rodapé só deve aparecer se o registro já estiver salvo (`editando`) e estiver atualmente **Ativo**.
-- **Modal de Confirmação**: Usar `AppModal` com `tamanho="sm"`, `rodapeEntre` e `semScroll`. O texto deve informar que o dado permanecerá no histórico.
-
-### 2.3 Formulários Complexos (Multi-etapas)
-Para formulários com muitos campos ou divisões lógicas claras, use o padrão de passos:
-- **Componente**: `AppPassosFormulario`.
-- **Estrutura**:
-  ```vue
-  <AppBarraNavegacao class="mb-8" ... />
-  <div class="mb-8">
-    <AppPassosFormulario :passos="['Etapa 1', 'Etapa 2']" :passoAtual="passoAtual" />
-  </div>
-  <AppCartaoFormulario> ... </AppCartaoFormulario>
-  ```
-- **UX**: 
-  - O rodapé deve alternar entre "Próxima Etapa" e "Finalizar Cadastro" conforme o `passoAtual`.
-  - **Validação Visual**: Implementar o efeito `animate-shake` nos campos obrigatórios que não forem preenchidos ao tentar avançar uma etapa.
-  - **Confirmação de Sucesso**: Ao finalizar, exibir um `AppModal` de sucesso com um resumo dos dados persistidos (ex: Apelido, CNPJ) para dar segurança ao usuário.
+### 1.3 Cadastro Multi-Etapas (`projeto/cadastro.vue`)
+**Por que utilizar?** Quando o volume de informações é alto (ex: Projetos tem Dados Gerais, Endereço e Parâmetros). Dividir em passos reduz a carga cognitiva e melhora a UX.
+- **Componente Chave**: `AppPassosFormulario`.
+- **Navegação**: `AppTrilhaNavegacao` (mais robusta que a barra simples).
+- **UX Etapas**: 
+  - **Validação Local**: Validar cada etapa antes de avançar (`avancarPasso`).
+  - **Feedback Visual**: Usar a classe `animate-shake` em campos obrigatórios vazios.
+  - **Resumo Final**: Exibir um `AppModal` de sucesso com o resumo dos dados salvos.
 
 ---
 
-## 3. Camada de Lógica (Composables)
+## 2. Camada de Lógica (Composables)
 
-Toda a inteligência deve estar em composables dedicados.
+Os composables devem ser separados em arquivos distintos dentro de `app/composables/cadastro/[modulo]/`.
 
-### 3.1 Listagem (`use...Listagem.ts`)
-- Mapear `labelsColunas` para reaproveitamento em modais e tabelas.
-- Usar `colunasTemp` para permitir o "Cancelar" no modal de exibição.
-- Implementar `placeholderDinamico` baseado em `useWindowSize` para melhor UX mobile.
+### 2.1 Padrão `use...Listagem.ts`
+Deve retornar:
+- `filtro`: Objeto reativo com os parâmetros de busca.
+- `listaRegistros`: Array com os dados retornados da API.
+- `colunasVisiveis`: Objeto para controle de visibilidade na tabela.
+- `buscar...()`: Função que chama o endpoint `/api/.../listagem`.
+- `abrirHistorico()`: Carrega logs de alteração do registro.
 
-### 3.2 Cadastro (`use...Formulario.ts`)
-- Utilizar `reactive` para o objeto `form`.
-- Definir `interface` TypeScript clara para o formulário.
-- Centralizar o status `ativo` (status 0 ou 1) no estado do formulário para controle de UI.
-
-### 3.3 Navegação de Passos
-Em formulários multi-etapas, o composable deve gerenciar:
-- `passoAtual: number`: Índice da etapa ativa.
-- `avancarPasso()` / `voltarPasso()`: Funções de navegação com validação.
-- `validarEtapa()`: Lógica que popula um `Set` ou `Array` de `erros` para disparar animações visuais.
-- `modalSucessoAberto: Ref<boolean>`: Controle do modal de resumo pós-gravacao.
-- `totalPassos: number`: Constante para controle de fim de fluxo.
-
----
-
-## 4. Camada de Servidor (API e Utils)
-
-### 4.1 Utilitários Universais (`comum.ts`)
-- **Sempre** utilizar as funções do [comum.ts](file:///c:/inetpub/wwwroot/contaVinculadaV2/server/utils/comum.ts) para:
-  - `validaCPF` / `validaCNPJ`.
-  - `abreviarNome`: Para listagens onde o espaço é reduzido.
-  - Formatações de data e valores (Recupera vs Grava).
-
-### 4.2 Endpoints de API
-- Seguir o padrão de retorno `{ status: 'success' | 'failed', data: ..., mensagem: ... }`.
-- **Histórico**: Implementar o log de alterações comparando os valores antigos e novos para exibição amigável.
+### 2.2 Padrão `use...Formulario.ts`
+Deve gerenciar:
+- `form`: Objeto `reactive` seguindo uma `interface` TypeScript rigorosa.
+- `passoAtual` (se multi-etapas): Controla qual div do formulário exibir.
+- `validarEtapa()`: Retorna boolean e popula o `Set` de `erros` (que dispara a animação `animate-shake`).
+- `gravarRegistro()`: Faz o POST para `/api/.../gravar`.
+- `excluirRegistro()`: Faz o POST para `/api/.../excluir` (inativação).
+- **Sucesso**: Exibir o modal de resumo com `modalSucessoAberto`.
 
 ---
 
-## 5. Design System e UX (Premium)
-- **Modais**: Sempre usar `<Teleport to="body">` e `<Transition>` (implementado no `AppModal` global).
-- **Z-Index**: O Modal global usa `z-[999]` para garantir visibilidade absoluta.
-- **Micro-interações**: Usar as animações `animate-fade-in` e `animate-modal-in` para suavidade.
-- **Iconografia**: Priorizar `fa7-solid` ou `fa6-solid` para consistência.
-- **Espaçamento Central**: Usar `md:p-10` no container principal para telas de cadastro.
-- **Grid de Formulários**:
-  - Usar `gap-6` entre campos.
-  - Alinhamento `items-end` para garantir que labels e inputs fiquem equilibrados visualmente.
-  - Labels sempre em caixa alta (uppercase) e com `tracking-wider` (através dos componentes de input).
-- **Labels**: Sempre em caixa alta (uppercase), com `tracking-wider` e cinza médio/claro (`text-gray-400`).
-- **Animações**:
-  - `animate-fade-in`: Em todos os containers principais das páginas.
-  - `animate-shake`: Aplicado ao container do input quando houver erro de validação.
-  - `animate-success-pop`: Usado no ícone principal de modais de conclusão.
-- **Z-Index**:
-  - `AppModal`: `z-[999]`.
-  - `AppSobreposicaoCarregamento`: Deve cobrir o formulário mas permitir ver o cabeçalho.
+## 3. Camada de Servidor (API e DB)
+
+### 3.1 Estrutura de Endpoints e Coleções XML
+Localizados em `server/api/cadastro/[modulo]/`:
+1. `listagem.post.ts`: Recebe filtros e retorna array de objetos. Deve usar `comum.formatarCpf` e `comum.abreviarNome` se necessário.
+2. `recupera.get.ts`: Recebe um ID/Código e retorna o objeto completo para edição.
+3. `gravar.post.ts`: 
+   - Recebe o `form` completo. 
+   - **Coleções (Grids)**: Se o formulário tiver listas (ex: `contas` ou `verbas`), converta-as para **XML** antes de enviar para o banco de dados via query EXEC.
+   - Chama a **Procedures SQL**.
+4. `excluir.post.ts`: Altera o campo `ativo` para `0`.
+5. `autocomplete.get.ts`: Retorna sugestões leves (id/nome) para o `AppInputAutocomplete`.
+
+### 3.2 Utilitários (`server/utils/comum.ts`)
+**Sempre** utilize estas funções para manter a integridade:
+- `comum.validaCPF` / `comum.validaCNPJ`.
+- `comum.formatarDataSql`: Converte DD/MM/YYYY para YYYY-MM-DD.
+- `comum.validaValorRecupera`: Converte números do banco para String "0,00".
 
 ---
 
-## 6. Padronização de Cores (Ações)
-Para garantir a clareza semântica, os botões devem seguir rigorosamente as cores abaixo baseadas em sua função:
+## 4. Componentes de Interface (UI/UX)
 
-- **Azul (`variacao="acao"`)**: Ações de sistema que não alteram dados permanentemente de imediato ou servem para navegação/busca.
-  - Exemplos: *Novo Registro, Pesquisar, Aplicar Filtros, Gerar Relatório.*
-- **Verde (`variacao="primario"`)**: Ações de confirmação, salvamento ou conclusão positiva.
-  - Exemplos: *Gravar Dados, Confirmar, Sim (em modais).*
-- **Vermelho (`variacao="perigo"`)**: Ações destrutivas, críticas ou de recusa.
-  - Exemplos: *Inativar, Excluir, Remover, Não (em modais).*
-- **Amarelo (`variacao="aviso"`)**: Alertas ou ações que exigem atenção redobrada.
-- **Cinza (`variacao="padrao"`)**: Ações secundárias ou de cancelamento.
-  - Exemplos: *Voltar, Cancelar, Fechar, Limpar.*
+| Componente | Uso Obrigatório | Contexto |
+| :--- | :--- | :--- |
+| `AppInputAutocomplete` | Sim | Busca principal da listagem. |
+| `AppInputCpf` / `AppInputCnpj` | Sim | Validação automática de máscara e dígito. |
+| `AppSelect` | Sim | Listas de seleção (use `itemValue="codigo"` e `itemLabel="descricao"`). |
+| `AppBotao` | Sim | Use as variações: `acao` (azul/sistema), `primario` (verde/gravar), `perigo` (vermelho/inativar). |
+| `AppSobreposicaoCarregamento` | Sim | feedback visual durante qualquer requisição `fetch`. |
+| `AppAtivo` | Sim | Exibe o status "Ativo/Inativo" com cores padronizadas. |
+
+---
+
+## 5. Fluxo de Implementação (Passo a Passo)
+
+Para criar uma nova tela sem erros:
+
+1. **Defina o Tipo**: Simples (Etapa única) ou Complexo (Multi-passos).
+2. **Crie o Back-end**: Endpoints de listagem, recupera, gravar e excluir. Use sempre Procedures SQL.
+3. **Desenvolva o Composable**:
+   - Defina a `interface` do formulário.
+   - Implemente as funções de busca e persistência.
+   - Para multi-etapas, crie a lógica de `passoAtual` e o `Set` de `erros`.
+4. **Construa a View**:
+   - Use os componentes `App...` conforme a tabela acima.
+   - Garanta que todos os botões no `AppRodapeFormulario` estejam vinculados corretamente.
+   - Adicione animações (`animate-fade-in` no container, `animate-shake` nos erros).
+5. **Verifique o "Zero Auto-Load"**: Garanta que o `onMounted` da listagem não dispare busca sem filtros.
+
+---
+
+## 6. Diferença entre Funcionários e Projetos (O "Porquê")
+
+| Característica | Funcionário (Simples) | Projeto (Complexo) |
+| :--- | :--- | :--- |
+| **Passos** | Não possui (`AppPassosFormulario`). | Possui 3 passos. |
+| **Público** | Operacional (Cadastro rápido). | Gestão (Cadastro detalhado/contratual). |
+| **Campos** | ~6 campos fundamentais. | >20 campos, incluindo endereços e verbas. |
+| **UX Strategy** | Foco em velocidade. | Foco em organização e precisão de dados. |
+
+> [!TIP]
+> Use o `AppPassosFormulario` sempre que o formulário exigir que o usuário mude o "contexto mental" (ex: trocar de dados pessoais para dados bancários ou endereços).
