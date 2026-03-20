@@ -44,7 +44,7 @@ export function useUsuarioListagem() {
     carregandoTela.value = true
     buscaRealizada.value = true
     try {
-      const data = await $fetch<any>('/api/configuracao/usuario/filtro', {
+      const data = await $fetch<any>('/api/configuracao/usuario/listagem', {
         method: 'POST',
         body: filtro
       })
@@ -73,7 +73,7 @@ export function useUsuarioListagem() {
   }
 
   onMounted(() => {
-    buscarLista()
+    // Regra de Busca Ativa (Zero Auto-Load): Não buscar automaticamente
   })
 
   return {

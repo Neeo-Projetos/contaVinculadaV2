@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
 
         let baseQuery = `
       SELECT DISTINCT 
-        U.codigo, U.login, U.nomeUsuario, U.cpf, U.email, U.telefone, U.ativo 
+        U.codigo, U.login, U.nomeUsuario as nome, U.cpf, U.email, U.telefone, U.ativo 
       FROM configuracao.usuario U
       LEFT JOIN configuracao.usuarioProjeto UP ON UP.usuario = U.codigo
       WHERE (1 = 1) AND U.tipoUsuario IS NULL
@@ -21,15 +21,24 @@ export default defineEventHandler(async (event) => {
             request.input('login', `%${body.login}%`)
         }
 
+        if (body.usuario) {
+            baseQuery += ` AND U.codigo = @usuario`
+            request.input('usuario', body.usuario)
+        }
+
         if (body.nome) {
             baseQuery += ` AND U.nomeUsuario LIKE @nome`
             request.input('nome', `%${body.nome}%`)
         }
 
         if (body.cpf) {
-            // Remove a máscara para buscar no banco se necessário, ou busca exato
             baseQuery += ` AND U.cpf = @cpf`
-            request.input('cpf', body.cpf)
+            request.input('cpf', body.cpf.replace(/[^\d]/g, ''))
+        }
+
+        if (body.projeto) {
+            baseQuery += ` AND UP.projeto = @projeto`
+            request.input('projeto', body.projeto)
         }
 
         if (body.ativo !== '' && body.ativo !== undefined) {

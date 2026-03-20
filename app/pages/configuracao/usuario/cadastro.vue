@@ -22,24 +22,24 @@
         <!-- PASSO 1: DADOS PESSOAIS -->
         <div v-if="passoAtual === 1" class="animate-fade-in space-y-8">
             <AppFormularioSecao icone="fa7-solid:user-tag">
-                Dados Pessoais
+                DADOS PESSOAIS
             </AppFormularioSecao>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8">
                 <div class="md:col-span-8">
-                    <AppInputTexto v-model="form.nomeUsuario" label="Nome Completo" placeholder="Digite o nome do usuário..." required maxlength="60" icone="fa7-solid:user" />
+                    <AppInputTexto v-model="form.nomeUsuario" label="NOME COMPLETO" placeholder="Digite o nome do usuário..." required maxlength="60" icone="fa7-solid:user" />
                 </div>
                 
                 <div class="md:col-span-4">
-                    <AppInputCpf v-model="form.cpf" required />
+                    <AppInputCpf v-model="form.cpf" label="CPF" required />
                 </div>
 
                 <div class="md:col-span-6">
-                    <AppInputEmail v-model="form.email" required maxlength="50" />
+                    <AppInputEmail v-model="form.email" label="E-MAIL" required maxlength="50" />
                 </div>
 
                 <div class="md:col-span-6">
-                    <AppInputTexto v-model="form.telefone" label="Telefone" placeholder="(00) 00000-0000" icone="fa7-solid:phone" v-maska="'(##) #####-####'" />
+                    <AppInputTexto v-model="form.telefone" label="TELEFONE" placeholder="(00) 00000-0000" icone="fa7-solid:phone" v-maska="'(##) #####-####'" />
                 </div>
             </div>
         </div>
@@ -47,20 +47,20 @@
         <!-- PASSO 2: ACESSO -->
         <div v-if="passoAtual === 2" class="animate-fade-in space-y-8">
             <AppFormularioSecao icone="fa7-solid:shield-halved">
-                Configurações de Acesso
+                CONFIGURAÇÕES DE ACESSO
             </AppFormularioSecao>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8">
                 <div class="md:col-span-6">
-                    <AppInputTexto v-model="form.login" label="Login (Username)" placeholder="Digite o login de acesso..." required maxlength="100" icone="fa7-solid:id-badge" />
+                    <AppInputTexto v-model="form.login" label="LOGIN (USERNAME)" placeholder="Digite o login de acesso..." required maxlength="100" icone="fa7-solid:id-badge" />
                 </div>
 
                 <div class="md:col-span-6">
                     <AppSelect 
                         v-model="form.restauraSenha" 
-                        label="Forçar Troca de Senha no 1º Acesso?" 
+                        label="FORÇAR TROCA DE SENHA NO 1º ACESSO?" 
                         placeholder="Selecione..." 
-                        :opcoes="[{codigo: 1, descricao: 'Sim, obrigatório'}, {codigo: 0, descricao: 'Não, manter atual'}]" 
+                        :opcoes="[{codigo: 1, descricao: 'SIM, OBRIGATÓRIO'}, {codigo: 0, descricao: 'NÃO, MANTER ATUAL'}]" 
                         itemValue="codigo" 
                         itemLabel="descricao" 
                         required 
@@ -69,8 +69,8 @@
 
                 <div class="md:col-span-6">
                     <div class="w-full relative">
-                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                            Senha {{ editando ? '(Opcional/Alterar)' : '*' }}
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
+                            SENHA {{ editando ? '(OPCIONAL/ALTERAR)' : '*' }}
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
@@ -82,7 +82,7 @@
                                 :required="!editando"
                                 autocomplete="new-password"
                                 placeholder="••••••••"
-                                class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl py-3 pl-11 pr-12 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400"
+                                class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl py-3 pl-11 pr-12 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400 font-sans"
                             />
                             <button type="button" @click="pwdVisible = !pwdVisible" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-emerald-500 transition-colors">
                                 <Icon :name="pwdVisible ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" class="w-5 h-5" />
@@ -93,8 +93,8 @@
 
                 <div class="md:col-span-6">
                     <div class="w-full relative">
-                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                            Confirmar Nova Senha
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
+                            CONFIRMAR NOVA SENHA
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
@@ -106,7 +106,7 @@
                                 :required="!editando || !!form.senha"
                                 autocomplete="new-password"
                                 placeholder="••••••••"
-                                class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl py-3 pl-11 pr-12 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400"
+                                class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl py-3 pl-11 pr-12 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400 font-sans"
                             />
                             <button type="button" @click="pwdVisibleConf = !pwdVisibleConf" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-emerald-500 transition-colors">
                                 <Icon :name="pwdVisibleConf ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" class="w-5 h-5" />
@@ -120,12 +120,12 @@
         <!-- PASSO 3: PROJETOS -->
         <div v-if="passoAtual === 3" class="animate-fade-in space-y-8">
             <AppFormularioSecao icone="fa7-solid:diagram-project">
-                Projetos Atribuídos
+                PROJETOS ATRIBUÍDOS
             </AppFormularioSecao>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <label v-for="p in projetosAtivos" :key="p.codigo" 
-                    class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 rounded-2xl cursor-pointer hover:border-emerald-500/30 hover:bg-white dark:hover:bg-gray-800/80 transition-all group shadow-sm">
+                    class="flex items-center gap-4 p-5 bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 rounded-3xl cursor-pointer hover:border-emerald-500/30 hover:bg-white dark:hover:bg-gray-800/80 transition-all group shadow-sm">
                     <div class="relative flex items-center justify-center">
                         <input 
                             type="checkbox" 
@@ -135,8 +135,8 @@
                         >
                     </div>
                     <div class="flex flex-col min-w-0">
-                        <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ p.apelido }}</span>
-                        <span class="text-[10px] text-gray-500 dark:text-gray-400 truncate uppercase tracking-wider">{{ p.descricao }}</span>
+                        <span class="text-sm font-black text-gray-700 dark:text-gray-200 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ p.apelido }}</span>
+                        <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 truncate uppercase tracking-widest">{{ p.descricao }}</span>
                     </div>
                 </label>
             </div>
@@ -171,10 +171,10 @@
       </template>
     </AppModal>
 
-    <!-- Modal de Exclusão -->
+    <!-- Modal de Inativação -->
     <AppModal 
       :isOpen="modalExclusaoAberto" 
-      title="Atenção: Exclusão" 
+      title="Atenção: Inativação" 
       icon="fa7-solid:user-xmark"
       tamanho="sm"
       rodapeEntre
@@ -183,22 +183,22 @@
       <div class="flex flex-col items-center py-4 text-center">
         <div class="relative mb-6">
             <div class="absolute inset-0 bg-red-500/20 blur-2xl rounded-full"></div>
-            <div class="relative w-20 h-20 bg-gradient-to-tr from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-xl">
+            <div class="relative w-22 h-22 bg-gradient-to-tr from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-xl">
                 <Icon name="fa7-solid:user-slash" class="w-10 h-10 text-white" />
             </div>
         </div>
         
-        <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-3">
-          Remover Usuário?
+        <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-3 uppercase tracking-tighter">
+          Inativar Usuário?
         </h4>
         
         <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-[280px]">
-          Você está prestes a remover <strong class="text-gray-900 dark:text-gray-100">{{ form.nomeUsuario }}</strong>.
+          Você está prestes a inativar o acesso de <strong class="text-gray-900 dark:text-gray-100">{{ form.nomeUsuario }}</strong>. O usuário não poderá mais acessar o sistema.
         </p>
       </div>
       <template #footer>
         <AppBotao variacao="padrao" @click="modalExclusaoAberto = false">Cancelar</AppBotao>
-        <AppBotao variacao="perigo" icone="fa7-solid:trash-can" :carregando="carregandoExclusao" @click="excluirRegistro">Sim, remover</AppBotao>
+        <AppBotao variacao="perigo" icone="fa7-solid:user-slash" :carregando="carregandoExclusao" @click="excluirRegistro">Sim, inativar</AppBotao>
       </template>
     </AppModal>
 

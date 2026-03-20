@@ -6,9 +6,9 @@
 
     <AppBarraFerramentas v-model:visao-atual="visaoAtual">
       <template #entradas>
-        <AppInputTexto v-model="filtro.nome" placeholder="Buscar por usuário..." icone="fa7-solid:magnifying-glass"
+        <AppInputTexto v-model="filtro.nome" label="USUÁRIO" placeholder="Buscar por usuário..." icone="fa7-solid:magnifying-glass"
           @enter="buscarLista" />
-        <AppSelecaoStatus v-model="filtro.ativo" />
+        <AppSelecaoStatus v-model="filtro.ativo" label="STATUS" />
       </template>
 
       <template #acoes-principais>
@@ -19,42 +19,58 @@
 
       <template #acoes-pesquisa>
         <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarLista">
-          Pesquisar Usuários
+          Pesquisar
         </AppBotao>
       </template>
     </AppBarraFerramentas>
 
-    <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
-      :visaoAtual="visaoAtual" @mudarPagina="mudarPagina">
+    <AppContainerListagem 
+      :carregando="carregando" 
+      :buscaRealizada="buscaRealizada" 
+      :lista="dados || []"
+      :visaoAtual="visaoAtual" 
+      :registroInicial="registroInicial" 
+      :registroFinal="registroFinal"
+      :totalRegistros="totalRegistros" 
+      :itensPorPagina="itensPorPagina" 
+      :totalPaginas="totalPaginas"
+      :paginaAtual="paginaAtual" 
+      :paginasExibidas="paginasExibidas" 
+      @mudarPagina="mudarPagina"
+      @mudarItensPorPagina="mudarItensPorPagina"
+    >
 
       <template #cabecalho-tabela>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-          Usuário</th>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-          Login</th>
-        <th scope="col"
-          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-          Status</th>
+        <th scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Usuário</th>
+        <th scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Login</th>
+        <th scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
+        <th scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Histórico</th>
       </template>
 
       <template #linhas-tabela="{ item }">
-        <td class="px-6 py-4">
+        <td class="p-4">
           <NuxtLink :to="`/configuracao/usuario/cadastro?codigo=${item.codigo}`" class="flex items-center gap-3 group">
-            <div
-              class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 text-blue-600 dark:text-blue-400 font-extrabold text-sm shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all">
               {{ item.nome.charAt(0).toUpperCase() }}
             </div>
-            <span
-              class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            <span class="text-sm font-bold text-gray-800 dark:text-gray-200 truncate group-hover:text-emerald-500 transition-colors uppercase">
               {{ item.nome }}
             </span>
           </NuxtLink>
         </td>
-        <td class="px-6 py-4 text-xs font-medium text-gray-600 dark:text-gray-400">
+        <td class="p-4 text-xs font-medium text-gray-500 dark:text-gray-400 italic">
           {{ item.login }}
         </td>
-        <td class="px-6 py-4 text-center">
+        <td class="p-4 text-center">
           <AppAtivo :ativo="item.ativo" />
+        </td>
+        <td class="p-4 text-center text-center">
+          <div class="flex items-center justify-center">
+            <button @click="verHistorico" 
+              class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Ver Histórico">
+              <Icon name="fa6-solid:clock-rotate-left" class="w-5 h-5" />
+            </button>
+          </div>
         </td>
       </template>
 
@@ -70,12 +86,14 @@
 </template>
 
 <script setup lang="ts">
-const visaoAtual = ref('lista')
-const buscaRealizada = ref(true)
-const carregando = ref(false)
-const dados = ref<any[]>([])
-const filtro = ref({ nome: '', ativo: 1 })
+const {
+  carregando, buscaRealizada, visaoAtual, filtro, buscarLista, filtrar,
+  dados, paginaAtual, itensPorPagina, totalRegistros, totalPaginas,
+  registroInicial, registroFinal, paginasExibidas,
+  mudarPagina, mudarItensPorPagina
+} = useUsuarioListagem()
 
-const mudarPagina = (p: number) => { }
-const buscarLista = () => { }
+const verHistorico = () => {
+    alert('📜 Ver Histórico...')
+}
 </script>
