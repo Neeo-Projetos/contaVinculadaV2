@@ -116,3 +116,14 @@ Para criar uma nova base para uma tela:
 3. **Criar Blueprint dos Composables**: Prepare a Interface `IModulo`, o hook `usePaginacaoFrontEnd` e injete os loads de botões e alertas customizados.
 4. **Construir a Interface (.vue)**: Copie os templates Grid Tailwind e conecte cada `<AppInput*>` com suas respectivas variáveis reativas e validações (`animate-shake`) e `<AppModal>` informativos/sucesso.
 5. **Blindagem final**: Execute auditoria do "Zero Auto-Load".
+
+---
+
+## 7. O Segredo da "Clonagem Perfeita" (Ecossistema Modular)
+
+**LEI ABSOLUTA: Você deve SEMPRE usar as telas e Composables de 'Funcionário' ou 'Projeto' como "molde arquitetural" de base. Abra os arquivos originais deles, entenda os padrões e extraia as estruturas (Grid, Nomenclaturas, funções e wrappers de UX). Adapte essas fundações de ponta a ponta para o contexto da sua nova entidade.**
+
+Quando for solicitado criar uma tela, não tente inventar o design do zero. Em vez disso, inicie transportando o esqueleto modular do 'Funcionário' (se for tela única) e molde o seu objetivo em cima dele:
+1. **Slots Ouro da Barra de Ferramentas**: Não esqueça de dividir as ações em `#entradas`, `#acoes-secundarias` (Filtros e View), `#acoes-principais` (Novo Registro), e `#acoes-pesquisa`.
+2. **Modais Periféricos**: Toda listagem madura do sistema contém a integração simultânea do `AppModalFiltroAvancado`, `AppModalExibicao` (para colunas da tabela dinâmica vinculadas por `v-if="colunas.x"`) e o `AppModalHistorico`. O Composable deve gerenciá-los ativamente.
+3. **Travamento Condicional (Novo vs Editando)**: Na View de `/cadastro`, os ID's controlam o estado da UI. Verifique se `id=0` para derivar flag booleana `editando`. Essa flag **muta e trava** chaves estrangeiras/unicas (`:disabled="editando"`) ou abre o input para cadastro de um novo item. Essa mutação precisa estar visível logo no input principal do form.

@@ -1,15 +1,38 @@
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 
 export function usePermissaoUsuarioListagem() {
   const carregando = ref(false)
   const buscaRealizada = ref(false)
   const visaoAtual = ref<'lista' | 'cards'>('lista')
+  
+  const modalHistoricoAberto = ref(false)
+  const historicoData = ref<any[]>([])
+  const carregandoHistorico = ref(false)
+  
+  const modalFiltroAvancadoAberto = ref(false)
+  const modalExibicaoAberto = ref(false)
 
   const filtro = reactive({
     login: '',
     nomeUsuario: '',
-    cpf: ''
+    cpf: '',
+    ativoParam: '1'
   })
+
+  // Exibição configuration like Funcionario
+  const colunas = reactive({
+    usuario: true,
+    cpf: true,
+    historico: true
+  })
+
+  const labels = {
+    usuario: 'Nome do Usuário',
+    cpf: 'CPF',
+    historico: 'Botão de Histórico'
+  }
+  
+  const colunasTemp = reactive({ ...colunas })
 
   const listaCompleta = ref<any[]>([])
   const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
@@ -31,36 +54,55 @@ export function usePermissaoUsuarioListagem() {
     }
   }
 
-  const modalHistoricoAberto = ref(false)
-  const historicoData = ref<any[]>([])
+  const limparFiltrosAvancados = () => {
+    filtro.nomeUsuario = ''
+    filtro.cpf = ''
+    modalFiltroAvancadoAberto.value = false
+    buscarUsuarios()
+  }
+
+  const aplicarFiltroAvancado = () => {
+    modalFiltroAvancadoAberto.value = false
+    buscarUsuarios()
+  }
+
+  const abrirModalFiltroAvancado = () => modalFiltroAvancadoAberto.value = true
+  
+  const abrirModalExibicao = () => {
+    Object.assign(colunasTemp, colunas)
+    modalExibicaoAberto.value = true
+  }
+  
+  const aplicarExibicao = () => {
+    Object.assign(colunas, colunasTemp)
+    modalExibicaoAberto.value = false
+  }
+
   const abrirHistorico = async (usuarioId: number) => {
+    carregandoHistorico.value = true
+    modalHistoricoAberto.value = true
+    historicoData.value = []
     try {
       const response = await $fetch<any>('/api/configuracao/permissaoUsuario/historico', {
-        method: 'POST',
-        body: { usuarioId }
+        method: 'POST', body: { usuarioId }
       })
       historicoData.value = response.data || []
-      modalHistoricoAberto.value = true
     } catch (error) {
-      console.error('Erro ao buscar histórico', error)
+      console.error('Erro ao buscar historico', error)
+    } finally {
+      carregandoHistorico.value = false
     }
   }
 
-  onMounted(() => {
-    buscarUsuarios()
-  })
+  // Removemos o Zero Auto-load da montagem conforme padrão ouro de performance!
 
   return {
-    carregando,
-    buscaRealizada,
-    visaoAtual,
-    filtro,
-    buscarUsuarios,
-    modalHistoricoAberto,
-    historicoData,
-    abrirHistorico,
+    carregando, buscaRealizada, visaoAtual, filtro,
+    buscarUsuarios, 
+    modalHistoricoAberto, historicoData, carregandoHistorico, abrirHistorico,
+    modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
+    modalExibicaoAberto, colunas, colunasTemp, labels, abrirModalExibicao, aplicarExibicao,
     
-    // Paginação
     dados: paginacao.listaPaginada,
     paginaAtual: paginacao.paginaAtual,
     itensPorPagina: paginacao.itensPorPagina,

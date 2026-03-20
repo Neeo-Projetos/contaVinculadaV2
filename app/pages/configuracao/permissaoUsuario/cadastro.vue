@@ -1,201 +1,155 @@
 <template>
-  <div class="p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">
-        <Icon name="fa-solid:cog" class="mr-2" />
-        Permissões do Usuário - Edição
-      </h1>
-    </div>
+  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
+    <AppBarraNavegacao 
+      icone="fa7-solid:shield-halved" 
+      :links="[{ label: 'Permissões', to: '/configuracao/permissaoUsuario' }]"
+      :paginaAtual="editando ? 'Configurar Acessos: ' + (form.usuarioNome || '...') : 'Novo Acesso'"
+    />
 
-    <div class="bg-white rounded-lg shadow-md mb-6 p-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
-          <input v-model="usuarioNome" type="text" disabled class="w-full border rounded-md p-2 bg-gray-100 cursor-not-allowed" />
+    <AppCartaoFormulario class="py-10 px-8 sm:px-12">
+      <AppSobreposicaoCarregamento :carregando="carregandoTela" mensagem="Carregando..." />
+
+      <form v-if="!carregandoTela" @submit.prevent="gravarRegistro" class="space-y-10 relative z-0">
+        
+        <AppFormularioSecao icone="fa7-solid:id-badge">
+          Dados do Acesso
+        </AppFormularioSecao>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+          <div class="md:col-span-6" :class="{ 'animate-shake': erros.has('usuarioNome') }">
+            <AppInputTexto 
+              v-if="editando"
+              v-model="form.usuarioNome" 
+              label="Usuário Selecionado" 
+              icone="fa7-solid:user" 
+              disabled
+            />
+            <AppInputAutocomplete 
+              v-else
+              v-model="form.usuarioId" 
+              urlConsulta="/api/configuracao/permissaoUsuario/autocompleteLogin" 
+              label="Selecionar Usuário a Configurar"
+              icone="fa7-solid:user" 
+              propId="id" 
+              propDescricao="descricao" 
+              placeholder="Busque pelo login..." 
+              required 
+            />
+          </div>
+          <div class="md:col-span-6" :class="{ 'animate-shake': erros.has('menuSelecionado') }">
+            <AppSelect 
+              v-model="form.menuSelecionado" 
+              label="Escolha de Permissão por Menu" 
+              :opcoes="menusDisponiveis" 
+              itemValue="codigo"
+              itemLabel="descricao"
+              required
+              @change="buscarPermissoesDoMenu"
+            />
+          </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Escolha de Permissão por Menu</label>
-          <select v-model="menuSelecionado" @change="buscarPermissoesDoMenu" class="w-full border rounded-md p-2">
-            <option value="">Selecione...</option>
-            <option v-for="menu in menusDisponiveis" :key="menu.codigo" :value="menu.codigo">
-              {{ menu.descricao }}
-            </option>
-          </select>
+
+        <template v-if="form.menuSelecionado">
+          <AppFormularioSecao icone="fa7-solid:list-check">
+            Funcionalidades Disponíveis
+          </AppFormularioSecao>
+
+          <div class="flex items-center gap-4 mb-4">
+            <AppBotao variacao="padrao" icone="fa7-solid:check-double" @click.prevent="marcarDesmarcarTodos">
+              Marcar / Desmarcar Todos
+            </AppBotao>
+          </div>
+
+          <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
+            <table class="w-full text-left">
+              <thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <tr>
+                  <th class="p-4 w-16 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  <th class="p-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Funcionalidade</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900">
+                <tr v-for="perm in form.permissoes" :key="perm.idFuncionalidade" class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  <td class="p-4 flex justify-center">
+                    <input type="checkbox" v-model="perm.marcado" class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600 dark:bg-gray-700 dark:border-gray-600 cursor-pointer" />
+                  </td>
+                  <td class="p-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ perm.nomeCompleto || perm.descricaoFuncionalidade }}
+                  </td>
+                </tr>
+                <tr v-if="form.permissoes.length === 0">
+                   <td colspan="2" class="p-6 text-center text-gray-400 dark:text-gray-500 italic">Nenhuma funcionalidade atrelada a este menu.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+
+        <AppRodapeFormulario 
+          :editando="editando" 
+          :carregandoGravar="carregandoGravacao"
+          labelGravar="Gravar Acessos"
+          labelExcluir="Revogar Selecionadas"
+          iconeExcluir="fa7-solid:trash-can"
+          @voltar="voltarParaLista"
+          @limpar="limparFormulario"
+          @excluir="abrirModalExclusao"
+        />
+      </form>
+    </AppCartaoFormulario>
+
+    <AppModal :isOpen="modalExclusaoAberto" title="Atenção: Revogar Permissões" icon="fa7-solid:circle-exclamation" tamanho="sm" rodapeEntre semScroll @close="fecharModal">
+      <div class="flex flex-col items-center py-2 text-center">
+        <div class="relative mb-6">
+          <div class="absolute inset-0 bg-amber-500/20 blur-2xl rounded-full"></div>
+          <div class="relative w-20 h-20 bg-gradient-to-tr from-amber-500 to-amber-600 rounded-full flex items-center justify-center shadow-xl">
+            <Icon name="fa7-solid:shield-virus" class="w-10 h-10 text-white" />
+          </div>
         </div>
+        <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-3 mt-4">Revogar Acessos?</h4>
+        <p class="text-gray-500 dark:text-gray-400 text-base leading-relaxed">
+          As funcionalidades selecionadas serão indisponibilizadas permanentemente para o usuário neste menu. Deseja prosseguir?
+        </p>
       </div>
+      <template #footer>
+        <AppBotao variacao="padrao" @click="fecharModal">Cancelar</AppBotao>
+        <AppBotao variacao="perigo" icone="fa7-solid:trash-can" :carregando="carregandoExclusao" @click="excluirRegistro">Sim, Revogar</AppBotao>
+      </template>
+    </AppModal>
 
-      <div v-if="menuSelecionado" class="mt-4">
-        <button @click="marcarDesmarcarTodos" class="bg-green-600 text-white px-4 py-2 rounded mb-3 hover:bg-green-700">
-          Marcar/Desmarcar todos <Icon name="fa-solid:check" class="ml-1" />
-        </button>
-
-        <div class="border rounded-md overflow-x-auto">
-          <table class="w-full text-left">
-            <thead class="bg-gray-100 border-b">
-              <tr>
-                <th class="p-2 w-10 text-center">#</th>
-                <th class="p-2">Funcionalidade</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="perm in permissoes" :key="perm.idFuncionalidade" class="border-b hover:bg-gray-50">
-                <td class="p-2 text-center">
-                  <input type="checkbox" v-model="perm.marcado" class="w-4 h-4 cursor-pointer" />
-                </td>
-                <td class="p-2">
-                  {{ perm.nomeCompleto || perm.descricaoFuncionalidade }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <AppModal :isOpen="modalAlertaAberto" :title="modalAlertaTitulo" icon="fa7-solid:circle-exclamation" @close="fecharModalAlerta">
+      <div class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+         <p class="text-base text-center font-medium">{{ modalAlertaMensagem }}</p>
       </div>
-    </div>
-
-    <div class="flex gap-3 mt-4">
-      <button @click="confirmarExclusao" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-        Excluir <Icon name="fa-solid:trash" class="ml-1" />
-      </button>
-      <button @click="gravarPermissoes" :disabled="salvando" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50">
-        {{ salvando ? 'Aguarde...' : 'Gravar' }} <Icon v-if="!salvando" name="fa-solid:save" class="ml-1" />
-      </button>
-      <button @click="voltar" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-        Retornar <Icon name="fa-solid:backward" class="ml-1" />
-      </button>
-    </div>
-
-    <AppModal :isOpen="modalExclusao" title="Atenção" @close="modalExclusao = false">
-      <div class="p-4 text-center">
-        <p class="text-lg mb-6">Tem certeza que deseja excluir as permissões selecionadas?</p>
-        <div class="flex justify-center gap-4">
-          <button @click="excluirPermissoes" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Sim</button>
-          <button @click="modalExclusao = false" class="bg-gray-300 text-gray-800 px-6 py-2 rounded hover:bg-gray-400">Não</button>
+      <template #footer><AppBotao variacao="primario" @click="fecharModalAlerta" class="w-full">Entendi</AppBotao></template>
+    </AppModal>
+    
+    <AppModal :isOpen="modalSucessoAberto" title="Acessos Atualizados!" icon="fa7-solid:circle-check" @close="voltarParaLista">
+      <div class="flex flex-col items-center py-4 text-center">
+        <div class="relative w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center animate-success-pop mb-4 shadow-lg shadow-emerald-500/30">
+            <Icon name="fa7-solid:check" class="w-10 h-10 text-white" />
         </div>
+        <h4 class="text-xl font-bold text-gray-900 dark:text-white">Gravado com sucesso!</h4>
       </div>
+      <template #footer><AppBotao variacao="primario" @click="voltarParaLista" class="w-full">Voltar p/ Listagem</AppBotao></template>
     </AppModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { onMounted } from 'vue'
 
-const route = useRoute()
-const router = useRouter()
+const {
+  carregandoTela, carregandoGravacao, carregandoExclusao,
+  modalExclusaoAberto, abrirModalExclusao, fecharModal,
+  modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta,
+  modalSucessoAberto, editando, possuiMarcacao,
+  form, erros, menusDisponiveis,
+  carregarDadosIniciais, buscarPermissoesDoMenu, marcarDesmarcarTodos,
+  gravarRegistro, excluirRegistro, voltarParaLista, limparFormulario
+} = usePermissaoUsuarioFormulario()
 
-// Peguei o ID do usuário direto da URL
-const usuarioId = route.params.id
-
-const usuarioNome = ref('')
-const menuSelecionado = ref('')
-const menusDisponiveis = ref<any[]>([])
-const permissoes = ref<any[]>([])
-const salvando = ref(false)
-const modalExclusao = ref(false)
-
-const todosMarcados = computed(() => permissoes.value.length > 0 && permissoes.value.every(p => p.marcado))
-
-const carregarDadosIniciais = async () => {
-  try {
-    // Tipifiquei o retorno aqui pra avisar o TS que vem um 'data' com 'login'
-    const { data: userData } = await $fetch<{ data: { login: string } }>('/api/configuracao/permissaoUsuario/recuperaUsuario', {
-      method: 'POST',
-      body: { id: usuarioId }
-    })
-    if (userData) usuarioNome.value = userData.login
-
-    // Tipifiquei o retorno dos menus como um array genérico
-    const { data: menus } = await $fetch<{ data: any[] }>('/api/tabelaBasica/menuItem/listarAtivos')
-    menusDisponiveis.value = menus || []
-  } catch (error) {
-    console.error('Erro ao buscar dados', error)
-  }
-}
-
-const marcarDesmarcarTodos = () => {
-  const novoEstado = !todosMarcados.value
-  permissoes.value.forEach(p => p.marcado = novoEstado)
-}
-
-const buscarPermissoesDoMenu = async () => {
-  if (!menuSelecionado.value) {
-    permissoes.value = []
-    return
-  }
-  
-  try {
-    // Tipifiquei o retorno das permissões
-    const { data } = await $fetch<{ data: any[] }>('/api/configuracao/permissaoUsuario/permissoesPorMenu', {
-      method: 'POST',
-      body: { menuItem: menuSelecionado.value, usuario: usuarioId }
-    })
-    
-    // Converti o 1 ou 0 do banco pra true/false do checkbox
-    permissoes.value = (data || []).map((p: any) => ({
-      ...p,
-      marcado: p.marcado === 1
-    }))
-  } catch (error) {
-    console.error('Erro ao buscar permissoes', error)
-  }
-}
-
-const gravarPermissoes = async () => {
-  const selecionadas = permissoes.value.filter(p => p.marcado)
-  if (selecionadas.length === 0) {
-    alert('Nenhuma permissão selecionada.')
-    return
-  }
-
-  salvando.value = true
-  try {
-    await $fetch('/api/configuracao/permissaoUsuario/gravar', {
-      method: 'POST',
-      body: { 
-        usuarioId, 
-        menuItem: menuSelecionado.value, 
-        permissoes: selecionadas.map(p => ({ ...p, marcado: 1 })) 
-      }
-    })
-    alert('Permissões gravadas com sucesso!')
-    voltar()
-  } catch (error) {
-    alert('Erro ao gravar.')
-  } finally {
-    salvando.value = false
-  }
-}
-
-const confirmarExclusao = () => {
-  const selecionadas = permissoes.value.filter(p => p.marcado)
-  if (selecionadas.length === 0) {
-    alert('Selecione as permissões que deseja excluir.')
-    return
-  }
-  modalExclusao.value = true
-}
-
-const excluirPermissoes = async () => {
-  const selecionadas = permissoes.value.filter(p => p.marcado)
-  try {
-    await $fetch('/api/configuracao/permissaoUsuario/excluir', {
-      method: 'POST',
-      body: { 
-        usuarioId, 
-        menuItem: menuSelecionado.value, 
-        permissoes: selecionadas 
-      }
-    })
-    alert('Permissões excluídas com sucesso!')
-    modalExclusao.value = false
-    buscarPermissoesDoMenu() 
-  } catch (error) {
-    alert('Erro ao excluir.')
-  }
-}
-
-const voltar = () => {
-  router.push('/configuracao/permissaoUsuario')
-}
-
-carregarDadosIniciais()
+onMounted(() => {
+  carregarDadosIniciais()
+})
 </script>
