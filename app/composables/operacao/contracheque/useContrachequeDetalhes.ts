@@ -19,21 +19,56 @@ export function useContrachequeDetalhes() {
   const funcionarios = ref<any[]>([])
   const detalhesVerba = ref<any[]>([])
   const modalDetalhesAberto = ref(false)
+  const modalFiltroAvancadoAberto = ref(false)
+
+  // Estados para Autocomplete de Funcionário
+  const nomeFuncionarioSearch = ref('')
+  const sugestoesFuncionarios = ref<any[]>([])
+  const buscandoFuncionarios = ref(false)
+  const mostrarMenuFuncionarios = ref(false)
 
   const carregarCombos = async () => {
     try {
-      const [resProj, resFunc] = await Promise.all([
-        $fetch<any>('/api/cadastro/projeto/ativos'),
-        $fetch<any>('/api/cadastro/funcionario/ativos')
-      ])
-      projetos.value = resProj.data || []
-      funcionarios.value = resFunc.data || []
+      const resProj = await $fetch<any>('/api/cadastro/projeto/ativos')
+      projetos.value = (resProj.data || []).map((p: any) => ({
+        ...p,
+        nomeExibicao: `${p.apelido} - ${p.descricao}`
+      }))
     } catch (e) {
       console.error('Erro ao carregar combos:', e)
     }
   }
 
+  const buscarFuncionarios = async () => {
+    const termo = nomeFuncionarioSearch.value
+    if (!termo || termo.length < 3) {
+        sugestoesFuncionarios.value = []
+        mostrarMenuFuncionarios.value = false
+        return
+    }
+
+    buscandoFuncionarios.value = true
+    mostrarMenuFuncionarios.value = true
+    try {
+        const res = await $fetch<any>('/api/cadastro/funcionario/autocomplete', {
+            query: { q: termo, projeto: filtro.projeto }
+        })
+        sugestoesFuncionarios.value = res.data || []
+    } catch (e) {
+        console.error('Erro ao buscar funcionários:', e)
+    } finally {
+        buscandoFuncionarios.value = false
+    }
+  }
+
+  const selecionarFuncionario = (sugestao: any) => {
+    filtro.funcionarioId = sugestao.id
+    nomeFuncionarioSearch.value = sugestao.descricao
+    mostrarMenuFuncionarios.value = false
+  }
+
   const buscarRegistros = async () => {
+    modalFiltroAvancadoAberto.value = false
     carregando.value = true
     buscaRealizada.value = true
     try {
@@ -78,6 +113,21 @@ export function useContrachequeDetalhes() {
     detalhesVerba,
     modalDetalhesAberto,
     abrirModalDetalhes,
+
+    // Filtro Avançado
+    modalFiltroAvancadoAberto,
+    limparFiltrosAvancados() {
+        Object.assign(filtro, { mesAno: '', projeto: '', funcionarioId: '', status: '' })
+        nomeFuncionarioSearch.value = ''
+    },
+
+    // Autocomplete Funcionário
+    nomeFuncionarioSearch,
+    sugestoesFuncionarios,
+    buscandoFuncionarios,
+    mostrarMenuFuncionarios,
+    buscarFuncionarios,
+    selecionarFuncionario,
     
     // Paginação
     dados: paginacao.listaPaginada,

@@ -10,57 +10,35 @@
 
     <AppBarraFerramentas v-model:visao-atual="visaoAtual">
       <template #entradas>
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end w-full">
-          <div class="md:col-span-2">
-            <AppInputTexto v-model="filtro.mesAno" label="Mês/Ano" placeholder="MM/AAAA" v-maska="'##/####'" icone="fa7-solid:calendar-check" />
-          </div>
-          <div class="md:col-span-3">
-            <AppSelect 
-                v-model="filtro.projeto" 
-                label="Projeto" 
-                placeholder="Todos os projetos" 
-                :opcoes="projetos" 
-                itemValue="codigo" 
-                itemLabel="apelido"
-                icone="fa7-solid:building-user"
-            />
-          </div>
-          <div class="md:col-span-4">
-            <AppSelect 
-                v-model="filtro.funcionarioId" 
-                label="Funcionário" 
-                placeholder="Todos os funcionários" 
-                :opcoes="funcionarios" 
-                itemValue="codigo" 
-                itemLabel="nomeCompleto"
-                icone="fa7-solid:user-tie"
-            />
-          </div>
-          <div class="md:col-span-3">
-            <AppSelect 
-                v-model="filtro.status" 
-                label="Situação Final" 
-                placeholder="Todas..." 
-                :opcoes="[{codigo: '1', descricao: 'Aprovados'}, {codigo: '0', descricao: 'Reprovados'}]" 
-                itemValue="codigo" 
-                itemLabel="descricao"
-                icone="fa7-solid:shield-check"
-            />
-          </div>
+        <div class="w-44">
+          <AppInputTexto v-model="filtro.mesAno" placeholder="Mês/Ano" v-maska="'##/####'" centralizado />
         </div>
+        
+        <AppInputAutocomplete 
+            v-model="nomeFuncionarioSearch" 
+            placeholder="Digite o nome do colaborador..." 
+            :sugestoes="sugestoesFuncionarios" 
+            :buscando="buscandoFuncionarios"
+            :mostrarMenu="mostrarMenuFuncionarios"
+            @buscar="buscarFuncionarios"
+            @selecionar="selecionarFuncionario"
+            @fechar="mostrarMenuFuncionarios = false"
+            icone="fa7-solid:user-magnifying-glass"
+        />
       </template>
 
       <template #acoes-secundarias>
-        <AppBotao variacao="padrao" icone="fa7-solid:gears" @click="navigateTo('/operacao/contracheque/processamento')">
-            Processamento
-        </AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:file-arrow-up" @click="navigateTo('/operacao/contracheque/importacao')">
-            Importação
-        </AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:filter" @click="modalFiltroAvancadoAberto = true">Filtro Avançado</AppBotao>
       </template>
 
       <template #acoes-principais>
-        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarRegistros">
+        <AppBotao variacao="padrao" icone="fa7-solid:gears" @click="navigateTo('/operacao/contracheque/processamento')">
+            Processamento
+        </AppBotao>
+      </template>
+
+      <template #acoes-pesquisa>
+        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarRegistros">
           Consultar
         </AppBotao>
       </template>
@@ -91,17 +69,28 @@
 
       <template #linhas-tabela="{ item }">
         <td class="px-6 py-4">
-            <div class="flex flex-col min-w-[200px]">
-                <span class="text-sm font-bold text-gray-900 dark:text-gray-100">{{ item.funcionario }}</span>
+          <div class="flex items-center gap-4 min-w-[300px]">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-black text-sm border border-emerald-500/10 shrink-0 uppercase">
+              {{ item.funcionario.split(' ').map((n: string) => n[0]).join('').substring(0, 2) }}
+            </div>
+            <div class="flex flex-col overflow-hidden">
+                <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{{ item.funcionario }}</span>
                 <span class="text-[10px] text-gray-500 font-bold tracking-widest">{{ item.cpf }}</span>
             </div>
+          </div>
         </td>
         <td class="px-6 py-4 text-center">
           <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-tight">{{ item.projeto }}</span>
         </td>
         <td class="px-6 py-4 text-center">
-            <span v-if="item.statusAprovacao === 0" class="px-2 py-1 rounded text-[10px] font-black uppercase bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 border border-rose-500/20">Reprovado</span>
-            <span v-else-if="item.statusAprovacao === 1" class="px-2 py-1 rounded text-[10px] font-black uppercase bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Aprovado</span>
+            <span v-if="item.statusAprovacao === 0" class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/10">
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-500 mr-2 animate-pulse"></span>
+                Reprovado
+            </span>
+            <span v-else-if="item.statusAprovacao === 1" class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+                Aprovado
+            </span>
         </td>
         <td class="px-6 py-4 text-center">
             <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ item.dataRetencao }}</span>
@@ -128,6 +117,33 @@
         />
       </template>
     </AppContainerListagem>
+
+    <!-- Modal de Filtro Avançado -->
+    <AppModalFiltroAvancado 
+        :aberto="modalFiltroAvancadoAberto" 
+        @close="modalFiltroAvancadoAberto = false"
+        @aplicar="buscarRegistros" 
+        @limpar="limparFiltrosAvancados"
+    >
+        <AppSelect 
+            v-model="filtro.projeto" 
+            label="Projeto" 
+            placeholder="Todos os projetos" 
+            :opcoes="projetos" 
+            itemValue="codigo" 
+            itemLabel="nomeExibicao"
+            icone="fa7-solid:building-user"
+        />
+        <AppSelect 
+            v-model="filtro.status" 
+            label="Situação Final" 
+            placeholder="Todas..." 
+            :opcoes="[{codigo: '1', descricao: 'Aprovados'}, {codigo: '0', descricao: 'Reprovados'}]" 
+            itemValue="codigo" 
+            itemLabel="descricao"
+            icone="fa7-solid:shield-check"
+        />
+    </AppModalFiltroAvancado>
 
     <!-- Modal Detalhes Verba -->
     <AppModal :isOpen="modalDetalhesAberto" title="Detalhamento por Verba" icon="fa7-solid:magnifying-glass-dollar" tamanho="5xl" @close="modalDetalhesAberto = false" rodapeEntre>
@@ -196,6 +212,14 @@
 const {
   carregando, buscaRealizada, visaoAtual, dados, filtro,
   buscarRegistros, projetos, funcionarios, detalhesVerba, modalDetalhesAberto, abrirModalDetalhes,
+  
+  // Filtro Avançado
+  modalFiltroAvancadoAberto, limparFiltrosAvancados,
+
+  // Autocomplete Funcionário
+  nomeFuncionarioSearch, sugestoesFuncionarios, buscandoFuncionarios, mostrarMenuFuncionarios,
+  buscarFuncionarios, selecionarFuncionario,
+
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = useContrachequeDetalhes()

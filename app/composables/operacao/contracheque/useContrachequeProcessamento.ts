@@ -75,7 +75,10 @@ export function useContrachequeProcessamento() {
   const carregarCombos = async () => {
     try {
       const resProj = await $fetch<any>('/api/cadastro/projeto/ativos')
-      projetos.value = resProj.data || []
+      projetos.value = (resProj.data || []).map((p: any) => ({
+        ...p,
+        nomeExibicao: `${p.apelido} - ${p.descricao}`
+      }))
     } catch (e) {
       console.error('Erro ao carregar combos:', e)
     }

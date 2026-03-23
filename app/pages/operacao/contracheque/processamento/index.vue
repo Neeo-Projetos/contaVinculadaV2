@@ -61,7 +61,7 @@
             placeholder="Todos os projetos" 
             :opcoes="projetos" 
             itemValue="codigo" 
-            itemLabel="apelido"
+            itemLabel="nomeExibicao"
             icone="fa7-solid:building-user"
         />
         <AppSelect 

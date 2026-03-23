@@ -58,8 +58,8 @@ Use a trindade nativa do sistema:
 | `AppSobreposicaoCarregamento` | Layer de opacidade durante qualquer `$fetch` crítico p/ a UI que renderiza dados lidos. |
 | `AppAtivo` | Exibe pills do sistema com o status "Ativo/Inativo" usando cores padronizadas. |
 
-> [!TIP]
-> **Formatação Estrita de Combos (Projetos)**: Sempre que buscar listas de projetos (`/api/cadastro/projeto/ativos`) para alimentar um `<AppSelect>`, você é proibido de exibir apenas a sigla. Intercepte o fetching usando `.map()` e crie uma propriedade virtual concatenada `nomeExibicao: p.descricao ? \`\${p.apelido} - \${p.descricao}\` : p.apelido` vinculando-a à property `itemLabel` do componente correspondente.
+> [!IMPORTANT]
+> **Formatação Estrita de Combos (Projetos)**: É OBRIGATÓRIO exibir os projetos no formato `APELIDO - DESCRIÇÃO` (ex: `NTL - Neoo`). No fetching (`/api/cadastro/projeto/ativos`), use `.map()` para criar a propriedade virtual `nomeExibicao: \`\${p.apelido} - \${p.descricao}\`` e vincule-a ao `itemLabel` do `AppSelect`.
 
 ---
 
