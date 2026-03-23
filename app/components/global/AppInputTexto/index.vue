@@ -15,7 +15,7 @@
         :required="required"
         :maxlength="maxlength"
         :placeholder="placeholder"
-        class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl py-3 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400"
+        class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl py-3 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400"
         :class="[
           icone ? 'pl-11 pr-4' : 'px-4',
           centralizado ? 'text-center' : 'text-left'
