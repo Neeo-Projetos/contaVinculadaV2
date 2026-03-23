@@ -8,41 +8,35 @@
       icone="fa7-solid:gears" 
     />
 
-    <AppBarraFerramentas v-model:visao-atual="visaoAtual" mostrar-relatorio @excel="gerarExcel" @pdf="gerarPdf">
+    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
       <template #entradas>
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end w-full">
-          <div class="md:col-span-3">
-            <AppInputTexto v-model="filtro.mesAno" label="Mês/Ano" placeholder="MM/AAAA" v-maska="'##/####'" icone="fa7-solid:calendar-circle-exclamation" />
-          </div>
-          <div class="md:col-span-9">
-            <AppInputAutocomplete 
-                v-model="nomeFuncionarioSearch" 
-                label="Buscar Funcionário" 
-                placeholder="Digite o nome do colaborador..." 
-                :sugestoes="sugestoesFuncionarios" 
-                :buscando="buscandoFuncionarios"
-                :mostrarMenu="mostrarMenuFuncionarios"
-                @buscar="buscarFuncionarios"
-                @selecionar="selecionarFuncionario"
-                @fechar="mostrarMenuFuncionarios = false"
-                icone="fa7-solid:user-magnifying-glass"
-            />
-          </div>
+        <div class="w-44">
+          <AppInputTexto v-model="filtro.mesAno" placeholder="Mês/Ano" v-maska="'##/####'" centralizado />
         </div>
+        
+        <AppInputAutocomplete 
+            v-model="nomeFuncionarioSearch" 
+            placeholder="Digite o nome do colaborador..." 
+            :sugestoes="sugestoesFuncionarios" 
+            :buscando="buscandoFuncionarios"
+            :mostrarMenu="mostrarMenuFuncionarios"
+            @buscar="buscarFuncionarios"
+            @selecionar="selecionarFuncionario"
+            @fechar="mostrarMenuFuncionarios = false"
+            icone="fa7-solid:user-magnifying-glass"
+        />
       </template>
 
       <template #acoes-secundarias>
-        <AppBotao variacao="padrao" icone="fa7-solid:filter-list" @click="modalFiltroAvancadoAberto = true">Avançado</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:file-import" @click="navigateTo('/operacao/contracheque/importacao')">
-            Importar
-        </AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:filter" @click="modalFiltroAvancadoAberto = true">Filtro Avançado</AppBotao>
       </template>
 
       <template #acoes-principais>
-        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarProcessamentos">Consultar</AppBotao>
-        
+        <AppBotao variacao="padrao" icone="fa7-solid:file-import" @click="navigateTo('/operacao/contracheque/importacao')">
+            Importar Contracheque
+        </AppBotao>
+
         <template v-if="filtro.status === '2' && dados.length > 0">
-            <div class="h-8 w-px bg-gray-200 dark:bg-gray-700 mx-1 hidden sm:block"></div>
             <AppBotao variacao="primario" icone="fa7-solid:check-double" @click="processarContracheque(1)">
                 Aprovar
             </AppBotao>
@@ -51,123 +45,130 @@
             </AppBotao>
         </template>
       </template>
-    </AppBarraFerramentas>
 
-    <div class="flex items-center justify-between px-2" v-if="totalRegistros > 0">
-        <div class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
-            <Icon name="fa7-solid:circle-info" class="w-4 h-4 text-emerald-500" />
-            <span>{{ totalRegistros }} registros encontrados</span>
-        </div>
-    </div>
+      <template #acoes-pesquisa>
+        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarProcessamentos">
+            Consultar
+        </AppBotao>
+      </template>
+    </AppBarraFerramentas>
 
     <!-- Modal de Filtro Avançado Padrão -->
     <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" @close="modalFiltroAvancadoAberto = false" @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
-        <div class="md:col-span-2">
-            <AppSelect 
-                v-model="filtro.projeto" 
-                label="Unidade / Projeto" 
-                placeholder="Todos os projetos" 
-                :opcoes="projetos" 
-                itemValue="codigo" 
-                itemLabel="apelido"
-                icone="fa7-solid:building-user"
-            />
-        </div>
-        <div class="md:col-span-2 mt-4">
-            <AppSelect 
-                v-model="filtro.status" 
-                label="Status da Remessa" 
-                :opcoes="[{codigo: '2', descricao: 'Pendentes de Aprovação'}, {codigo: '1', descricao: 'Lotes Aprovados'}, {codigo: '0', descricao: 'Lotes Reprovados'}]" 
-                itemValue="codigo" 
-                itemLabel="descricao"
-                icone="fa7-solid:shield-clock"
-            />
-        </div>
+        <AppSelect 
+            v-model="filtro.projeto" 
+            label="Unidade / Projeto" 
+            placeholder="Todos os projetos" 
+            :opcoes="projetos" 
+            itemValue="codigo" 
+            itemLabel="apelido"
+            icone="fa7-solid:building-user"
+        />
+        <AppSelect 
+            v-model="filtro.status" 
+            label="Status da Remessa" 
+            :opcoes="[{codigo: '2', descricao: 'Pendentes de Aprovação'}, {codigo: '1', descricao: 'Lotes Aprovados'}, {codigo: '0', descricao: 'Lotes Reprovados'}]" 
+            itemValue="codigo" 
+            itemLabel="descricao"
+            icone="fa7-solid:shield-clock"
+        />
     </AppModalFiltroAvancado>
 
     <div class="relative min-h-[400px]">
-        <AppSobreposicaoCarregamento :carregando="carregando" mensagem="Buscando registros de processamento..." />
+        <AppSobreposicaoCarregamento :carregando="carregando" mensagem="Buscando registros..." />
         
         <AppContainerListagem 
-        :carregando="carregando" 
-        :buscaRealizada="buscaRealizada" 
-        :lista="dados || []"
-        :visaoAtual="visaoAtual" 
-        :registroInicial="registroInicial" 
-        :registroFinal="registroFinal"
-        :totalRegistros="totalRegistros" 
-        :itensPorPagina="itensPorPagina" 
-        :totalPaginas="totalPaginas"
-        :paginaAtual="paginaAtual" 
-        :paginasExibidas="paginasExibidas" 
-        @mudarPagina="mudarPagina"
-        @mudarItensPorPagina="mudarItensPorPagina"
+            :carregando="carregando" 
+            :buscaRealizada="buscaRealizada" 
+            :lista="dados || []"
+            :visaoAtual="visaoAtual" 
+            :registroInicial="registroInicial" 
+            :registroFinal="registroFinal"
+            :totalRegistros="totalRegistros" 
+            :itensPorPagina="itensPorPagina" 
+            :totalPaginas="totalPaginas"
+            :paginaAtual="paginaAtual" 
+            :paginasExibidas="paginasExibidas" 
+            @mudarPagina="mudarPagina"
+            @mudarItensPorPagina="mudarItensPorPagina"
         >
         <template #cabecalho-tabela>
-            <th v-if="filtro.status === '2'" class="px-6 py-5 text-center w-20">
-                <button @click="marcarDesmarcarTodos" class="w-9 h-9 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center mx-auto" title="Selecionar Todos">
+            <th v-if="filtro.status === '2'" scope="col" class="px-6 py-4 text-center w-20">
+                <button @click="marcarDesmarcarTodos" class="w-8 h-8 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 shadow-md transition-all flex items-center justify-center mx-auto" title="Selecionar Todos">
                     <Icon name="fa7-solid:check-double" class="w-4 h-4" />
                 </button>
             </th>
-            <th scope="col" class="px-6 py-5 text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] text-left">{{ labelsColunas.funcionario }}</th>
-            <th scope="col" class="px-6 py-5 text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] text-left">{{ labelsColunas.projeto }}</th>
-            <th scope="col" class="px-6 py-5 text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] text-right">{{ labelsColunas.valorLiquido }}</th>
-            <th scope="col" class="px-6 py-5 text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] text-right">{{ labelsColunas.valorRetencao }}</th>
-            <th scope="col" class="px-6 py-5 text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] text-center">{{ labelsColunas.status }}</th>
-            <th scope="col" class="px-6 py-5 text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] text-right">Ação</th>
+            <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">
+                {{ labelsColunas.funcionario }}
+            </th>
+            <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">
+                {{ labelsColunas.projeto }}
+            </th>
+            <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">
+                {{ labelsColunas.valorLiquido }}
+            </th>
+            <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">
+                {{ labelsColunas.valorRetencao }}
+            </th>
+            <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+                {{ labelsColunas.status }}
+            </th>
+            <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">
+                Ação
+            </th>
         </template>
 
         <template #linhas-tabela="{ item }">
             <td v-if="filtro.status === '2'" class="px-6 py-4 text-center">
-                <input type="checkbox" v-model="item.selecionado" class="w-6 h-6 rounded-xl border-gray-200 dark:border-gray-700 text-emerald-600 focus:ring-emerald-500 cursor-pointer shadow-sm transition-all bg-white dark:bg-gray-800" />
+                <input type="checkbox" v-model="item.selecionado" class="w-5 h-5 rounded-lg border-gray-300 dark:border-gray-700 text-emerald-600 focus:ring-emerald-500/50 cursor-pointer transition-all bg-white dark:bg-gray-800" />
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center gap-4">
-                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center border border-gray-200 dark:border-gray-700 font-black text-gray-500 dark:text-gray-400 text-xs shadow-sm">
+            <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs shrink-0">
                         {{ item.funcionario.substring(0, 2).toUpperCase() }}
                     </div>
-                    <div class="flex flex-col">
-                        <span class="text-sm font-black text-gray-900 dark:text-gray-100 group-hover:text-emerald-500 transition-colors">{{ item.funcionario }}</span>
-                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-2">
-                           <Icon name="fa7-solid:address-card" class="w-3 h-3 opacity-50" /> {{ item.cpf }} <span class="opacity-20">|</span> <Icon name="fa7-solid:fingerprint" class="w-3 h-3 opacity-50" /> {{ item.matricula }}
-                        </span>
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{{ item.funcionario }}</span>
+                        <div class="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tighter">
+                           <Icon name="fa7-solid:address-card" class="w-3 h-3 opacity-70" /> {{ item.cpf }} 
+                           <span class="opacity-30">|</span> 
+                           <Icon name="fa7-solid:fingerprint" class="w-3 h-3 opacity-70" /> {{ item.matricula }}
+                        </div>
                     </div>
                 </div>
             </td>
-            <td class="px-6 py-4 text-left min-w-[240px]">
-                <div class="flex flex-col gap-1">
-                    <div class="flex items-center gap-2">
-                        <Icon name="fa7-solid:building" class="w-3 h-3 text-emerald-500 opacity-50" />
-                        <span class="text-[11px] font-black text-gray-700 dark:text-gray-300 uppercase tracking-tight leading-tight">{{ item.projeto }}</span>
-                    </div>
-                    <div class="h-1 w-8 bg-emerald-500/20 rounded-full"></div>
-                </div>
-            </td>
-            <td class="px-6 py-4 text-right font-bold text-sm text-gray-600 dark:text-gray-400 tabular-nums">
-                {{ Number(item.valorLiquido).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
+            <td class="px-6 py-4">
+                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 px-2 py-1 rounded-lg border border-emerald-500/10">
+                    {{ item.projeto }}
+                </span>
             </td>
             <td class="px-6 py-4 text-right">
-                <div class="inline-flex flex-col items-end">
-                    <span class="font-black text-sm text-emerald-600 dark:text-emerald-400 tabular-nums">
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400 tabular-nums">
+                    {{ Number(item.valorLiquido).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
+                </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+                <div class="flex flex-col items-end">
+                    <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
                         {{ Number(item.valorRetencao).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
                     </span>
-                    <span class="text-[9px] font-black text-emerald-500/50 uppercase tracking-widest mt-0.5">Retenção Processada</span>
+                    <span class="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-0.5">Retenção</span>
                 </div>
             </td>
             <td class="px-6 py-4 text-center">
-                <span v-if="item.statusAprovacao === 0" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 border border-rose-500/10 shadow-sm">
+                <span v-if="item.statusAprovacao === 0" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 border border-rose-500/10">
                     <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span> Reprovado
                 </span>
-                <span v-else-if="item.statusAprovacao === 1" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10 shadow-sm">
+                <span v-else-if="item.statusAprovacao === 1" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aprovado
                 </span>
-                <span v-else class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-500/10 shadow-sm">
+                <span v-else class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-500/10">
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Pendente
                 </span>
             </td>
             <td class="px-6 py-4 text-right">
-                <button @click="abrirModalDetalhes(item.codigo)" class="group w-11 h-11 flex items-center justify-center bg-gray-50 hover:bg-emerald-500 dark:bg-gray-800/50 dark:hover:bg-emerald-500 text-gray-400 hover:text-white rounded-2xl transition-all duration-300 border border-gray-200/50 dark:border-gray-700/50 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/20" title="Ver Verbas Detalhadas">
-                    <Icon name="fa7-solid:magnifying-glass-chart" class="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <button @click="abrirModalDetalhes(item.codigo)" class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Ver Detalhes">
+                    <Icon name="fa7-solid:magnifying-glass-chart" class="w-5 h-5" />
                 </button>
             </td>
         </template>
