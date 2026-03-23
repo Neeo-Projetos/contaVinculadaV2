@@ -10,30 +10,31 @@
     <AppCartaoFormulario>
       <AppSobreposicaoCarregamento :carregando="carregandoTela" mensagem="Carregando dados do funcionário..." />
 
-      <form v-if="!carregandoTela" @submit.prevent="gravarRegistro" class="space-y-8 relative z-0">
+      <form v-if="!carregandoTela" @submit.prevent="handleSubmit" class="space-y-8 relative z-0">
         <AppFormularioSecao icone="fa7-solid:file-lines">
           Dados Principais
         </AppFormularioSecao>
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8">
           <div class="md:col-span-8">
-            <AppInputTexto v-model="form.nomeCompleto" label="Nome Completo" placeholder="Digite o nome completo do funcionário..." required maxlength="60" icone="fa7-solid:user" />
+            <AppInputTexto ref="nomeCompletoRef" v-model="form.nomeCompleto" label="Nome Completo" placeholder="Digite o nome completo do funcionário..." required maxlength="60" icone="fa7-solid:user" />
           </div>
           
           <div class="md:col-span-4">
-            <AppInputCpf v-model="form.cpf" required />
+            <AppInputCpf ref="cpfRef" v-model="form.cpf" @invalido="cpfInvalido = $event" required />
           </div>
 
           <div class="md:col-span-3">
-            <AppInputTexto v-model="form.matricula" label="Matrícula" placeholder="Ex: 12345" required icone="fa7-solid:id-badge" />
+            <AppInputTexto ref="matriculaRef" v-model="form.matricula" label="Matrícula" placeholder="Ex: 12345" required icone="fa7-solid:id-badge" />
           </div>
 
           <div class="md:col-span-4">
-            <AppInputEmail v-model="form.email" required maxlength="50" />
+            <AppInputEmail ref="emailRef" v-model="form.email" @invalido="emailInvalido = $event" required maxlength="50" />
           </div>
 
           <div class="md:col-span-5">
             <AppSelect 
+              ref="projetoRef"
               v-model="form.projeto" 
               label="Projeto Responsável" 
               placeholder="Selecione o projeto na lista..." 
@@ -98,21 +99,6 @@
       </template>
     </AppModal>
 
-    <AppModal 
-      :isOpen="modalAlertaAberto" 
-      :title="modalAlertaTitulo" 
-      icon="fa7-solid:circle-exclamation"
-      @close="fecharModalAlerta"
-    >
-      <div class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-300">
-         <p class="text-base text-center font-medium">{{ modalAlertaMensagem }}</p>
-      </div>
-      <template #footer>
-        <AppBotao variacao="primario" @click="fecharModalAlerta" class="w-full sm:w-auto">
-          Entendi
-        </AppBotao>
-      </template>
-    </AppModal>
   </div>
 </template>
 
@@ -120,13 +106,37 @@
 const {
   carregandoTela, carregandoGravacao, carregandoExclusao, modalExclusaoAberto, form, editando,
   projetosAtivos, carregarProjetos, carregarDados, voltarParaLista, limparFormulario,
-  abrirModalExclusao, fecharModal, gravarRegistro, excluirRegistro,
-  cpfInvalido, emailInvalido, projetosFormatados,
-  modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta 
+    abrirModalExclusao, fecharModal, gravarRegistro, excluirRegistro,
+    cpfInvalido, emailInvalido, projetosFormatados
 } = useFuncionarioFormulario()
 
 onMounted(() => { 
   carregarProjetos()
   carregarDados() 
 })
+
+// Refs para Focus
+const nomeCompletoRef = ref<any>(null)
+const cpfRef = ref<any>(null)
+const matriculaRef = ref<any>(null)
+const emailRef = ref<any>(null)
+const projetoRef = ref<any>(null)
+
+const refsMap: any = {
+  nomeCompleto: nomeCompletoRef,
+  cpf: cpfRef,
+  matricula: matriculaRef,
+  email: emailRef,
+  projeto: projetoRef
+}
+
+async function handleSubmit() {
+  const result: any = await gravarRegistro()
+  if (result && result.erro) {
+    const component = refsMap[result.campo]
+    if (component?.value) {
+      component.value.focus()
+    }
+  }
+}
 </script>

@@ -1,6 +1,8 @@
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useAppNotificacao } from '~/composables/global/useAppNotificacao'
 
 export function useContrachequeDetalhes() {
+  const { dispararAlerta } = useAppNotificacao()
   const carregando = ref(false)
   const buscaRealizada = ref(false)
   const visaoAtual = ref<'lista' | 'cards'>('lista')
@@ -68,6 +70,11 @@ export function useContrachequeDetalhes() {
   }
 
   const buscarRegistros = async () => {
+    if (!filtro.mesAno) {
+      dispararAlerta('Filtro Obrigatório', 'Por favor, informe o Mês/Ano para realizar a consulta.', 'warning')
+      return
+    }
+
     modalFiltroAvancadoAberto.value = false
     carregando.value = true
     buscaRealizada.value = true

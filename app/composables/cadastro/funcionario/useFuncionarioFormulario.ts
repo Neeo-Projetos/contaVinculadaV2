@@ -1,9 +1,11 @@
 import { ref, reactive, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useAppNotificacao } from '~/composables/global/useAppNotificacao'
 
 export function useFuncionarioFormulario() {
   const route = useRoute()
   const router = useRouter()
+  const { dispararAlerta } = useAppNotificacao()
   
   const codigoRaw = route.query.codigo
 
@@ -49,14 +51,12 @@ export function useFuncionarioFormulario() {
     }))
   })
 
-  const mostrarAlerta = (titulo: string, mensagem: string) => {
-    modalAlertaTitulo.value = titulo
-    modalAlertaMensagem.value = mensagem
-    modalAlertaAberto.value = true
+  const mostrarAlerta = (titulo: string, mensagem: string, tipo: any = 'error') => {
+    dispararAlerta(titulo, mensagem, tipo)
   }
 
   const fecharModalAlerta = () => {
-    modalAlertaAberto.value = false
+    // Mantido para compatibilidade, mas agora usa toast
   }
 
   const carregarProjetos = async () => {
@@ -111,9 +111,34 @@ export function useFuncionarioFormulario() {
   const fecharModal = () => { modalExclusaoAberto.value = false }
 
   const gravarRegistro = async () => {
-    if (cpfInvalido.value || emailInvalido.value) {
-      mostrarAlerta('Atenção', 'Por favor, ajuste os campos com erro (CPF ou E-mail) antes de gravar.')
-      return 
+    // Validação sequencial de campos obrigatórios
+    if (!form.nomeCompleto) {
+      dispararAlerta('Dados Incompletos', 'Por favor, informe o Nome Completo do colaborador.', 'warning')
+      return { erro: true, campo: 'nomeCompleto' }
+    }
+    if (!form.cpf) {
+      dispararAlerta('Dados Incompletos', 'Por favor, informe o CPF.', 'warning')
+      return { erro: true, campo: 'cpf' }
+    }
+    if (cpfInvalido.value) {
+      dispararAlerta('Atenção', 'O CPF informado é inválido. Por favor, verifique.', 'warning')
+      return { erro: true, campo: 'cpf' }
+    }
+    if (!form.matricula) {
+      dispararAlerta('Dados Incompletos', 'Por favor, informe a Matrícula.', 'warning')
+      return { erro: true, campo: 'matricula' }
+    }
+    if (!form.email) {
+      dispararAlerta('Dados Incompletos', 'Por favor, informe o E-mail.', 'warning')
+      return { erro: true, campo: 'email' }
+    }
+    if (emailInvalido.value) {
+      dispararAlerta('Atenção', 'O E-mail informado é inválido.', 'warning')
+      return { erro: true, campo: 'email' }
+    }
+    if (!form.projeto) {
+      dispararAlerta('Dados Incompletos', 'Por favor, selecione o Projeto Responsável.', 'warning')
+      return { erro: true, campo: 'projeto' }
     }
 
     carregandoGravacao.value = true

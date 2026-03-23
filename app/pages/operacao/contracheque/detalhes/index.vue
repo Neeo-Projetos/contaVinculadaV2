@@ -7,7 +7,7 @@
     <AppBarraFerramentas v-model:visao-atual="visaoAtual">
       <template #entradas>
         <div class="w-44">
-          <AppInputTexto v-model="filtro.mesAno" placeholder="Mês/Ano" v-maska="'##/####'" centralizado />
+          <AppInputTexto v-model="filtro.mesAno" placeholder="Mês/Ano" v-maska="'##/####'" centralizado required icone="fa7-solid:calendar-days" />
         </div>
 
         <AppInputAutocomplete v-model="nomeFuncionarioSearch" placeholder="Digite o nome do colaborador..."

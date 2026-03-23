@@ -12,6 +12,8 @@ onMounted(() => {
     <NuxtPage />
   </NuxtLayout>
 
+  <AppNotificacao />
+
   <!-- Filtros SVG para Daltonismo (Globais para o protótipo) -->
   <svg style="display: none; position: absolute; width: 0; height: 0;" aria-hidden="true">
     <defs>
