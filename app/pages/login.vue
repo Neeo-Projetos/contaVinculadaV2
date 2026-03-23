@@ -52,7 +52,7 @@
         :enter="{ opacity: 1, transition: { delay: 350, duration: 400 } }"
       >
         <div class="space-y-1.5">
-          <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider pl-1">Usuário / CPF</label>
+          <label class="block text-xs font-bold text-gray-600 dark:text-emerald-400/90 uppercase tracking-wider pl-1">Usuário / CPF</label>
           <div class="relative group">
             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-emerald-500 transition-colors">
               <Icon name="fa7-solid:user" class="h-4 w-4" />
@@ -60,7 +60,7 @@
             <input
               v-model="form.login"
               type="text"
-              class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700/70 bg-white/50 dark:bg-gray-900/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400 dark:placeholder-gray-500 shadow-sm"
+              class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700/70 bg-white/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400 dark:placeholder-gray-400 shadow-sm"
               placeholder="Digite seu usuário"
               required
             />
@@ -68,7 +68,7 @@
         </div>
 
         <div class="space-y-1.5">
-          <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider pl-1">Senha</label>
+          <label class="block text-xs font-bold text-gray-600 dark:text-emerald-400/90 uppercase tracking-wider pl-1">Senha</label>
           <div class="relative group">
             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-emerald-500 transition-colors">
               <Icon name="fa7-solid:lock" class="h-4 w-4" />
@@ -76,7 +76,7 @@
             <input
               v-model="form.senha"
               type="password"
-              class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700/70 bg-white/50 dark:bg-gray-900/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400 dark:placeholder-gray-500 shadow-sm"
+              class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700/70 bg-white/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400 dark:placeholder-gray-400 shadow-sm"
               placeholder="Digite sua senha"
               required
             />
@@ -111,7 +111,7 @@
       </form>
 
       <div class="mt-8 text-center" v-motion :initial="{ opacity: 0 }" :enter="{ opacity: 1, transition: { delay: 500 } }">
-        <a href="#" class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+        <a href="#" class="text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
           Esqueceu sua senha?
         </a>
       </div>
@@ -133,11 +133,6 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const { isDark, toggleTheme } = useTheme()
-
-onMounted(() => {
-  const token = useCookie('token')
-  if (token.value) router.push('/')
-})
 
 const form = ref({ login: '', senha: '' })
 const loading = ref(false)
@@ -163,7 +158,7 @@ const handleLogin = async () => {
         const tokenCookie = useCookie('token')
         tokenCookie.value = userData.token
         
-        router.push('/')
+        router.push('/inicio')
       } else {
         error.value = 'Usuário ou senha incorretos. Tente novamente.'
       }
@@ -199,6 +194,13 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus, 
 input:-webkit-autofill:active{
     -webkit-box-shadow: 0 0 0 30px transparent inset !important;
+    -webkit-text-fill-color: #ffffff !important;
     transition: background-color 5000s ease-in-out 0s;
+}
+
+@media (prefers-color-scheme: light) {
+    input:-webkit-autofill {
+        -webkit-text-fill-color: #111827 !important;
+    }
 }
 </style>

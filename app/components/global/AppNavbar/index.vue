@@ -18,7 +18,7 @@
     <div class="flex items-center gap-3 md:gap-5">
       
       <Transition name="slide-fade">
-        <div v-if="!isHome" class="hidden md:flex items-center gap-4">
+        <div v-if="!eInicio" class="hidden md:flex items-center gap-4">
           <div class="flex items-center gap-3 bg-white dark:bg-[#1e2029] border border-gray-200 dark:border-gray-700/80 px-4 py-1.5 rounded-full shadow-sm">
             <Icon name="fa7-solid:clock" class="text-emerald-500 dark:text-emerald-400 w-4 h-4" />
             <div class="flex flex-col items-center justify-center leading-none mt-0.5">
@@ -71,17 +71,15 @@ import { useCookie } from '#app'
 const router = useRouter()
 const route = useRoute()
 
-// Verifica se estamos na raiz (Home)
-const isHome = computed(() => route.path === '/')
+const isInicio = computed(() => route.path === '/' || route.path === '/dashboard')
+const eInicio = isInicio
 
 const userName = ref('Usuário')
 const menuOpen = ref(false)
 const menuRef = ref(null)
 
-// Fecha o menu ao clicar fora
 onClickOutside(menuRef, () => (menuOpen.value = false))
 
-// Lógica de tempo para o relógio da Navbar
 const horaAtual = ref('')
 const dataAtual = ref('')
 let timer: ReturnType<typeof setInterval>
@@ -89,10 +87,8 @@ let timer: ReturnType<typeof setInterval>
 const updateTime = () => {
   const now = new Date()
   
-  // Hora formato 10:48
   horaAtual.value = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   
-  // Data formato QUA, 04 DE MAR.
   const diaSemana = now.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '').toUpperCase()
   const dia = String(now.getDate()).padStart(2, '0')
   const mes = now.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase()

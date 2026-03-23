@@ -7,10 +7,10 @@
   >
     <nav class="flex-1 overflow-y-auto py-6 space-y-1 overflow-x-hidden scrollbar-hide w-64">
       
-      <!-- DASHBOARD -->
-      <NuxtLink to="/" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Dashboard' : ''">
+      <!-- INÍCIO -->
+      <NuxtLink to="/inicio" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Início' : ''">
         <Icon name="fa7-solid:house" class="menu-icon" />
-        <span v-if="!collapsed" class="menu-text">Dashboard</span>
+        <span v-if="!collapsed" class="menu-text">Início</span>
       </NuxtLink>
 
       <!-- GESTÃO DE CADASTROS -->

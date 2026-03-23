@@ -138,10 +138,10 @@
         </div>
 
         <AppRodapeFormulario 
-          labelVoltar="Voltar ao Dashboard"
+          labelVoltar="Voltar ao Início"
           labelGravar="Processar Importação"
           iconeGravar="fa7-solid:cloud-arrow-up"
-          @voltar="navigateTo('/')"
+          @voltar="navigateTo('/inicio')"
           @gravar="importarArquivo"
         />
       </form>
