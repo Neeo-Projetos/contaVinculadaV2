@@ -19,15 +19,15 @@
       </div>
 
       <!-- NAVEGAÇÃO HORIZONTAL (Barra Superior) -->
-      <nav v-if="layout === 'barraSuperior'" class="hidden lg:flex items-center gap-1 ml-4">
+      <nav v-if="layout === 'barraSuperior'" class="hidden lg:flex items-center gap-1 ml-4 translate-y-[2px]">
         <template v-for="item in menuItems" :key="item.label">
           <NuxtLink 
             :to="item.to" 
-            class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all duration-300 whitespace-nowrap border border-transparent"
+            class="flex items-center gap-2 px-2.5 py-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all duration-300 whitespace-nowrap border border-transparent"
             active-class="!text-emerald-500 dark:!text-emerald-400 !font-extrabold"
           >
-            <Icon :name="item.icon" class="w-4 h-4" />
-            <span class="text-[11px] font-bold uppercase tracking-wide">{{ item.label }}</span>
+            <Icon :name="item.icon" class="w-[18px] h-[18px]" />
+            <span class="text-[13px] font-bold uppercase tracking-wide leading-none">{{ item.label }}</span>
           </NuxtLink>
         </template>
       </nav>
