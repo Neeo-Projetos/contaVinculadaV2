@@ -42,6 +42,54 @@
             </div>
           </div>
 
+          <!-- SEÇÃO: LAYOUT -->
+          <div>
+            <AppFormularioSecao icone="fa7-solid:layer-group">
+              Layout do Sistema
+            </AppFormularioSecao>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mt-[-1.5rem] mb-8 ml-14 max-w-2xl leading-relaxed">
+              Escolha como deseja que o menu de navegação seja exibido no sistema.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <button 
+                v-for="layout in layouts" 
+                :key="layout.id"
+                @click="settings.layout = layout.id"
+                class="flex flex-col items-center gap-4 p-5 rounded-3xl border-2 transition-all duration-500 group relative overflow-hidden active:scale-95"
+                :class="settings.layout === layout.id ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10 shadow-lg shadow-emerald-500/10' : 'border-gray-100 dark:border-gray-800 hover:border-emerald-300 dark:hover:border-emerald-700 bg-white dark:bg-gray-900/40'"
+              >
+                <div v-if="settings.layout === layout.id" class="absolute -right-2 -top-2 w-8 h-8 bg-emerald-500 flex items-center justify-center rounded-bl-xl shadow-md z-20">
+                    <Icon name="fa7-solid:check" class="w-4 h-4 text-white" />
+                </div>
+                
+                <div class="w-full aspect-[21/9] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 relative shadow-inner group-hover:shadow-md transition-shadow">
+                   <!-- Preview de cada layout usando CSS simples -->
+                   <div class="absolute inset-0 bg-gray-50 dark:bg-gray-900 p-2 flex gap-1">
+                      <!-- BARRA LATERAL -->
+                      <template v-if="layout.id === 'barraLateral'">
+                        <div class="w-4 h-full bg-emerald-500/30 rounded-md"></div>
+                        <div class="flex-1 flex flex-col gap-1">
+                          <div class="h-2 w-full bg-gray-200 dark:bg-gray-800 rounded-sm"></div>
+                          <div class="flex-1 bg-white dark:bg-[#1a1c23] border border-gray-100 dark:border-gray-800 rounded-sm"></div>
+                        </div>
+                      </template>
+                      <!-- BARRA SUPERIOR -->
+                      <template v-else>
+                        <div class="flex-1 flex flex-col gap-1">
+                          <div class="h-2 w-full bg-emerald-500/30 rounded-sm"></div>
+                          <div class="h-1 w-full bg-gray-200 dark:bg-gray-800 rounded-sm"></div>
+                          <div class="flex-1 bg-white dark:bg-[#1a1c23] border border-gray-100 dark:border-gray-800 rounded-sm"></div>
+                        </div>
+                      </template>
+                   </div>
+                      <Icon :name="layout.icone" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 opacity-10 transform group-hover:scale-125 transition-transform duration-700 pointer-events-none" :class="settings.layout === layout.id ? 'text-emerald-500' : 'text-gray-400'" />
+                </div>
+                <span class="font-black text-[10px] uppercase tracking-[0.2em]" :class="settings.layout === layout.id ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'">{{ layout.nome }}</span>
+              </button>
+            </div>
+          </div>
+
           <!-- SEÇÃO: ACESSIBILIDADE VISUAL -->
           <div>
             <AppFormularioSecao icone="fa7-solid:eye">
@@ -185,12 +233,18 @@ const temas = [
   { id: 'system', nome: 'Sistema', icone: 'fa7-solid:display', previewClass: 'bg-gradient-to-br from-white to-[#1a1c23]' }
 ]
 
+const layouts = [
+  { id: 'barraLateral' as const, nome: 'Barra Lateral', icone: 'fa7-solid:grip-vertical' },
+  { id: 'barraSuperior' as const, nome: 'Barra Superior', icone: 'fa7-solid:window-maximize' }
+]
+
 const restaurarPadroes = () => {
   settings.value.tema = 'system'
   settings.value.daltonismo = 'normal'
   settings.value.escalaFonte = 100
   settings.value.reduzirMovimento = false
   settings.value.altoContraste = false
+  settings.value.layout = 'barraLateral'
   colorMode.preference = 'system'
 }
 </script>

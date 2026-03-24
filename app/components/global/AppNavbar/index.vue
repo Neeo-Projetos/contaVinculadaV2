@@ -2,10 +2,14 @@
   <header class="bg-white/90 dark:bg-[#1a1c23]/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 h-16 flex items-center justify-between px-4 sticky top-0 z-50 transition-colors duration-300">
     
     <div class="flex items-center gap-4">
-      <button @click="$emit('toggle-sidebar')" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+      <button 
+        v-if="layout === 'barraLateral'"
+        @click="$emit('toggle-sidebar')" 
+        class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+      >
         <Icon name="fa7-solid:bars" class="w-5 h-5" />
       </button>
-      <div class="hidden sm:flex items-center gap-2 select-none">
+      <div class="flex items-center gap-2 select-none mr-4">
         <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-md">
           <Icon name="fa7-solid:building-columns" class="text-white w-4 h-4" />
         </div>
@@ -13,12 +17,72 @@
           Conta<span class="font-light text-emerald-600 dark:text-emerald-400">Vinculada</span>
         </h1>
       </div>
+
+      <!-- NAVEGAÇÃO HORIZONTAL (Barra Superior) -->
+      <nav v-if="layout === 'barraSuperior'" class="hidden lg:flex items-center gap-1 ml-4" ref="navbarRef">
+        <template v-for="item in menuItems" :key="item.label">
+          <!-- Link Direto (Início) -->
+          <NuxtLink 
+            v-if="!item.children"
+            :to="item.to" 
+            class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all duration-300 whitespace-nowrap border border-transparent"
+            active-class="!text-emerald-500 dark:!text-emerald-400 !font-extrabold"
+          >
+            <Icon :name="item.icon" class="w-4 h-4" />
+            <span class="text-[11px] font-bold uppercase tracking-wide">{{ item.label }}</span>
+          </NuxtLink>
+
+          <!-- Categoria com Dropdown (Overlay Flutuante) -->
+          <div v-else class="relative">
+            <button 
+              @click="toggleCategory(item.label)"
+              class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all duration-300 whitespace-nowrap border border-transparent"
+              :class="{ '!text-emerald-500 dark:!text-emerald-400 !font-extrabold': activeCategory === item.label || clickedCategory === item.label }"
+            >
+              <Icon :name="item.icon" class="w-4 h-4" />
+              <span class="text-[11px] font-bold uppercase tracking-wide">{{ item.label }}</span>
+              <Icon name="fa7-solid:chevron-down" class="w-2.5 h-2.5 opacity-50 transition-transform" :class="{ 'rotate-180': clickedCategory === item.label }" />
+            </button>
+
+            <Transition name="slide-down">
+              <div 
+                v-if="clickedCategory === item.label" 
+                class="absolute top-full left-1/2 -translate-x-1/2 mt-4 bg-white/95 dark:bg-[#1e2029]/95 backdrop-blur-2xl border border-gray-200/30 dark:border-gray-700/30 rounded-[2.8rem] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.4)] p-2.5 min-w-[320px] z-[60] flex flex-col gap-1.5"
+              >
+                <!-- Indicador (Seta) -->
+                <div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-4 h-4 bg-white/95 dark:bg-[#1e2029]/95 border-t border-l border-gray-200/30 dark:border-gray-700/30 rotate-45 rounded-sm"></div>
+
+                <NuxtLink 
+                  v-for="sub in item.children" 
+                  :key="sub.to" 
+                  :to="sub.to"
+                  class="group/sub flex items-center justify-between pl-3 pr-6 py-4 rounded-[2.2rem] text-[13px] font-bold text-gray-500 dark:text-gray-400 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-300 active:scale-[0.98]"
+                  active-class="!bg-emerald-500/10 !text-emerald-600 dark:!text-emerald-400"
+                >
+                  <div class="flex items-center gap-5">
+                    <div class="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center group-hover/sub:bg-emerald-500/20 group-hover/sub:scale-110 transition-all duration-300 shadow-sm border border-transparent group-hover/sub:border-emerald-500/30 shrink-0">
+                      <Icon :name="sub.icon" class="w-5 h-5 opacity-60 group-hover/sub:opacity-100 transition-opacity" />
+                    </div>
+                    <div class="flex flex-col gap-0.5">
+                      <span class="text-[14px] leading-tight tracking-tight whitespace-nowrap">{{ sub.label }}</span>
+                      <span class="text-[10px] opacity-40 font-semibold uppercase tracking-widest group-hover/sub:opacity-100 transition-opacity whitespace-nowrap">Gerenciamento completo</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center ml-4">
+                    <Icon name="fa7-solid:chevron-right" class="w-3 h-3 opacity-30 group-hover/sub:opacity-100 group-hover/sub:translate-x-1.5 transition-all duration-300" />
+                  </div>
+                </NuxtLink>
+              </div>
+            </Transition>
+          </div>
+        </template>
+      </nav>
     </div>
 
     <div class="flex items-center gap-3 md:gap-5">
       
       <Transition name="slide-fade">
-        <div v-if="!eInicio" class="hidden md:flex items-center gap-4">
+        <div v-if="!eInicio && layout === 'barraLateral'" class="hidden md:flex items-center gap-4">
           <div class="flex items-center gap-3 bg-white dark:bg-[#1e2029] border border-gray-200 dark:border-gray-700/80 px-4 py-1.5 rounded-full shadow-sm">
             <Icon name="fa7-solid:clock" class="text-emerald-500 dark:text-emerald-400 w-4 h-4" />
             <div class="flex flex-col items-center justify-center leading-none mt-0.5">
@@ -63,22 +127,109 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
 import { useCookie } from '#app'
 
+const props = defineProps<{ 
+  layout: 'barraLateral' | 'barraSuperior' 
+}>()
+
 const router = useRouter()
 const route = useRoute()
 
-const isInicio = computed(() => route.path === '/' || route.path === '/dashboard')
+const isInicio = computed(() => route.path === '/' || route.path === '/dashboard' || route.path === '/inicio')
 const eInicio = isInicio
 
 const userName = ref('Usuário')
 const menuOpen = ref(false)
 const menuRef = ref(null)
+const navbarRef = ref(null)
+const clickedCategory = ref('')
 
 onClickOutside(menuRef, () => (menuOpen.value = false))
+onClickOutside(navbarRef, () => (clickedCategory.value = ''))
+
+// Resetar categoria clicada ao mudar de rota
+watch(() => route.path, () => {
+  clickedCategory.value = ''
+})
+
+const menuItems = [
+  { label: 'Início', to: '/inicio', icon: 'fa7-solid:house' },
+  { 
+    label: 'Gestão de Cadastros', 
+    icon: 'fa7-solid:users', 
+    children: [
+      { label: 'Funcionários', to: '/cadastro/funcionario', icon: 'fa7-solid:user' },
+      { label: 'Projetos', to: '/cadastro/projeto', icon: 'fa7-solid:briefcase' }
+    ]
+  },
+  { 
+    label: 'Rotinas de Folha', 
+    icon: 'fa7-solid:file-invoice-dollar', 
+    children: [
+      { label: 'Importação TXT', to: '/operacao/contracheque/importacao', icon: 'fa7-solid:file-arrow-up' },
+      { label: 'Processamento', to: '/operacao/contracheque/processamento', icon: 'fa7-solid:gears' },
+      { label: 'Histórico', to: '/operacao/contracheque/detalhes', icon: 'fa7-solid:clock-rotate-left' }
+    ]
+  },
+  { 
+    label: 'Financeiro', 
+    icon: 'fa7-solid:hand-holding-dollar', 
+    children: [
+      { label: 'Lançamento Reembolso', to: '/operacao/oficio/lancamentoReembolso', icon: 'fa7-solid:money-bill-transfer' },
+      { label: 'Lançamento Manual', to: '/operacao/movimentacaoBancaria/lancamentoManual', icon: 'fa7-solid:cash-register' },
+      { label: 'Estornos', to: '/operacao/movimentacaoBancaria/lancamentoEstorno', icon: 'fa7-solid:rotate-left' }
+    ]
+  },
+  { 
+    label: 'Relatórios', 
+    icon: 'fa7-solid:chart-pie', 
+    children: [
+      { label: 'Extrato Projeto', to: '/operacao/movimentacaoBancaria/extratoProjeto', icon: 'fa7-solid:list-check' },
+      { label: 'Extrato Funcionário', to: '/operacao/movimentacaoBancaria/extratoFuncionario', icon: 'fa7-solid:list' }
+    ]
+  },
+  { 
+    label: 'Configurações', 
+    icon: 'fa7-solid:screwdriver-wrench', 
+    children: [
+      { label: 'Central de Configurações', to: '/configuracao', icon: 'fa7-solid:gear' },
+      { label: 'Tabelas Básicas', to: '/tabelaBasica', icon: 'fa7-solid:database' }
+    ]
+  }
+]
+
+const activeCategory = computed(() => {
+  const currentPath = route.path.replace(/\/$/, '') || '/'
+  for (const item of menuItems) {
+    if (item.children && item.children.some(sub => {
+      const subTo = sub.to.replace(/\/$/, '')
+      return currentPath === subTo || currentPath.startsWith(subTo + '/')
+    })) {
+      return item.label
+    }
+  }
+  return ''
+})
+
+const displayCategoryItems = computed(() => {
+  const categoryName = clickedCategory.value || activeCategory.value
+  if (!categoryName) return []
+  
+  const category = menuItems.find(item => item.label === categoryName)
+  return category?.children || []
+})
+
+const toggleCategory = (label: string) => {
+  if (clickedCategory.value === label) {
+    clickedCategory.value = ''
+  } else {
+    clickedCategory.value = label
+  }
+}
 
 const horaAtual = ref('')
 const dataAtual = ref('')
@@ -131,6 +282,14 @@ defineEmits(['toggle-sidebar'])
 </script>
 
 <style scoped>
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .dropdown-enter-active,
 .dropdown-leave-active {
   transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -159,5 +318,16 @@ defineEmits(['toggle-sidebar'])
 .slide-fade-leave-to {
   opacity: 0;
   transform: translateX(20px);
+}
+
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -10px) scale(0.98);
 }
 </style>

@@ -1,10 +1,18 @@
 <template>
   <div class="h-screen w-full bg-slate-50 dark:bg-[#0f172a] flex flex-col font-sans text-gray-800 dark:text-gray-200 transition-colors duration-300 overflow-hidden">
     
-    <AppNavbar @toggle-sidebar="collapsed = !collapsed" class="shrink-0" />
+    <AppNavbar 
+      @toggle-sidebar="collapsed = !collapsed" 
+      class="shrink-0" 
+      :layout="settings.layout"
+    />
 
-    <div class="flex flex-1 overflow-hidden relative">
-      <AppSidebar :collapsed="collapsed" class="z-20" />
+    <div class="flex flex-1 overflow-hidden relative" :class="{ 'flex-col': settings.layout === 'barraSuperior' }">
+      <AppSidebar 
+        v-if="settings.layout === 'barraLateral'"
+        :collapsed="collapsed" 
+        class="z-20" 
+      />
 
       <main class="flex-1 overflow-y-auto overflow-x-hidden transition-colors duration-300 scrollbar-hide">
         <NuxtPage />
@@ -18,6 +26,7 @@
 import { ref, onMounted } from 'vue'
 
 const collapsed = ref(false)
+const { settings } = useInterfaceSettings()
 
 onMounted(() => {
   if (window.innerWidth < 1024) {
