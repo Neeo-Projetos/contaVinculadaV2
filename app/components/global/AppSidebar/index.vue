@@ -116,4 +116,45 @@ const { toggleTheme, theme } = useTheme()
 defineProps<{ collapsed: boolean }>()
 </script>
 
-<style scoped src="./style.css"></style>
+<style scoped>
+.menu-link {
+  @apply flex items-center mx-3 px-3 py-2.5 rounded-xl text-gray-500 dark:text-gray-400 transition-all duration-200 border border-transparent;
+}
+
+.menu-link:hover {
+  @apply bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 dark:text-emerald-400;
+}
+
+.menu-active {
+  @apply bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 font-bold shadow-sm border border-emerald-200 dark:border-emerald-800/30;
+}
+
+.menu-icon {
+  @apply w-5 h-5 shrink-0 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-200;
+}
+
+.menu-active .menu-icon {
+  @apply opacity-100 scale-105;
+}
+
+.menu-text {
+  @apply ml-3 text-sm tracking-wide whitespace-nowrap;
+}
+
+.menu-header {
+  @apply px-7 pt-4 pb-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] select-none;
+}
+
+.menu-divider {
+  @apply w-8 h-px bg-gray-200 dark:bg-gray-800 mx-auto my-3;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>

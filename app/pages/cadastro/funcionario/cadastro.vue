@@ -83,10 +83,9 @@
           Você está prestes a tornar <strong class="text-gray-800 dark:text-gray-200">{{ form.nomeCompleto }}</strong> inativo. Ele não aparecerá mais nas listagens principais.
         </p>
         
-        <div class="mt-8 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 rounded-2xl flex items-center gap-3 text-amber-700 dark:text-amber-400 text-xs font-bold uppercase tracking-wider">
-          <Icon name="fa7-solid:circle-info" class="w-5 h-5 shrink-0" />
-          <span>O registro permanecerá no histórico</span>
-        </div>
+        <AppCampoObrigatorio class="mt-8">
+          O registro permanecerá no histórico
+        </AppCampoObrigatorio>
       </div>
       <template #footer>
         <AppBotao variacao="padrao" @click="fecharModal">

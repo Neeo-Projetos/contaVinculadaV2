@@ -19,6 +19,11 @@ Este documento é a referência arquitetural definitiva para a criação de TUDO
    - **Cadastros (`cadastro.vue`)**: Uso OBRIGATÓRIO de `AppBarraNavegacao` (Simples) ou `AppTrilhaNavegacao` (Complexos) no topo.
 5. **Inativação Lógica**: Nunca crie fluxos de "Delete" físico. Sempre "Inativar" o registro (`ativo = 0` ou `false`).
 6. **Theme CSS & Layout**: Tudo requer suporte via classes `dark:`. Formulários usam sempre matriz em Grid responsiva (`grid grid-cols-1 md:grid-cols-12 gap-6 items-end`). A tela principal (View root) deve iniciar com `<div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">`.
+7. **Estilos Embutidos vs Externos**: 
+   - **Componentes (`components/`)**: Devem ser auto-contidos. O CSS deve estar dentro do arquivo `.vue` usando `<style scoped>`.
+   - **Páginas (`pages/`)**: Devem manter seus estilos em arquivos `.css` externos (vinculados via `<style scoped src="./estilo.css">`) para manter o arquivo `.vue` limpo e focado na estrutura.
+
+
 
 ---
 
@@ -44,6 +49,8 @@ Use a trindade nativa do sistema:
    <AppInputCnpj v-model="form.cnpj" required />
 </div>
 ```
+**Dica Técnica**: Use seletores `:deep(input)` ou `:deep(select)` no CSS do componente pai para garantir que o contorno vermelho (`border-red-500`) seja aplicado mesmo em inputs encapsulados.
+
 
 ---
 
@@ -57,6 +64,10 @@ Use a trindade nativa do sistema:
 | `AppBotao` | Use variações engessadas: `acao` (azul), `primario` (verde/gravar), `perigo` (vermelho/inativar). |
 | `AppSobreposicaoCarregamento` | Layer de opacidade durante qualquer `$fetch` crítico p/ a UI que renderiza dados lidos. |
 | `AppAtivo` | Exibe pills do sistema com o status "Ativo/Inativo" usando cores padronizadas. |
+| `AppNotificacao` | Toast de feedback (Sucesso, Erro, Alerta). Integrado via `useAppNotificacao`. |
+| `AppCampoObrigatorio` | Card de aviso Âmbar para sinalizar campos que devem ser preenchidos. |
+
+
 
 > [!IMPORTANT]
 > **Formatação Estrita de Combos (Projetos)**: É OBRIGATÓRIO exibir os projetos no formato `APELIDO - DESCRIÇÃO` (ex: `NTL - Neoo`). No fetching (`/api/cadastro/projeto/ativos`), use `.map()` para criar a propriedade virtual `nomeExibicao: \`\${p.apelido} - \${p.descricao}\`` e vincule-a ao `itemLabel` do `AppSelect`.
@@ -130,3 +141,7 @@ Quando for solicitado criar uma tela, não tente inventar o design do zero. Em v
 1. **Slots Ouro da Barra de Ferramentas**: Não esqueça de dividir as ações em `#entradas`, `#acoes-secundarias` (Filtros e View), `#acoes-principais` (Novo Registro), e `#acoes-pesquisa`.
 2. **Modais Periféricos**: Toda listagem madura do sistema contém a integração simultânea do `AppModalFiltroAvancado`, `AppModalExibicao` (para colunas da tabela dinâmica vinculadas por `v-if="colunas.x"`) e o `AppModalHistorico`. O Composable deve gerenciá-los ativamente.
 3. **Travamento Condicional (Novo vs Editando)**: Na View de `/cadastro`, os ID's controlam o estado da UI. Verifique se `id=0` para derivar flag booleana `editando`. Essa flag **muta e trava** chaves estrangeiras/unicas (`:disabled="editando"`) ou abre o input para cadastro de um novo item. Essa mutação precisa estar visível logo no input principal do form.
+4. **Padrão de Alerta e Campos Obrigatórios (Âmbar)**: Utilize o componente **`AppCampoObrigatorio`** para sinalizar avisos de preenchimento ou dados essenciais. Ele segue o tema Âmbar (Amarelo) e já inclui a animação e o ícone padrão.
+
+5. **O "Grand Finale" (Modal de Sucesso)**: Após gravar, dispare o `AppModal` de sucesso com a animação `animate-success-pop`. Este modal deve conter um **Resumo dos Dados** (um mini-card com as infos principais) para confirmar ao usuário o que foi salvo antes de retornar à listagem.
+
