@@ -1,16 +1,15 @@
 <template>
   <div class="h-screen w-full bg-slate-50 dark:bg-[#0f172a] flex flex-col font-sans text-gray-800 dark:text-gray-200 transition-colors duration-300 overflow-hidden">
     
-    <AppNavbar 
+    <AppBarraSuperior 
+      :layout="settings.layout" 
       @toggle-sidebar="collapsed = !collapsed" 
-      class="shrink-0" 
-      :layout="settings.layout"
     />
 
-    <div class="flex flex-1 overflow-hidden relative" :class="{ 'flex-col': settings.layout === 'barraSuperior' }">
-      <AppSidebar 
+    <div class="flex flex-1 overflow-hidden relative">
+      <AppBarraLateral 
         v-if="settings.layout === 'barraLateral'"
-        :collapsed="collapsed" 
+        v-model:collapsed="collapsed" 
         class="z-20" 
       />
 

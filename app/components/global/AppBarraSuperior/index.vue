@@ -19,11 +19,9 @@
       </div>
 
       <!-- NAVEGAÇÃO HORIZONTAL (Barra Superior) -->
-      <nav v-if="layout === 'barraSuperior'" class="hidden lg:flex items-center gap-1 ml-4" ref="navbarRef">
+      <nav v-if="layout === 'barraSuperior'" class="hidden lg:flex items-center gap-1 ml-4">
         <template v-for="item in menuItems" :key="item.label">
-          <!-- Link Direto (Início) -->
           <NuxtLink 
-            v-if="!item.children"
             :to="item.to" 
             class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all duration-300 whitespace-nowrap border border-transparent"
             active-class="!text-emerald-500 dark:!text-emerald-400 !font-extrabold"
@@ -31,50 +29,6 @@
             <Icon :name="item.icon" class="w-4 h-4" />
             <span class="text-[11px] font-bold uppercase tracking-wide">{{ item.label }}</span>
           </NuxtLink>
-
-          <!-- Categoria com Dropdown (Overlay Flutuante) -->
-          <div v-else class="relative">
-            <button 
-              @click="toggleCategory(item.label)"
-              class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all duration-300 whitespace-nowrap border border-transparent"
-              :class="{ '!text-emerald-500 dark:!text-emerald-400 !font-extrabold': activeCategory === item.label || clickedCategory === item.label }"
-            >
-              <Icon :name="item.icon" class="w-4 h-4" />
-              <span class="text-[11px] font-bold uppercase tracking-wide">{{ item.label }}</span>
-              <Icon name="fa7-solid:chevron-down" class="w-2.5 h-2.5 opacity-50 transition-transform" :class="{ 'rotate-180': clickedCategory === item.label }" />
-            </button>
-
-            <Transition name="slide-down">
-              <div 
-                v-if="clickedCategory === item.label" 
-                class="absolute top-full left-1/2 -translate-x-1/2 mt-4 bg-white/95 dark:bg-[#1e2029]/95 backdrop-blur-2xl border border-gray-200/30 dark:border-gray-700/30 rounded-[2.8rem] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.4)] p-2.5 min-w-[320px] z-[60] flex flex-col gap-1.5"
-              >
-                <!-- Indicador (Seta) -->
-                <div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-4 h-4 bg-white/95 dark:bg-[#1e2029]/95 border-t border-l border-gray-200/30 dark:border-gray-700/30 rotate-45 rounded-sm"></div>
-
-                <NuxtLink 
-                  v-for="sub in item.children" 
-                  :key="sub.to" 
-                  :to="sub.to"
-                  class="group/sub flex items-center justify-between pl-3 pr-6 py-4 rounded-[2.2rem] text-[13px] font-bold text-gray-500 dark:text-gray-400 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-300 active:scale-[0.98]"
-                  active-class="!bg-emerald-500/10 !text-emerald-600 dark:!text-emerald-400"
-                >
-                  <div class="flex items-center gap-5">
-                    <div class="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center group-hover/sub:bg-emerald-500/20 group-hover/sub:scale-110 transition-all duration-300 shadow-sm border border-transparent group-hover/sub:border-emerald-500/30 shrink-0">
-                      <Icon :name="sub.icon" class="w-5 h-5 opacity-60 group-hover/sub:opacity-100 transition-opacity" />
-                    </div>
-                    <div class="flex flex-col gap-0.5">
-                      <span class="text-[14px] leading-tight tracking-tight whitespace-nowrap">{{ sub.label }}</span>
-                      <span class="text-[10px] opacity-40 font-semibold uppercase tracking-widest group-hover/sub:opacity-100 transition-opacity whitespace-nowrap">Gerenciamento completo</span>
-                    </div>
-                  </div>
-                  <div class="flex items-center ml-4">
-                    <Icon name="fa7-solid:chevron-right" class="w-3 h-3 opacity-30 group-hover/sub:opacity-100 group-hover/sub:translate-x-1.5 transition-all duration-300" />
-                  </div>
-                </NuxtLink>
-              </div>
-            </Transition>
-          </div>
         </template>
       </nav>
     </div>
@@ -145,21 +99,14 @@ const eInicio = isInicio
 const userName = ref('Usuário')
 const menuOpen = ref(false)
 const menuRef = ref(null)
-const navbarRef = ref(null)
-const clickedCategory = ref('')
 
 onClickOutside(menuRef, () => (menuOpen.value = false))
-onClickOutside(navbarRef, () => (clickedCategory.value = ''))
-
-// Resetar categoria clicada ao mudar de rota
-watch(() => route.path, () => {
-  clickedCategory.value = ''
-})
 
 const menuItems = [
   { label: 'Início', to: '/inicio', icon: 'fa7-solid:house' },
   { 
     label: 'Gestão de Cadastros', 
+    to: '/cadastro', 
     icon: 'fa7-solid:users', 
     children: [
       { label: 'Funcionários', to: '/cadastro/funcionario', icon: 'fa7-solid:user' },
@@ -168,6 +115,7 @@ const menuItems = [
   },
   { 
     label: 'Rotinas de Folha', 
+    to: '/operacao', 
     icon: 'fa7-solid:file-invoice-dollar', 
     children: [
       { label: 'Importação TXT', to: '/operacao/contracheque/importacao', icon: 'fa7-solid:file-arrow-up' },
@@ -177,6 +125,7 @@ const menuItems = [
   },
   { 
     label: 'Financeiro', 
+    to: '/operacao/financeiro', 
     icon: 'fa7-solid:hand-holding-dollar', 
     children: [
       { label: 'Lançamento Reembolso', to: '/operacao/oficio/lancamentoReembolso', icon: 'fa7-solid:money-bill-transfer' },
@@ -186,6 +135,7 @@ const menuItems = [
   },
   { 
     label: 'Relatórios', 
+    to: '/operacao/relatorio', 
     icon: 'fa7-solid:chart-pie', 
     children: [
       { label: 'Extrato Projeto', to: '/operacao/movimentacaoBancaria/extratoProjeto', icon: 'fa7-solid:list-check' },
@@ -194,6 +144,7 @@ const menuItems = [
   },
   { 
     label: 'Configurações', 
+    to: '/configuracao', 
     icon: 'fa7-solid:screwdriver-wrench', 
     children: [
       { label: 'Central de Configurações', to: '/configuracao', icon: 'fa7-solid:gear' },
@@ -201,35 +152,6 @@ const menuItems = [
     ]
   }
 ]
-
-const activeCategory = computed(() => {
-  const currentPath = route.path.replace(/\/$/, '') || '/'
-  for (const item of menuItems) {
-    if (item.children && item.children.some(sub => {
-      const subTo = sub.to.replace(/\/$/, '')
-      return currentPath === subTo || currentPath.startsWith(subTo + '/')
-    })) {
-      return item.label
-    }
-  }
-  return ''
-})
-
-const displayCategoryItems = computed(() => {
-  const categoryName = clickedCategory.value || activeCategory.value
-  if (!categoryName) return []
-  
-  const category = menuItems.find(item => item.label === categoryName)
-  return category?.children || []
-})
-
-const toggleCategory = (label: string) => {
-  if (clickedCategory.value === label) {
-    clickedCategory.value = ''
-  } else {
-    clickedCategory.value = label
-  }
-}
 
 const horaAtual = ref('')
 const dataAtual = ref('')
@@ -320,14 +242,4 @@ defineEmits(['toggle-sidebar'])
   transform: translateX(20px);
 }
 
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.slide-down-enter-from,
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translate(-50%, -10px) scale(0.98);
-}
 </style>
