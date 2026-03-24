@@ -25,19 +25,38 @@
                 v-for="tema in temas" 
                 :key="tema.id"
                 @click="colorMode.preference = tema.id; settings.tema = tema.id"
-                class="flex flex-col items-center gap-4 p-5 rounded-3xl border-2 transition-all duration-500 group relative overflow-hidden active:scale-95"
-                :class="colorMode.preference === tema.id ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10 shadow-lg shadow-emerald-500/10' : 'border-gray-100 dark:border-gray-800 hover:border-emerald-300 dark:hover:border-emerald-700 bg-white dark:bg-gray-900/40'"
+                class="group relative bg-white dark:bg-[#1e2029] rounded-2xl p-6 shadow-sm border-2 transition-all duration-500 overflow-hidden flex flex-col justify-between cursor-pointer active:scale-[0.98]"
+                :class="colorMode.preference === tema.id ? 'border-emerald-500 shadow-lg shadow-emerald-500/10' : 'border-gray-100 dark:border-gray-800 hover:border-emerald-500/40 hover:shadow-md'"
               >
-                <div v-if="colorMode.preference === tema.id" class="absolute -right-2 -top-2 w-8 h-8 bg-emerald-500 flex items-center justify-center rounded-bl-xl shadow-md z-20">
+                <!-- Check de Seleção -->
+                <div v-if="colorMode.preference === tema.id" class="absolute -right-2 -top-2 w-10 h-10 bg-emerald-500 flex items-center justify-center rounded-bl-2xl shadow-md z-20">
                     <Icon name="fa7-solid:check" class="w-4 h-4 text-white" />
                 </div>
-                
-                <div class="w-full aspect-[16/10] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 relative shadow-inner group-hover:shadow-md transition-shadow">
-                   <div :class="tema.previewClass" class="absolute inset-0 flex items-center justify-center">
-                      <Icon :name="tema.icone" class="w-10 h-10 opacity-20 transform group-hover:scale-125 transition-transform duration-700" :class="colorMode.preference === tema.id ? 'text-emerald-500' : 'text-gray-400'" />
-                   </div>
+
+                <!-- Shape Decorativo -->
+                <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" :class="colorMode.preference === tema.id ? 'bg-emerald-500/10' : 'bg-gray-500/5'"></div>
+
+                <div class="flex items-start justify-between relative z-10 w-full">
+                  <div class="flex-1 pr-4 text-left">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider" :class="colorMode.preference === tema.id ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'">
+                          Diferencial
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-gray-900 dark:text-white group-hover:text-opacity-80 transition-colors">
+                      {{ tema.nome }}
+                    </h3>
+                  </div>
+                  
+                  <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border border-white/5 shadow-inner transition-all group-hover:scale-110 group-hover:rotate-3" :class="colorMode.preference === tema.id ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-gray-50 dark:bg-gray-800/40'">
+                    <Icon :name="tema.icone" class="w-6 h-6" :class="colorMode.preference === tema.id ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'" />
+                  </div>
                 </div>
-                <span class="font-black text-[10px] uppercase tracking-[0.2em]" :class="colorMode.preference === tema.id ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'">{{ tema.nome }}</span>
+
+                <!-- Preview Area -->
+                <div class="mt-8 w-full aspect-[16/10] rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 relative shadow-inner group-hover:shadow-md transition-shadow">
+                   <div :class="tema.previewClass" class="absolute inset-0"></div>
+                </div>
               </button>
             </div>
           </div>
@@ -56,36 +75,53 @@
                 v-for="layout in layouts" 
                 :key="layout.id"
                 @click="settings.layout = layout.id"
-                class="flex flex-col items-center gap-4 p-5 rounded-3xl border-2 transition-all duration-500 group relative overflow-hidden active:scale-95"
-                :class="settings.layout === layout.id ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10 shadow-lg shadow-emerald-500/10' : 'border-gray-100 dark:border-gray-800 hover:border-emerald-300 dark:hover:border-emerald-700 bg-white dark:bg-gray-900/40'"
+                class="group relative bg-white dark:bg-[#1e2029] rounded-2xl p-6 shadow-sm border-2 transition-all duration-500 overflow-hidden flex flex-col justify-between cursor-pointer active:scale-[0.98]"
+                :class="settings.layout === layout.id ? 'border-emerald-500 shadow-lg shadow-emerald-500/10' : 'border-gray-100 dark:border-gray-800 hover:border-emerald-500/40 hover:shadow-md'"
               >
-                <div v-if="settings.layout === layout.id" class="absolute -right-2 -top-2 w-8 h-8 bg-emerald-500 flex items-center justify-center rounded-bl-xl shadow-md z-20">
+                <!-- Check de Seleção -->
+                <div v-if="settings.layout === layout.id" class="absolute -right-2 -top-2 w-10 h-10 bg-emerald-500 flex items-center justify-center rounded-bl-2xl shadow-md z-20">
                     <Icon name="fa7-solid:check" class="w-4 h-4 text-white" />
                 </div>
-                
-                <div class="w-full aspect-[21/9] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 relative shadow-inner group-hover:shadow-md transition-shadow">
-                   <!-- Preview de cada layout usando CSS simples -->
+
+                <!-- Shape Decorativo -->
+                <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" :class="settings.layout === layout.id ? 'bg-emerald-500/10' : 'bg-gray-500/5'"></div>
+
+                <div class="flex items-start justify-between relative z-10 w-full">
+                  <div class="flex-1 pr-4 text-left">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider" :class="settings.layout === layout.id ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'">
+                          Configuração
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-gray-900 dark:text-white group-hover:text-opacity-80 transition-colors">
+                      {{ layout.nome }}
+                    </h3>
+                  </div>
+                  
+                  <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border border-white/5 shadow-inner transition-all group-hover:scale-110 group-hover:rotate-3" :class="settings.layout === layout.id ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-gray-50 dark:bg-gray-800/40'">
+                    <Icon :name="layout.icone" class="w-6 h-6" :class="settings.layout === layout.id ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'" />
+                  </div>
+                </div>
+
+                <!-- Preview Area Layout -->
+                <div class="mt-8 w-full aspect-[21/9] rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 relative shadow-inner group-hover:shadow-md transition-shadow">
                    <div class="absolute inset-0 bg-gray-50 dark:bg-gray-900 p-2 flex gap-1">
-                      <!-- BARRA LATERAL -->
                       <template v-if="layout.id === 'barraLateral'">
-                        <div class="w-4 h-full bg-emerald-500/30 rounded-md"></div>
+                        <div class="w-8 h-full bg-emerald-500/30 rounded-md"></div>
                         <div class="flex-1 flex flex-col gap-1">
+                          <div class="h-3 w-full bg-gray-200 dark:bg-gray-800 rounded-sm"></div>
+                          <div class="flex-1 bg-white dark:bg-[#1a1c23] border border-gray-100 dark:border-gray-800 rounded-sm"></div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div class="flex-1 flex flex-col gap-1">
+                          <div class="h-4 w-full bg-emerald-500/30 rounded-sm"></div>
                           <div class="h-2 w-full bg-gray-200 dark:bg-gray-800 rounded-sm"></div>
                           <div class="flex-1 bg-white dark:bg-[#1a1c23] border border-gray-100 dark:border-gray-800 rounded-sm"></div>
                         </div>
                       </template>
-                      <!-- BARRA SUPERIOR -->
-                      <template v-else>
-                        <div class="flex-1 flex flex-col gap-1">
-                          <div class="h-2 w-full bg-emerald-500/30 rounded-sm"></div>
-                          <div class="h-1 w-full bg-gray-200 dark:bg-gray-800 rounded-sm"></div>
-                          <div class="flex-1 bg-white dark:bg-[#1a1c23] border border-gray-100 dark:border-gray-800 rounded-sm"></div>
-                        </div>
-                      </template>
                    </div>
-                      <Icon :name="layout.icone" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 opacity-10 transform group-hover:scale-125 transition-transform duration-700 pointer-events-none" :class="settings.layout === layout.id ? 'text-emerald-500' : 'text-gray-400'" />
                 </div>
-                <span class="font-black text-[10px] uppercase tracking-[0.2em]" :class="settings.layout === layout.id ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'">{{ layout.nome }}</span>
               </button>
             </div>
           </div>
@@ -142,40 +178,82 @@
                <!-- Alto Contraste -->
                <div 
                  @click="settings.altoContraste = !settings.altoContraste"
-                 class="group flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/40 rounded-3xl border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 cursor-pointer shadow-sm active:scale-[0.98]"
+                 class="group relative bg-white dark:bg-[#1e2029] rounded-2xl p-6 shadow-sm border-2 transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer active:scale-[0.98]"
+                 :class="settings.altoContraste ? 'border-emerald-500 shadow-lg shadow-emerald-500/10' : 'border-gray-100 dark:border-gray-800 hover:border-emerald-500/40 hover:shadow-md'"
                >
-                  <div class="flex flex-col gap-1.5 pr-4">
-                    <span class="font-black text-xs uppercase tracking-[0.15em] text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Alto Contraste</span>
-                    <span class="text-[10px] sm:text-[11px] font-semibold text-gray-500 dark:text-gray-500 leading-tight">Melhora a separação visual entre os elementos do sistema</span>
+                  <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 bg-emerald-500/5 group-hover:bg-emerald-500/10 transition-all duration-700"></div>
+
+                  <div class="flex items-start justify-between relative z-10">
+                    <div class="flex-1 pr-4">
+                      <div class="flex items-center gap-2 mb-2">
+                          <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider" :class="settings.altoContraste ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'">
+                            {{ settings.altoContraste ? 'Ativado' : 'Desativado' }}
+                          </span>
+                      </div>
+                      <h3 class="text-xl font-extrabold text-gray-900 dark:text-white group-hover:text-opacity-80 transition-colors">
+                        Alto Contraste
+                      </h3>
+                      <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-2 line-clamp-2 leading-relaxed">
+                        Melhora a separação visual entre os elementos do sistema.
+                      </p>
+                    </div>
+                    
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border border-white/5 shadow-inner transition-all group-hover:scale-110" :class="settings.altoContraste ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-gray-50 dark:bg-gray-800/40'">
+                      <Icon name="fa7-solid:circle-half-stroke" class="w-6 h-6" :class="settings.altoContraste ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'" />
+                    </div>
                   </div>
-                  <div 
-                    class="relative inline-flex h-7 w-12 shrink-0 rounded-full border-2 border-transparent transition-colors duration-400 ease-in-out bg-gray-200 dark:bg-gray-700 shadow-inner"
-                    :class="{ 'bg-emerald-500 dark:bg-emerald-600': settings.altoContraste }"
-                  >
-                    <span 
-                      class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-xl ring-0 transition duration-400 cubic-bezier(0.175, 0.885, 0.32, 1.275)"
-                      :class="settings.altoContraste ? 'translate-x-5' : 'translate-x-0'"
-                    ></span>
+
+                  <div class="mt-8 flex items-center justify-end relative z-10">
+                    <div 
+                      class="relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-gray-200 dark:bg-gray-700 shadow-inner"
+                      :class="{ 'bg-emerald-500 dark:bg-emerald-600': settings.altoContraste }"
+                    >
+                      <span 
+                        class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xl transition duration-200"
+                        :class="settings.altoContraste ? 'translate-x-5' : 'translate-x-0'"
+                      ></span>
+                    </div>
                   </div>
                </div>
 
                <!-- Reduzir Movimento -->
                <div 
                  @click="settings.reduzirMovimento = !settings.reduzirMovimento"
-                 class="group flex items-center justify-between p-6 bg-gray-50 dark:bg-gray-800/40 rounded-3xl border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 cursor-pointer shadow-sm active:scale-[0.98]"
+                 class="group relative bg-white dark:bg-[#1e2029] rounded-2xl p-6 shadow-sm border-2 transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer active:scale-[0.98]"
+                 :class="settings.reduzirMovimento ? 'border-emerald-500 shadow-lg shadow-emerald-500/10' : 'border-gray-100 dark:border-gray-800 hover:border-emerald-500/40 hover:shadow-md'"
                >
-                  <div class="flex flex-col gap-1.5 pr-4">
-                    <span class="font-black text-xs uppercase tracking-[0.15em] text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Reduzir Movimento</span>
-                    <span class="text-[10px] sm:text-[11px] font-semibold text-gray-500 dark:text-gray-500 leading-tight">Desativa animações e transições para maior fluidez e foco</span>
+                  <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 bg-emerald-500/5 group-hover:bg-emerald-500/10 transition-all duration-700"></div>
+
+                  <div class="flex items-start justify-between relative z-10">
+                    <div class="flex-1 pr-4">
+                      <div class="flex items-center gap-2 mb-2">
+                          <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider" :class="settings.reduzirMovimento ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'">
+                            {{ settings.reduzirMovimento ? 'Ativado' : 'Desativado' }}
+                          </span>
+                      </div>
+                      <h3 class="text-xl font-extrabold text-gray-900 dark:text-white group-hover:text-opacity-80 transition-colors">
+                        Reduzir Movimento
+                      </h3>
+                      <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-2 line-clamp-2 leading-relaxed">
+                        Desativa animações e transições para maior fluidez e foco.
+                      </p>
+                    </div>
+                    
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border border-white/5 shadow-inner transition-all group-hover:scale-110" :class="settings.reduzirMovimento ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-gray-50 dark:bg-gray-800/40'">
+                      <Icon name="fa7-solid:wind" class="w-6 h-6" :class="settings.reduzirMovimento ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'" />
+                    </div>
                   </div>
-                  <div 
-                    class="relative inline-flex h-7 w-12 shrink-0 rounded-full border-2 border-transparent transition-colors duration-400 ease-in-out bg-gray-200 dark:bg-gray-700 shadow-inner"
-                    :class="{ 'bg-emerald-500 dark:bg-emerald-600': settings.reduzirMovimento }"
-                  >
-                    <span 
-                      class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-xl ring-0 transition duration-400 cubic-bezier(0.175, 0.885, 0.32, 1.275)"
-                      :class="settings.reduzirMovimento ? 'translate-x-5' : 'translate-x-0'"
-                    ></span>
+
+                  <div class="mt-8 flex items-center justify-end relative z-10">
+                    <div 
+                      class="relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-gray-200 dark:bg-gray-700 shadow-inner"
+                      :class="{ 'bg-emerald-500 dark:bg-emerald-600': settings.reduzirMovimento }"
+                    >
+                      <span 
+                        class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xl transition duration-200"
+                        :class="settings.reduzirMovimento ? 'translate-x-5' : 'translate-x-0'"
+                      ></span>
+                    </div>
                   </div>
                </div>
             </div>
