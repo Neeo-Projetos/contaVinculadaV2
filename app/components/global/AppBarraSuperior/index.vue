@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-white/90 dark:bg-[#1a1c23]/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 h-16 flex items-center px-8 gap-8 sticky top-0 z-50 transition-colors duration-300">
+  <header class="bg-white dark:bg-[#1a1c23] border-b border-gray-100 dark:border-gray-800/50 h-16 flex items-center px-8 gap-8 sticky top-0 z-50 transition-colors duration-300">
     
     <!-- CONTEÚDO PARA BARRA SUPERIOR -->
     <template v-if="layout === 'barraSuperior'">
@@ -55,22 +55,36 @@
 
     <!-- CONTEÚDO PARA BARRA LATERAL -->
     <template v-if="layout === 'barraLateral'">
-      <button @click="$emit('toggle-sidebar')" class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0">
-        <Icon name="fa7-solid:bars" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
-      </button>
+      <div class="flex items-center gap-4 flex-shrink-0">
+        <button @click="$emit('toggle-sidebar')" class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0 -ml-4">
+          <Icon name="fa7-solid:bars" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
+        </button>
 
-      <div v-if="!isInicio" class="flex items-center gap-4 ml-4 flex-shrink-0">
-        <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
-          <Icon name="fa7-solid:clock" class="w-4 h-4" />
-          <span>{{ horaAtual }}</span>
-        </div>
-        <div class="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
-        <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
-          <Icon name="fa7-solid:calendar-days" class="w-4 h-4" />
-          <span>{{ dataAtual }}</span>
+        <!-- LOGO NO MODO LATERAL -->
+        <div class="flex items-center gap-3 select-none flex-shrink-0 ml-2">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-md shadow-emerald-500/20 active:scale-95 transition-transform">
+            <Icon name="fa7-solid:building-columns" class="text-white w-4 h-4" />
+          </div>
+          <h1 class="font-bold text-[18px] tracking-tight text-gray-800 dark:text-white leading-none">
+            Conta<span class="font-extralight text-emerald-600 dark:text-emerald-400">Vinculada</span>
+          </h1>
         </div>
       </div>
-      <div class="flex-1"></div> <!-- Spacer para empurrar o perfil para a direita -->
+
+      <div class="flex-1"></div>
+
+      <!-- PILL DE TEMPO À DIREITA -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 hover:border-emerald-500/30 transition-colors group cursor-default">
+          <div class="w-8 h-8 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center transition-transform group-hover:scale-110">
+            <Icon name="fa7-solid:clock" class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <div class="flex flex-col leading-tight pr-1">
+            <span class="text-[13px] font-black text-gray-800 dark:text-white tracking-widest">{{ horaAtual }}</span>
+            <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter">{{ dataAtual }}</span>
+          </div>
+        </div>
+      </div>
     </template>
 
     <!-- PERFIL DO USUÁRIO (Sempre no canto direito) -->

@@ -1,7 +1,7 @@
 <template>
   <aside 
     :class="[
-      'bg-white/80 dark:bg-[#1a1c23]/80 backdrop-blur-xl border-gray-200/50 dark:border-gray-800/50 flex flex-col transition-all duration-300 h-full overflow-hidden absolute lg:relative z-50', 
+      'bg-white dark:bg-[#1a1c23] border-gray-200/50 dark:border-gray-800/50 flex flex-col transition-all duration-300 h-full overflow-hidden absolute lg:relative z-50', 
       collapsed ? 'w-0 lg:w-20 border-0 lg:border-r' : 'w-64 border-r shadow-2xl lg:shadow-sm'
     ]"
   >
