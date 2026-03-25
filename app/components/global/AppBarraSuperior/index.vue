@@ -1,87 +1,112 @@
 <template>
-  <header class="bg-white/90 dark:bg-[#1a1c23]/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 h-16 flex items-center justify-between px-4 sticky top-0 z-50 transition-colors duration-300">
+  <header class="bg-white/90 dark:bg-[#1a1c23]/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 h-16 flex items-center px-8 gap-8 sticky top-0 z-50 transition-colors duration-300">
     
-    <div class="flex items-center gap-4">
-      <button 
-        v-if="layout === 'barraLateral'"
-        @click="$emit('toggle-sidebar')" 
-        class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-      >
-        <Icon name="fa7-solid:bars" class="w-5 h-5" />
-      </button>
-      <div class="flex items-center gap-2 select-none mr-4">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-md">
+    <!-- CONTEÚDO PARA BARRA SUPERIOR -->
+    <template v-if="layout === 'barraSuperior'">
+      <!-- LOGO -->
+      <div class="flex items-center gap-3 select-none flex-shrink-0">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-md shadow-emerald-500/20 active:scale-95 transition-transform">
           <Icon name="fa7-solid:building-columns" class="text-white w-4 h-4" />
         </div>
-        <h1 class="font-bold text-xl tracking-tight text-gray-800 dark:text-white">
-          Conta<span class="font-light text-emerald-600 dark:text-emerald-400">Vinculada</span>
+        <h1 class="font-bold text-[18px] tracking-tight text-gray-800 dark:text-white leading-none">
+          Conta<span class="font-extralight text-emerald-600 dark:text-emerald-400">Vinculada</span>
         </h1>
       </div>
 
-      <!-- NAVEGAÇÃO HORIZONTAL (Barra Superior) -->
-      <nav v-if="layout === 'barraSuperior'" class="hidden lg:flex items-center gap-1 ml-4 translate-y-[2px]">
-        <template v-for="item in menuItems" :key="item.label">
-          <NuxtLink 
-            :to="item.to" 
-            class="flex items-center gap-2 px-2.5 py-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all duration-300 whitespace-nowrap border border-transparent"
-            active-class="!text-emerald-500 dark:!text-emerald-400 !font-extrabold"
-          >
-            <Icon :name="item.icon" class="w-[18px] h-[18px]" />
-            <span class="text-[13px] font-bold uppercase tracking-wide leading-none">{{ item.label }}</span>
-          </NuxtLink>
-        </template>
-      </nav>
-    </div>
-
-    <div class="flex items-center gap-3 md:gap-5">
-      
-      <Transition name="slide-fade">
-        <div v-if="!eInicio && layout === 'barraLateral'" class="hidden md:flex items-center gap-4">
-          <div class="flex items-center gap-3 bg-white dark:bg-[#1e2029] border border-gray-200 dark:border-gray-700/80 px-4 py-1.5 rounded-full shadow-sm">
-            <Icon name="fa7-solid:clock" class="text-emerald-500 dark:text-emerald-400 w-4 h-4" />
-            <div class="flex flex-col items-center justify-center leading-none mt-0.5">
-              <span class="font-extrabold text-gray-800 dark:text-white text-[15px] tabular-nums tracking-wide leading-none mb-1">{{ horaAtual }}</span>
-              <span class="text-[9px] text-gray-500 dark:text-gray-400 uppercase tracking-[0.15em] font-bold leading-none">{{ dataAtual }}</span>
-            </div>
-          </div>
-          <div class="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
-        </div>
-      </Transition>
-      
-      <div class="relative" ref="menuRef">
-        <button @click="menuOpen = !menuOpen" class="flex items-center gap-3 p-1 pr-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600 rounded-full transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center text-white font-bold shadow-inner">
-            {{ userInitial }}
-          </div>
-          <span class="text-sm font-semibold text-gray-700 dark:text-gray-200 hidden sm:block max-w-[120px] truncate">
-            {{ userName }}
-          </span>
-          <Icon name="fa7-solid:chevron-down" class="w-3 h-3 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': menuOpen }" />
-        </button>
-
-        <Transition name="dropdown">
-          <div v-if="menuOpen" class="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 py-2 overflow-hidden" @mousedown.prevent>
-            <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50 dark:bg-gray-800/80 mb-1">
-              <p class="text-xs text-gray-500 dark:text-gray-400">Logado como</p>
-              <p class="text-sm font-bold text-gray-800 dark:text-white truncate">{{ userName }}</p>
-            </div>
-            <NuxtLink to="/configuracao" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-700/50 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-              <Icon name="fa7-solid:gear" class="w-4 h-4 opacity-70" /> Configurações
+      <!-- NAVEGAÇÃO HORIZONTAL (Com Indicador de Scroll) -->
+      <div class="relative flex-1 flex items-center justify-center min-w-0 group">
+        <nav 
+          ref="scrollContainer"
+          @scroll="checkScroll"
+          class="flex items-center gap-2.5 h-16 overflow-x-auto custom-scrollbar py-2"
+        >
+          <template v-for="item in menuItems" :key="item.label">
+            <NuxtLink 
+              :to="item.to" 
+              class="flex items-center gap-2 px-4 py-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-300 whitespace-nowrap border border-transparent flex-shrink-0"
+              :class="{ 
+                '!text-emerald-600 dark:!text-emerald-400 !font-extrabold bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-800/30 shadow-sm': isRouteActive(item.to, true) || item.children?.some(c => isRouteActive(c.to)) 
+              }"
+            >
+              <Icon :name="item.icon" class="w-[17px] h-[17px]" />
+              <span class="text-[12px] font-black uppercase tracking-tight leading-none">{{ item.label }}</span>
             </NuxtLink>
-            <div class="border-t border-gray-100 dark:border-gray-700/50 my-1"></div>
-            <button @click="logout" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left">
-              <Icon name="fa7-solid:arrow-right-from-bracket" class="w-4 h-4 opacity-70" /> Sair do Sistema
-            </button>
+          </template>
+        </nav>
+
+        <!-- Indicador de "Mais Itens" (Seta + Fade) -->
+        <Transition name="fade-left">
+          <div v-if="canScrollLeft" class="absolute -left-5 inset-y-0 w-20 flex items-center justify-start pl-2 bg-gradient-to-r from-white dark:from-[#1a1c23] via-white/80 dark:via-[#1a1c23]/80 to-transparent pointer-events-none z-10">
+            <div class="w-6 h-6 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center animate-pulse">
+              <Icon name="fa7-solid:chevron-left" class="text-emerald-600 dark:text-emerald-400 w-3 h-3" />
+            </div>
+          </div>
+        </Transition>
+
+        <Transition name="fade-right">
+          <div v-if="canScrollRight" class="absolute -right-5 inset-y-0 w-20 flex items-center justify-end pr-2 bg-gradient-to-l from-white dark:from-[#1a1c23] via-white/80 dark:via-[#1a1c23]/80 to-transparent pointer-events-none z-10">
+            <div class="w-6 h-6 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center animate-pulse">
+              <Icon name="fa7-solid:chevron-right" class="text-emerald-600 dark:text-emerald-400 w-3 h-3" />
+            </div>
           </div>
         </Transition>
       </div>
+    </template>
 
+    <!-- CONTEÚDO PARA BARRA LATERAL -->
+    <template v-if="layout === 'barraLateral'">
+      <button @click="$emit('toggle-sidebar')" class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0">
+        <Icon name="fa7-solid:bars" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
+      </button>
+
+      <div v-if="!isInicio" class="flex items-center gap-4 ml-4 flex-shrink-0">
+        <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
+          <Icon name="fa7-solid:clock" class="w-4 h-4" />
+          <span>{{ horaAtual }}</span>
+        </div>
+        <div class="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
+        <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
+          <Icon name="fa7-solid:calendar-days" class="w-4 h-4" />
+          <span>{{ dataAtual }}</span>
+        </div>
+      </div>
+      <div class="flex-1"></div> <!-- Spacer para empurrar o perfil para a direita -->
+    </template>
+
+    <!-- PERFIL DO USUÁRIO (Sempre no canto direito) -->
+    <div class="relative ml-auto" ref="menuRef">
+      <button @click="menuOpen = !menuOpen" class="flex items-center gap-3 p-1 pr-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600 rounded-full transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center text-white font-bold shadow-inner">
+          {{ userInitial }}
+        </div>
+        <span class="text-sm font-semibold text-gray-700 dark:text-gray-200 hidden sm:block max-w-[120px] truncate">
+          {{ userName }}
+        </span>
+        <Icon name="fa7-solid:chevron-down" class="w-3 h-3 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': menuOpen }" />
+      </button>
+
+      <Transition name="dropdown">
+        <div v-if="menuOpen" class="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-60 py-2 overflow-hidden" @mousedown.prevent>
+          <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50 dark:bg-gray-800/80 mb-1">
+            <p class="text-xs text-gray-500 dark:text-gray-400">Logado como</p>
+            <p class="text-sm font-bold text-gray-800 dark:text-white truncate">{{ userName }}</p>
+          </div>
+          <NuxtLink to="/configuracao" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-700/50 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+            <Icon name="fa7-solid:gear" class="w-4 h-4 opacity-70" /> Configurações
+          </NuxtLink>
+          <div class="border-t border-gray-100 dark:border-gray-700/50 my-1"></div>
+          <button @click="logout" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left">
+            <Icon name="fa7-solid:arrow-right-from-bracket" class="w-4 h-4 opacity-70" /> Sair do Sistema
+          </button>
+        </div>
+      </Transition>
     </div>
+
   </header>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
 import { useCookie } from '#app'
@@ -100,58 +125,79 @@ const userName = ref('Usuário')
 const menuOpen = ref(false)
 const menuRef = ref(null)
 
+// Lógica de Scroll e Indicadores
+const scrollContainer = ref<HTMLElement | null>(null)
+const canScrollLeft = ref(false)
+const canScrollRight = ref(false)
+
+const checkScroll = () => {
+  if (!scrollContainer.value) return
+  const { scrollLeft, scrollWidth, clientWidth } = scrollContainer.value
+  
+  // Ativa indicadores com margem de segurança
+  canScrollLeft.value = scrollLeft > 10
+  canScrollRight.value = scrollLeft + clientWidth < scrollWidth - 10
+}
+
 onClickOutside(menuRef, () => (menuOpen.value = false))
 
 const menuItems = [
   { label: 'Início', to: '/inicio', icon: 'fa7-solid:house' },
   { 
-    label: 'Gestão de Cadastros', 
-    to: '/cadastro', 
-    icon: 'fa7-solid:users', 
+    label: 'GESTÃO DE CADASTROS', 
+    to: '/cadastro',
+    icon: 'fa7-solid:address-card',
     children: [
-      { label: 'Funcionários', to: '/cadastro/funcionario', icon: 'fa7-solid:user' },
-      { label: 'Projetos', to: '/cadastro/projeto', icon: 'fa7-solid:briefcase' }
+      { label: 'Funcionários', to: '/cadastro/funcionario', icon: 'fa7-solid:users', tags: ['cadastro', 'funcionario', 'colaborador'] },
+      { label: 'Projetos', to: '/cadastro/projeto', icon: 'fa7-solid:briefcase', tags: ['cadastro', 'projeto', 'obra'] },
     ]
   },
   { 
-    label: 'Rotinas de Folha', 
-    to: '/operacao', 
-    icon: 'fa7-solid:file-invoice-dollar', 
+    label: 'ROTINAS DE FOLHA', 
+    to: '/operacao',
+    icon: 'fa7-solid:file-invoice-dollar',
     children: [
-      { label: 'Importação TXT', to: '/operacao/contracheque/importacao', icon: 'fa7-solid:file-arrow-up' },
-      { label: 'Processamento', to: '/operacao/contracheque/processamento', icon: 'fa7-solid:gears' },
-      { label: 'Histórico', to: '/operacao/contracheque/detalhes', icon: 'fa7-solid:clock-rotate-left' }
+      { label: 'Importação TXT', to: '/operacao/contracheque/importacao', icon: 'fa7-solid:file-arrow-up', tags: ['folha', 'importacao', 'txt', 'contracheque'] },
+      { label: 'Processamento', to: '/operacao/contracheque/processamento', icon: 'fa7-solid:gears', tags: ['folha', 'processamento', 'contracheque'] },
+      { label: 'Histórico', to: '/operacao/contracheque/detalhes', icon: 'fa7-solid:clock-rotate-left', tags: ['folha', 'historico', 'detalhes', 'contracheque'] },
     ]
   },
   { 
-    label: 'Financeiro', 
-    to: '/operacao/financeiro', 
-    icon: 'fa7-solid:hand-holding-dollar', 
+    label: 'FINANCEIRO & REEMBOLSO', 
+    to: '/operacao/financeiro',
+    icon: 'fa7-solid:hand-holding-dollar',
     children: [
-      { label: 'Lançamento Reembolso', to: '/operacao/oficio/lancamentoReembolso', icon: 'fa7-solid:money-bill-transfer' },
-      { label: 'Lançamento Manual', to: '/operacao/movimentacaoBancaria/lancamentoManual', icon: 'fa7-solid:cash-register' },
-      { label: 'Estornos', to: '/operacao/movimentacaoBancaria/lancamentoEstorno', icon: 'fa7-solid:rotate-left' }
+      { label: 'Lançamento Reembolso', to: '/operacao/oficio/lancamentoReembolso', icon: 'fa7-solid:hand-holding-dollar', tags: ['financeiro', 'reembolso', 'oficio'] },
+      { label: 'Lançamento Manual', to: '/operacao/movimentacaoBancaria/lancamentoManual', icon: 'fa7-solid:cash-register', tags: ['financeiro', 'bancario', 'manual'] },
+      { label: 'Estornos', to: '/operacao/movimentacaoBancaria/lancamentoEstorno', icon: 'fa7-solid:rotate-left', tags: ['financeiro', 'bancario', 'estorno'] },
     ]
   },
   { 
-    label: 'Relatórios', 
-    to: '/operacao/relatorio', 
-    icon: 'fa7-solid:chart-pie', 
+    label: 'RELATÓRIOS & EXTRATOS', 
+    to: '/operacao/relatorio',
+    icon: 'fa7-solid:list-check',
     children: [
-      { label: 'Extrato Projeto', to: '/operacao/movimentacaoBancaria/extratoProjeto', icon: 'fa7-solid:list-check' },
-      { label: 'Extrato Funcionário', to: '/operacao/movimentacaoBancaria/extratoFuncionario', icon: 'fa7-solid:list' }
+      { label: 'Extrato Projeto', to: '/operacao/movimentacaoBancaria/extratoProjeto', icon: 'fa7-solid:list-check', tags: ['relatorio', 'extrato', 'projeto'] },
+      { label: 'Extrato Funcionário', to: '/operacao/movimentacaoBancaria/extratoFuncionario', icon: 'fa7-solid:list', tags: ['relatorio', 'extrato', 'funcionario'] },
     ]
   },
   { 
-    label: 'Configurações', 
-    to: '/configuracao', 
-    icon: 'fa7-solid:screwdriver-wrench', 
+    label: 'CONFIGURAÇÕES', 
+    to: '/configuracao',
+    icon: 'fa7-solid:screwdriver-wrench',
     children: [
-      { label: 'Central de Configurações', to: '/configuracao', icon: 'fa7-solid:gear' },
-      { label: 'Tabelas Básicas', to: '/tabelaBasica', icon: 'fa7-solid:database' }
+      { label: 'Sistema', to: '/configuracao', icon: 'fa7-solid:screwdriver-wrench', tags: ['configuracao', 'ajustes'] },
+      { label: 'Tabelas Básicas', to: '/tabelaBasica', icon: 'fa7-solid:database', tags: ['configuracao', 'tabela', 'basica'] },
     ]
-  }
+  },
 ]
+
+// Lógica de Ativação Inteligente
+const isRouteActive = (to: string, exact = false) => {
+  if (!to) return false
+  if (exact) return route.path === to
+  return route.path === to || route.path.startsWith(to + '/')
+}
 
 const horaAtual = ref('')
 const dataAtual = ref('')
@@ -177,6 +223,12 @@ onMounted(() => {
   updateTime()
   timer = setInterval(updateTime, 1000)
 
+  // Inicializar Scroll
+  nextTick(() => {
+    checkScroll()
+  })
+  window.addEventListener('resize', checkScroll)
+
   if (process.client) {
     try {
       const userRaw = localStorage.getItem('user')
@@ -191,6 +243,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (timer) clearInterval(timer)
+  window.removeEventListener('resize', checkScroll)
 })
 
 const logout = () => {
@@ -204,12 +257,42 @@ defineEmits(['toggle-sidebar'])
 </script>
 
 <style scoped>
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+.custom-scrollbar::-webkit-scrollbar {
+  height: 3px;
 }
-.no-scrollbar {
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #10b981; /* emerald-500 */
+  border-radius: 10px;
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: #059669; /* emerald-600 */
+}
+.custom-scrollbar {
   -ms-overflow-style: none;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: #10b981 transparent;
+}
+
+.fade-left-enter-active,
+.fade-left-leave-active,
+.fade-right-enter-active,
+.fade-right-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-left-enter-from,
+.fade-left-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.fade-right-enter-from,
+.fade-right-leave-to {
+  opacity: 0;
+  transform: translateX(10px);
 }
 
 .dropdown-enter-active,
