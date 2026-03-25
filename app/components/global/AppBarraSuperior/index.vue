@@ -72,24 +72,38 @@
       </div>
 
       <div class="flex-1"></div>
-
-      <!-- PILL DE TEMPO À DIREITA -->
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-3 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 hover:border-emerald-500/30 transition-colors group cursor-default">
-          <div class="w-8 h-8 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center transition-transform group-hover:scale-110">
-            <Icon name="fa7-solid:clock" class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <div class="flex flex-col leading-tight pr-1">
-            <span class="text-[13px] font-black text-gray-800 dark:text-white tracking-widest">{{ horaAtual }}</span>
-            <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter">{{ dataAtual }}</span>
-          </div>
-        </div>
-      </div>
     </template>
 
-    <!-- PERFIL DO USUÁRIO (Sempre no canto direito) -->
-    <div class="relative ml-auto" ref="menuRef">
-      <button @click="menuOpen = !menuOpen" class="flex items-center gap-3 p-1 pr-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600 rounded-full transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+    <!-- ÁREA DA DIREITA (TEMPO + PERFIL) -->
+    <div class="ml-auto flex items-center gap-4">
+      <!-- PILL DE TEMPO (Aparece apenas no modo lateral, fora do início) -->
+      <Transition
+        enter-active-class="transition-all duration-700 ease-in-out"
+        enter-from-class="translate-x-10 opacity-0"
+        enter-to-class="translate-x-0 opacity-100"
+        leave-active-class="transition-all duration-700 ease-in-out"
+        leave-from-class="translate-x-0 opacity-100"
+        leave-to-class="translate-x-10 opacity-0"
+      >
+        <div v-if="layout === 'barraLateral' && !isInicio" class="flex items-center gap-3">
+          <div class="flex items-center gap-3 p-1 pr-4 rounded-full bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 hover:border-emerald-500/30 transition-colors group cursor-default h-10">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm">
+              <Icon name="fa7-solid:clock" class="w-4 h-4 text-white" />
+            </div>
+            <div class="flex flex-col leading-tight items-center min-w-[80px]">
+              <span class="text-[13px] font-black text-gray-800 dark:text-white tracking-widest text-center leading-none">{{ horaAtual }}</span>
+              <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter text-center leading-none">{{ dataAtual }}</span>
+            </div>
+          </div>
+          
+          <!-- DIVISOR -->
+          <div class="w-px h-8 bg-gray-200 dark:bg-gray-800/60 mx-1"></div>
+        </div>
+      </Transition>
+
+      <!-- PERFIL DO USUÁRIO -->
+      <div class="relative" ref="menuRef">
+        <button @click="menuOpen = !menuOpen" class="flex items-center gap-3 p-1 pr-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600 rounded-full transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 h-10">
         <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center text-white font-bold shadow-inner">
           {{ userInitial }}
         </div>
@@ -116,7 +130,8 @@
       </Transition>
     </div>
 
-  </header>
+  </div>
+</header>
 </template>
 
 <script setup lang="ts">

@@ -75,7 +75,7 @@
           <!-- Item com Children -->
           <template v-if="item.children">
             <button 
-              @click="toggleSubmenu(item.label)"
+              @click="handleItemClick(item)"
               @mouseenter="collapsed && (activePopover = item.label)"
               @mouseleave="collapsed && (activePopover = null)"
               class="menu-link w-[calc(100%-24px)] group relative"
@@ -102,6 +102,7 @@
                   v-for="child in item.children" 
                   :key="child.to" 
                   :to="child.to"
+                  @click="collapsed && emit('update:collapsed', false)"
                   class="flex items-center gap-3 px-5 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
                 >
                   <Icon :name="child.icon" class="w-3.5 h-3.5" />
@@ -144,6 +145,7 @@
             class="menu-link group" 
             :class="{ 'menu-active': isRouteActive(item.to) && !isSearchFocused }" 
             :title="collapsed ? item.label : ''"
+            @click="collapsed && emit('update:collapsed', false)"
           >
             <Icon :name="item.icon" class="menu-icon" />
             <span v-if="!collapsed" class="menu-text flex-1 truncate text-left">{{ item.label }}</span>
@@ -159,7 +161,21 @@ const { toggleTheme, theme } = useTheme()
 const router = useRouter()
 const route = useRoute()
 
-defineProps<{ collapsed: boolean }>()
+const props = defineProps<{ collapsed: boolean }>()
+const emit = defineEmits(['update:collapsed'])
+
+// Gerencia cliques nos itens (especialmente para modo colapsado)
+const handleItemClick = (item: any) => {
+  if (props.collapsed) {
+    // Se estiver fechado, expande e navega para a central do item
+    emit('update:collapsed', false)
+    if (item.to) router.push(item.to)
+    activePopover.value = null
+  } else if (item.children) {
+    // Se estiver aberto, apenas expande/recolhe o submenu interno
+    toggleSubmenu(item.label)
+  }
+}
 
 const isSearchFocused = ref(false)
 const searchQuery = ref('')
