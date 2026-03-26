@@ -18,7 +18,8 @@
         <nav 
           ref="scrollContainer"
           @scroll="checkScroll"
-          class="flex items-center gap-2.5 h-16 overflow-x-auto custom-scrollbar py-2"
+          @wheel.prevent="handleWheel"
+          class="flex items-center gap-2.5 overflow-x-auto custom-scrollbar py-2 mt-1"
         >
           <template v-for="item in menuItems" :key="item.label">
             <NuxtLink 
@@ -29,7 +30,7 @@
               }"
             >
               <Icon :name="item.icon" class="w-[17px] h-[17px]" />
-              <span class="text-[11px] font-bold uppercase tracking-[0.15em] leading-none">{{ item.label }}</span>
+              <span class="text-[10px] font-bold uppercase tracking-[0.15em] leading-none translate-y-[2px]">{{ item.label }}</span>
             </NuxtLink>
           </template>
         </nav>
@@ -90,9 +91,9 @@
             <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm">
               <Icon name="fa7-solid:clock" class="w-4 h-4 text-white" />
             </div>
-            <div class="flex flex-col leading-tight items-center min-w-[80px]">
+            <div class="flex flex-col items-center min-w-[80px]">
               <span class="text-[13px] font-black text-gray-800 dark:text-white tracking-widest text-center leading-none">{{ horaAtual }}</span>
-              <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter text-center leading-none">{{ dataAtual }}</span>
+              <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] text-center leading-none translate-y-[1.5px]">{{ dataAtual }}</span>
             </div>
           </div>
           
@@ -116,7 +117,7 @@
       <Transition name="dropdown">
         <div v-if="menuOpen" class="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-60 py-2 overflow-hidden" @mousedown.prevent>
           <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50 dark:bg-gray-800/80 mb-1">
-            <p class="text-xs text-gray-500 dark:text-gray-400">Logado como</p>
+            <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-gray-400 translate-y-[1.5px]">Logado como</p>
             <p class="text-sm font-bold text-gray-800 dark:text-white truncate">{{ userName }}</p>
           </div>
           <NuxtLink to="/configuracao" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-700/50 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
@@ -158,6 +159,12 @@ const menuRef = ref(null)
 const scrollContainer = ref<HTMLElement | null>(null)
 const canScrollLeft = ref(false)
 const canScrollRight = ref(false)
+
+const handleWheel = (e: WheelEvent) => {
+  if (!scrollContainer.value) return
+  scrollContainer.value.scrollLeft += e.deltaY
+  checkScroll()
+}
 
 const checkScroll = () => {
   if (!scrollContainer.value) return

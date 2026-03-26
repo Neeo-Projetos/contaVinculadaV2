@@ -70,6 +70,9 @@
         </Transition>
       </div>
 
+      <!-- Divisor Sutil -->
+      <div v-if="!collapsed" class="mx-6 h-px bg-gradient-to-r from-transparent via-gray-100 dark:via-gray-800 to-transparent mb-4 opacity-50"></div>
+
       <template v-for="item in menuItems" :key="item.label">
         <div class="relative">
           <!-- Item com Children -->
@@ -78,15 +81,15 @@
               @click="handleItemClick(item)"
               @mouseenter="collapsed && (activePopover = item.label)"
               @mouseleave="collapsed && (activePopover = null)"
-              class="menu-link w-[calc(100%-24px)] group relative"
+              class="menu-link mx-3 w-[calc(100%-1.5rem)] group relative"
               :class="{ 'menu-active': isRouteActive(item.to, true) || item.children.some(c => isRouteActive(c.to)) }"
             >
-              <Icon :name="item.icon" class="menu-icon" />
-              <span v-if="!collapsed" class="menu-text flex-1 truncate text-left">{{ item.label }}</span>
+              <Icon :name="item.icon" class="menu-icon shrink-0" />
+              <span v-if="!collapsed" class="ml-3 text-[10px] font-bold uppercase tracking-[0.15em] truncate text-left flex-1">{{ item.label }}</span>
               <Icon 
                 v-if="!collapsed" 
                 name="fa7-solid:chevron-right" 
-                class="ml-2 w-3 h-3 transition-transform duration-200 shrink-0"
+                class="ml-2 w-3 h-3 transition-transform duration-200 shrink-0 opacity-50"
                 :class="{ 'rotate-90': isSubmenuExpanded(item) }"
               />
 
@@ -120,19 +123,21 @@
               leave-from-class="max-h-[500px] opacity-100 overflow-hidden"
               leave-to-class="max-h-0 opacity-0 overflow-hidden"
             >
-              <div v-if="!collapsed && isSubmenuExpanded(item)" class="ml-9 mt-1 space-y-1 border-l-2 border-gray-100 dark:border-gray-800/50">
+              <div v-if="!collapsed && isSubmenuExpanded(item)" class="menu-sub-items">
                 <NuxtLink 
                   v-for="child in item.children" 
                   :key="child.to" 
                   :to="child.to"
-                  class="flex items-center px-4 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all relative overflow-hidden group/sub"
-                  active-class="!text-emerald-600 dark:!text-emerald-400"
+                  class="menu-sub-link group"
+                  active-class="menu-sub-active"
                 >
-                  <div 
-                    class="absolute left-0 w-1 h-1 rounded-full bg-emerald-500 transition-opacity"
-                    :class="isRouteActive(child.to) ? 'opacity-100' : 'opacity-0 group-hover/sub:opacity-100'"
-                  ></div>
-                  <span class="truncate">{{ child.label }}</span>
+                  <span class="menu-text truncate flex-1">{{ child.label }}</span>
+                  <Icon 
+                    :name="favorites[child.to] ? 'fa7-solid:star' : 'fa7-regular:star'" 
+                    class="menu-sub-fav-icon" 
+                    :class="{ 'menu-sub-fav-active': favorites[child.to] }"
+                    @click="toggleFavorite(child.to, $event)"
+                  />
                 </NuxtLink>
               </div>
             </Transition>
@@ -148,7 +153,7 @@
             @click="collapsed && emit('update:collapsed', false)"
           >
             <Icon :name="item.icon" class="menu-icon" />
-            <span v-if="!collapsed" class="menu-text flex-1 truncate text-left">{{ item.label }}</span>
+            <span v-if="!collapsed" class="ml-3 text-[10px] font-bold uppercase tracking-[0.15em] flex-1 truncate text-left">{{ item.label }}</span>
           </NuxtLink>
         </div>
       </template>
@@ -157,12 +162,20 @@
 </template>
 
 <script setup lang="ts">
+import { reactive } from 'vue'
+
 const { toggleTheme, theme } = useTheme()
 const router = useRouter()
 const route = useRoute()
 
 const props = defineProps<{ collapsed: boolean }>()
 const emit = defineEmits(['update:collapsed'])
+const favorites = reactive<Record<string, boolean>>({});
+function toggleFavorite(id: string, event: Event) {
+  event.preventDefault(); // Evita navegar ao clicar na estrela
+  event.stopPropagation(); // Evita abrir/fechar o menu ao clicar
+  favorites[id] = !favorites[id];
+}
 
 // Gerencia cliques nos itens (especialmente para modo colapsado)
 const handleItemClick = (item: any) => {
@@ -316,9 +329,9 @@ const navigateTo = (item: any) => {
   searchInput.value?.blur()
   isSearchFocused.value = false
   
-  // A expansão agora é automática pelo isSubmenuExpanded baseado na rota (router.push)
-  // mas se o usuário clicar na busca, podemos opcionalmente limpar menus manuais 
-  // que não sejam o destino, mas o pedido foi "deixar aberto se manual".
+  // Limpa estados manuais para que a barra lateral siga apenas a nova rota ativa
+  manuallyOpenedSubmenus.value = []
+  manuallyClosedSubmenus.value = []
 
   router.push(item.to)
   searchQuery.value = ''
@@ -327,54 +340,64 @@ const navigateTo = (item: any) => {
 
 <style scoped>
 .menu-link {
-  @apply flex items-center mx-3 px-3 py-2.5 rounded-2xl text-gray-500 dark:text-gray-400 transition-all duration-300 border border-transparent select-none cursor-pointer;
+  @apply flex items-center mx-3 px-3 py-2.5 rounded-xl text-gray-500 dark:text-gray-400 transition-all duration-300 border border-transparent select-none cursor-pointer;
 }
 
 .menu-link:hover {
-  @apply bg-emerald-50/80 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/20 shadow-sm;
+  @apply bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 shadow-sm;
 }
 
 .menu-active {
-  @apply bg-gradient-to-r from-emerald-50 to-white dark:from-emerald-900/20 dark:to-transparent text-emerald-700 dark:text-emerald-400 font-bold shadow-sm border border-emerald-200/50 dark:border-emerald-500/30;
+  @apply bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold shadow-sm border border-emerald-500/20;
 }
 
 .menu-icon {
-  @apply w-5 h-5 shrink-0 opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300;
+  @apply w-5 h-5 shrink-0 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300;
 }
 
 .menu-active .menu-icon {
   @apply opacity-100 scale-105 text-emerald-600 dark:text-emerald-400;
 }
 
+/* Sub-items Styles (Tree View) */
+.menu-sub-items {
+  @apply relative ml-6 my-1 mb-2 overflow-hidden;
+}
+
+.menu-sub-link {
+  @apply relative flex items-center mr-3 pl-4 pr-3 py-2 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200;
+}
+
+/* Linha Vertical */
+.menu-sub-link::before {
+  content: "";
+  @apply absolute left-0 top-0 w-[2px] h-full bg-emerald-500/20;
+}
+
+.menu-sub-link:last-child::before {
+  @apply h-1/2;
+}
+
+/* Linha Horizontal */
+.menu-sub-link::after {
+  content: "";
+  @apply absolute left-0 top-1/2 w-3 h-[2px] bg-emerald-500/20;
+}
+
+.menu-sub-active {
+  @apply text-emerald-600 dark:text-emerald-400 font-bold;
+}
+
+.menu-sub-fav-icon {
+  @apply ml-auto w-3.5 h-3.5 opacity-60 text-gray-400 dark:text-gray-500 hover:!opacity-100 hover:text-yellow-500 transition-all duration-200 cursor-pointer z-10;
+}
+
+.menu-sub-fav-active {
+  @apply opacity-100 text-yellow-500 dark:text-yellow-400 !important;
+}
+
 .menu-text {
-  @apply ml-3 text-sm tracking-wide whitespace-nowrap transition-colors duration-300;
-}
-
-.menu-header {
-  @apply px-7 pt-5 pb-1 text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-[0.15em] select-none;
-}
-
-.menu-divider {
-  @apply w-10 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-800 to-transparent mx-auto my-4;
-}
-
-/* Animações Customizadas */
-.animate-in {
-  animation: animate-in 0.2s ease-out;
-}
-
-@keyframes animate-in {
-  from { opacity: 0; transform: translateX(-10px) scale(0.95); }
-  to { opacity: 1; transform: translateX(0) scale(1); }
-}
-
-.fade-in {
-  animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  @apply ml-3 text-sm tracking-wide transition-colors duration-300;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
