@@ -1,5 +1,8 @@
 <template>
-  <div class="h-screen w-full bg-slate-50 dark:bg-[#0f172a] flex flex-col font-sans text-gray-800 dark:text-gray-200 transition-colors duration-300 overflow-hidden">
+  <div class="h-screen w-full bg-slate-50 dark:bg-[#0f172a] flex flex-col font-sans text-gray-800 dark:text-gray-200 transition-colors duration-300 overflow-hidden relative">
+    
+    <!-- Cortina de Carregamento Global (Cobre tudo) -->
+    <AppCarregamentoPagina :carregando="isCurtainGlobal" mensagem="Sincronizando ambiente corporativo..." />
     
     <AppBarraSuperior 
       :layout="settings.layout" 
@@ -26,6 +29,7 @@ import { ref, onMounted } from 'vue'
 
 const collapsed = ref(false)
 const { settings } = useInterfaceSettings()
+const { isCurtainGlobal } = useStatusLogin()
 
 onMounted(() => {
   if (window.innerWidth < 1024) {

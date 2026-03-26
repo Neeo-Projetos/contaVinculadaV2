@@ -146,6 +146,10 @@ const handleLogin = async () => {
         const tokenCookie = useCookie('token')
         tokenCookie.value = userData.token
         
+        const { isPrimeiroAcessoAposLogin, isCurtainGlobal } = useStatusLogin()
+        isPrimeiroAcessoAposLogin.value = true
+        isCurtainGlobal.value = true
+        
         router.push('/')
       } else {
         error.value = 'Usuário ou senha incorretos. Tente novamente.'

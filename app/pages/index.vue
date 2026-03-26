@@ -1,5 +1,7 @@
 <template>
-  <div class="min-h-full flex flex-col gap-6 p-2 md:p-6 animate-fade-in transition-colors duration-500">
+  <div class="min-h-full flex flex-col gap-6 p-2 md:p-6 animate-fade-in transition-colors duration-500 relative">
+    
+
     <div class="relative overflow-hidden rounded-2xl shadow-xl bg-white dark:bg-gradient-to-r dark:from-[#1a1c23] dark:to-[#0f172a] p-8 border border-gray-100 dark:border-gray-800 transition-all duration-500 group">
       <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full border-[30px] border-emerald-500/5 dark:border-emerald-500/10 blur-sm pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
       <div class="absolute -right-10 top-20 w-32 h-32 rounded-full border-[15px] border-emerald-500/5 dark:border-emerald-500/10 blur-sm pointer-events-none group-hover:-translate-y-4 transition-all duration-700"></div>
@@ -51,7 +53,7 @@
         <div class="flex items-start justify-between relative z-10">
           <div>
             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Funcionários Ativos</p>
-            <div v-if="loading" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div v-if="loading && !isPrimeiroAcessoAposLogin" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
             <h3 v-else class="text-4xl font-extrabold text-gray-900 dark:text-white mt-2">{{ stats.funcionariosAtivos }}</h3>
           </div>
           <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center shrink-0 border border-emerald-100 dark:border-emerald-800/30">
@@ -69,7 +71,7 @@
         <div class="flex items-start justify-between relative z-10">
           <div>
             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contracheques</p>
-            <div v-if="loading" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div v-if="loading && !isPrimeiroAcessoAposLogin" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
             <h3 v-else class="text-4xl font-extrabold text-gray-900 dark:text-white mt-2">{{ stats.totalContracheques }}</h3>
           </div>
           <div class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-800/30">
@@ -87,7 +89,7 @@
         <div class="flex items-start justify-between relative z-10">
           <div>
             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Lançamentos Lote</p>
-            <div v-if="loading" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div v-if="loading && !isPrimeiroAcessoAposLogin" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
             <h3 v-else class="text-4xl font-extrabold text-gray-900 dark:text-white mt-2">{{ stats.totalLancamentosManuais }}</h3>
           </div>
           <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0 border border-amber-100 dark:border-amber-800/30">
@@ -105,7 +107,7 @@
         <div class="flex items-start justify-between relative z-10">
           <div>
             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reembolsos</p>
-            <div v-if="loading" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div v-if="loading && !isPrimeiroAcessoAposLogin" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
             <h3 v-else class="text-4xl font-extrabold text-gray-900 dark:text-white mt-2">{{ stats.totalReembolsos }}</h3>
           </div>
           <div class="w-12 h-12 rounded-xl bg-[#a8cf45]/10 flex items-center justify-center shrink-0 border border-[#a8cf45]/30">
@@ -201,20 +203,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
+const { isPrimeiroAcessoAposLogin, isCurtainGlobal } = useStatusLogin()
+const { stats, chartData, isDataLoaded, fetchDashboardData } = useDashboardData()
+
 const userName = ref('Usuário')
-const loading = ref(true)
+const loading = ref(!isDataLoaded.value)
 const dataAtual = ref(new Date())
 let timerTempo: ReturnType<typeof setInterval>
-
-const stats = ref({
-  funcionariosAtivos: 0,
-  funcionariosTotal: 0,
-  totalContracheques: 0,
-  totalLancamentosManuais: 0,
-  totalReembolsos: 0,
-})
-
-const chartData = ref<any[]>([])
 
 const saudacao = computed(() => {
   const hora = dataAtual.value.getHours()
@@ -237,8 +232,8 @@ const horaCompleta = computed(() => {
 const chartSeries = computed(() => {
   if (chartData.value.length === 0) return []
   return [
-    { name: 'Entradas', data: chartData.value.map(d => d.entradas) },
-    { name: 'Saídas', data: chartData.value.map(d => d.saidas) }
+    { name: 'Entradas', data: chartData.value.map((d: any) => d.entradas) },
+    { name: 'Saídas', data: chartData.value.map((d: any) => d.saidas) }
   ]
 })
 
@@ -249,7 +244,7 @@ const chartOptions = computed(() => ({
   stroke: { curve: 'smooth', width: 3 },
   fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0, stops: [0, 95, 100] } },
   xaxis: {
-    categories: chartData.value.map(d => d.mesAno),
+    categories: chartData.value.map((d: any) => d.mesAno),
     axisBorder: { show: false }, axisTicks: { show: false },
     labels: { style: { colors: '#94a3b8', fontWeight: 700, fontSize: '10px' } }
   },
@@ -281,18 +276,14 @@ onMounted(async () => {
   }
 
   try {
-    const [resStats, resChart] = await Promise.all([
-      $fetch<any>('/api/dashboard/stats'),
-      $fetch<any>('/api/dashboard/movimentacaoMensal')
-    ])
-    
-    if (resStats?.status === 'success') stats.value = resStats.data
-    if (resChart?.status === 'success') chartData.value = resChart.data
-
+    // Agora chama a lógica encapsulada que gerencia o cache
+    await fetchDashboardData()
   } catch (e) {
     console.error('Erro ao buscar dados do dashboard:', e)
   } finally {
     loading.value = false
+    isCurtainGlobal.value = false
+    isPrimeiroAcessoAposLogin.value = false
   }
 })
 
