@@ -14,12 +14,14 @@ Este documento é a referência arquitetural definitiva para a criação de TUDO
 1. **Separação Estrita View/Controller**: O `.vue` é **estritamente View**. Todas as propriedades reativas de form, variáveis de *loading*, *modais de alerta* e funções async/fetch devem ser injetadas a partir de um `use[Modulo]Formulario` ou `use[Modulo]Listagem`. Nenhum fetch avulso no vue.
 2. **Zero Auto-Load Funcional**: Listagens começam vazias. A chamada de API para buscar lista só ocorre no clique de "Pesquisar" ou submissão de filtro explícita pelo usuário.
 3. **Data Fetching Assíncrono Restrito**: Nunca use `useFetch` ou `useAsyncData` (isomórficos) para persistência e listagens. Use **SEMPRE o `$fetch` manual dentro de blocos `try/catch/finally`** manipulando *flags* de loading (ex: `carregandoTela.value = true`).
-4. **Navegação Distinta**: 
+4. **Suporte a Layout Dinâmico**: O sistema suporta dois modos de navegação (`barraLateral` e `barraSuperior`). Use o composable `useInterfaceSettings` para reagir ao layout atual se necessário.
+5. **Acessibilidade Nativa**: Toda nova implementação deve respeitar as variáveis de escala de fonte (`--cv-font-scale`), suporte a Daltonismo (classes `.mode-protanopia`, etc.) e modo de Alto Contraste.
+6. **Navegação Distinta**: 
    - **Listagens (`index.vue`)**: Sem barra de navegação no topo. Usam apenas `AppCabecalhoPagina`.
    - **Cadastros (`cadastro.vue`)**: Uso OBRIGATÓRIO de `AppBarraNavegacao` (Simples) ou `AppTrilhaNavegacao` (Complexos) no topo.
-5. **Inativação Lógica**: Nunca crie fluxos de "Delete" físico. Sempre "Inativar" o registro (`ativo = 0` ou `false`).
-6. **Theme CSS & Layout**: Tudo requer suporte via classes `dark:`. Formulários usam sempre matriz em Grid responsiva (`grid grid-cols-1 md:grid-cols-12 gap-6 items-end`). A tela principal (View root) deve iniciar com `<div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">`.
-7. **Estilos Embutidos vs Externos**: 
+7. **Inativação Lógica**: Nunca crie fluxos de "Delete" físico. Sempre "Inativar" o registro (`ativo = 0` ou `false`).
+8. **Theme CSS & Layout**: Tudo requer suporte via classes `dark:`. Formulários usam sempre matriz em Grid responsiva (`grid grid-cols-1 md:grid-cols-12 gap-6 items-end`). A tela principal (View root) deve iniciar com `<div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">`.
+9. **Estilos Embutidos vs Externos**: 
    - **Componentes (`components/`)**: Devem ser auto-contidos. O CSS deve estar dentro do arquivo `.vue` usando `<style scoped>`.
    - **Páginas (`pages/`)**: Devem manter seus estilos em arquivos `.css` externos (vinculados via `<style scoped src="./estilo.css">`) para manter o arquivo `.vue` limpo e focado na estrutura.
 
@@ -58,11 +60,14 @@ Use a trindade nativa do sistema:
 
 | Componente | Contexto Ouro e Uso Obrigatório |
 | :--- | :--- |
+| `AppBarraSuperior` | Cabeçalho global. Gerencia perfil, logout e navegação (no modo `barraSuperior`). |
+| `AppBarraLateral` | Menu retrátil. Possui busca rápida de menu e sistema de favoritos. |
 | `AppInputAutocomplete` | Busca principal no header de telas de Listagem. |
 | `AppInputCpf` / `Cnpj` / `Cep` | Inputs mascarados e validados por regras de negócio nativas. |
-| `AppSelect` | Listas de seleção (Sempre passe props `itemValue="codigo"` e `itemLabel="descricao"`). **Extra**: Selects vinculados a "Projetos" exigem formatação rica (`itemLabel="nomeExibicao"`). |
+| `AppSelect` | Listas de seleção (Sempre passe props `itemValue="codigo"` e `itemLabel="descricao"`). |
 | `AppBotao` | Use variações engessadas: `acao` (azul), `primario` (verde/gravar), `perigo` (vermelho/inativar). |
 | `AppSobreposicaoCarregamento` | Layer de opacidade durante qualquer `$fetch` crítico p/ a UI que renderiza dados lidos. |
+| `AppCarregamentoPagina` | Cortina de carregamento global para transições de login ou trocas de layout. |
 | `AppAtivo` | Exibe pills do sistema com o status "Ativo/Inativo" usando cores padronizadas. |
 | `AppNotificacao` | Toast de feedback (Sucesso, Erro, Alerta). Integrado via `useAppNotificacao`. |
 | `AppCampoObrigatorio` | Card de aviso Âmbar para sinalizar campos que devem ser preenchidos. |
@@ -79,19 +84,21 @@ Use a trindade nativa do sistema:
 A lógica vital reside aqui (`app/composables/cadastro/[modulo]/...`). Estas variáveis DEVERÃO existir.
 
 ### 3.1 Composable de Listagem (`use...Listagem.ts`)
-- **Paginação Global via Função Auxiliar**: Nunca escreva paginação lógica manual. Utilize **`usePaginacaoFrontEnd(listaCompleta, visaoAtual)`**. Você mapeia o `$fetch` na API para `listaCompleta.value = apiData` e o composable gerenciará e retornará `listaPaginada`, `paginaAtual`, etc.
+- **Paginação Global via Função Auxiliar**: Nunca escreva paginação lógica manual. Utilize **`usePaginacaoFrontEnd(listaCompleta, visaoAtual)`**.
 - **Debounce de Autocomplete**: Sugestões exigem length > 2 e `setTimeout()` para evitar spam de Requests.
 - **Modais Avançados (Booleans)**: Controles nativos como `modalFiltroAvancadoAberto`, `modalExibicaoAberto` e a property `colunasVisiveis`.
 
 ### 3.2 Composable de Formulário (`use...Formulario.ts`)
 1. **Identificadores Iniciais**: Resgate via `const registroId = useRoute().query.id as string`.
 2. **Interface TS Forte**: Defina tipos rígidos, ex: `interface ModuloForm { codigo: string | number, ... }`.
-3. **Reatividade e Edição**:
-   - `const form = reactive<ModuloForm>({ codigo: registroId || '0', ... })`
-   - `const editando = computed(() => form.codigo !== '0' && !!form.codigo)`
-4. **Tratamento de Erros via `Set`**: `const erros = reactive(new Set<string>())`. Função manual `validarEtapa()` atualiza este Set para disparar o `animate-shake`.
-5. **Modais Seguros**: Nunca acesse o nativo `alert()`. Invoque métodos abstratos como `mostrarAlerta(titulo, msg)`, que abrirão o `AppModal` usando prop de erro `icon="fa7-solid:circle-exclamation"`.
-6. **Integração CRUD**: Funções `carregarDados()`, `gravarRegistro()` e `excluirRegistro()` manipulando métodos `$fetch({ method: 'POST', body: form })` dentro de `try/catch/finally` acompanhados das flags estritas `carregandoTela`, `carregandoGravacao`, `carregandoExclusao`.
+3. **Reatividade e Edição**: `const form = reactive<ModuloForm>({ codigo: registroId || '0', ... })`.
+4. **Tratamento de Erros via `Set`**: `const erros = reactive(new Set<string>())`.
+5. **Modais Seguros**: Nunca acesse o nativo `alert()`. Invoque métodos abstratos como `mostrarAlerta(titulo, msg)`.
+6. **Integração CRUD**: Funções `carregarDados()`, `gravarRegistro()` e `excluirRegistro()` manipulando métodos `$fetch`.
+
+### 3.3 Composable de Interface (`useInterfaceSettings.ts`)
+- Gerencia `tema`, `daltonismo`, `escalaFonte`, `reduzirMovimento`, `altoContraste` e `layout`.
+- Persistência automática via `useLocalStorage`.
 
 ---
 
@@ -100,7 +107,7 @@ A lógica vital reside aqui (`app/composables/cadastro/[modulo]/...`). Estas var
 A via de comunicação final usa endpoints Nuxt:
 1. `listagem.post.ts`: Extraia filtros e devolva a query no limite necessário.
 2. `recupera.get.ts`: Retorna JSON puro do registro (`?codigo=x`).
-3. `gravar.post.ts`: Recebe `form`. **Obrigatório**: Se submeter Listas filhas/Grids (ex: `verbas`), converta os Arrays do JS para um XML raw (ex: `<row id="X" />`) antes de despachar via `EXEC SP_` do SQL Server.
+3. `gravar.post.ts`: Recebe `form`. **Obrigatório**: Converter Arrays (Grids) para XML raw se necessário para a SP.
 4. `excluir.post.ts`: Procedimento de Inativar (`update set ativo = 0`).
 5. `autocomplete.get.ts`: Fast fetch com propriedades enxutas para combos visuais (ID, Apelido).
 
@@ -138,10 +145,9 @@ Para criar uma nova base para uma tela:
 **LEI ABSOLUTA: Você deve SEMPRE usar as telas e Composables de 'Funcionário' ou 'Projeto' como "molde arquitetural" de base. Abra os arquivos originais deles, entenda os padrões e extraia as estruturas (Grid, Nomenclaturas, funções e wrappers de UX). Adapte essas fundações de ponta a ponta para o contexto da sua nova entidade.**
 
 Quando for solicitado criar uma tela, não tente inventar o design do zero. Em vez disso, inicie transportando o esqueleto modular do 'Funcionário' (se for tela única) e molde o seu objetivo em cima dele:
-1. **Slots Ouro da Barra de Ferramentas**: Não esqueça de dividir as ações em `#entradas`, `#acoes-secundarias` (Filtros e View), `#acoes-principais` (Novo Registro), e `#acoes-pesquisa`.
-2. **Modais Periféricos**: Toda listagem madura do sistema contém a integração simultânea do `AppModalFiltroAvancado`, `AppModalExibicao` (para colunas da tabela dinâmica vinculadas por `v-if="colunas.x"`) e o `AppModalHistorico`. O Composable deve gerenciá-los ativamente.
-3. **Travamento Condicional (Novo vs Editando)**: Na View de `/cadastro`, os ID's controlam o estado da UI. Verifique se `id=0` para derivar flag booleana `editando`. Essa flag **muta e trava** chaves estrangeiras/unicas (`:disabled="editando"`) ou abre o input para cadastro de um novo item. Essa mutação precisa estar visível logo no input principal do form.
-4. **Padrão de Alerta e Campos Obrigatórios (Âmbar)**: Utilize o componente **`AppCampoObrigatorio`** para sinalizar avisos de preenchimento ou dados essenciais. Ele segue o tema Âmbar (Amarelo) e já inclui a animação e o ícone padrão.
-
-5. **O "Grand Finale" (Modal de Sucesso)**: Após gravar, dispare o `AppModal` de sucesso com a animação `animate-success-pop`. Este modal deve conter um **Resumo dos Dados** (um mini-card com as infos principais) para confirmar ao usuário o que foi salvo antes de retornar à listagem.
+1. **Slots Ouro da Barra de Ferramentas**: Divida em `#entradas`, `#acoes-secundarias`, `#acoes-principais`, e `#acoes-pesquisa`.
+2. **Modais Periféricos**: Toda listagem madura contém `AppModalFiltroAvancado`, `AppModalExibicao` e `AppModalHistorico`.
+3. **Travamento Condicional (Novo vs Editando)**: Verifique se `id=0` para derivar flag booleana `editando`.
+4. **Padrão de Alerta e Campos Obrigatórios (Âmbar)**: Utilize o componente **`AppCampoObrigatorio`**.
+5. **O "Grand Finale" (Modal de Sucesso)**: Após gravar, dispare o `AppModal` com a animação `animate-success-pop` e um **Resumo dos Dados**.
 
