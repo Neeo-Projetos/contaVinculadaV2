@@ -40,18 +40,6 @@
         iconColor: 'text-emerald-600 dark:text-emerald-400',
         bgShape: 'bg-emerald-500/10',
         borderHover: 'hover:border-emerald-500/40'
-      },
-      {
-        label: 'Interface e Acessibilidade',
-        description: 'Personalização do tema, escala visual e filtros de inclusão para daltonismo.',
-        icon: 'fa7-solid:universal-access',
-        to: '/configuracao/interface',
-        tag: 'Segurança',
-        tagColor: 'bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300',
-        bgLight: 'bg-purple-50 dark:bg-purple-900/20',
-        iconColor: 'text-purple-600 dark:text-purple-400',
-        bgShape: 'bg-purple-500/10',
-        borderHover: 'hover:border-purple-500/40'
       }
     ]"
   />

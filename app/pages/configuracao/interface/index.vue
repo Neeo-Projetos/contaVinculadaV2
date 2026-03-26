@@ -2,9 +2,9 @@
   <div class="min-h-full flex flex-col gap-6 p-4 md:p-10 animate-fade-in">
     <!-- Navegação -->
     <AppBarraNavegacao 
-      pagina-atual="Interface e Acessibilidade" 
+      pagina-atual="Acessibilidade" 
       icone="fa7-solid:universal-access" 
-      :links="[{ label: 'Configurações', to: '/configuracao' }]" 
+      :links="[]" 
     />
 
     <div class="w-full">

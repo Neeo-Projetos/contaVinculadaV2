@@ -226,6 +226,12 @@ const toggleSubmenu = (label: string) => {
 const isRouteActive = (to: string, exact = false) => {
   if (!to) return false
   if (exact) return route.path === to
+  
+  // Evita que "Configurações" fique ativo quando estamos em "Acessibilidade"
+  if (to === '/configuracao' && route.path.startsWith('/configuracao/interface')) {
+    return false
+  }
+
   return route.path === to || route.path.startsWith(to + '/')
 }
 
@@ -293,6 +299,11 @@ const menuItems = [
       { label: 'Sistema', to: '/configuracao', icon: 'fa7-solid:screwdriver-wrench', tags: ['configuracao', 'ajustes'] },
       { label: 'Tabelas Básicas', to: '/tabelaBasica', icon: 'fa7-solid:database', tags: ['configuracao', 'tabela', 'basica'] },
     ]
+  },
+  { 
+    label: 'Acessibilidade', 
+    to: '/configuracao/interface',
+    icon: 'fa7-solid:universal-access'
   },
 ]
 

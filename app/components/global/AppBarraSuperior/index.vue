@@ -115,18 +115,51 @@
       </button>
 
       <Transition name="dropdown">
-        <div v-if="menuOpen" class="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-60 py-2 overflow-hidden" @mousedown.prevent>
-          <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50 dark:bg-gray-800/80 mb-1">
-            <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-gray-400 translate-y-[1.5px]">Logado como</p>
-            <p class="text-sm font-bold text-gray-800 dark:text-white truncate">{{ userName }}</p>
+        <div 
+          v-if="menuOpen" 
+          class="absolute right-0 mt-3 w-64 bg-white/90 dark:bg-[#1a1c23]/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl shadow-2xl z-60 overflow-hidden animate-in fade-in zoom-in duration-200" 
+          @mousedown.prevent
+        >
+          <!-- HEADER DO DROPDOWN -->
+          <div class="px-5 py-4 bg-gradient-to-br from-emerald-500/5 to-green-600/5 border-b border-gray-100 dark:border-gray-700/50 relative overflow-hidden group">
+            <div class="absolute -right-4 -top-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-700"></div>
+            
+            <div class="flex items-center gap-3 relative z-10">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-emerald-500/20">
+                {{ userInitial }}
+              </div>
+              <div class="flex flex-col min-w-0">
+                <span class="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 leading-none mb-1">Logado como</span>
+                <span class="text-sm font-bold text-gray-800 dark:text-white truncate">{{ userName }}</span>
+              </div>
+            </div>
           </div>
-          <NuxtLink to="/configuracao" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-gray-700/50 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-            <Icon name="fa7-solid:gear" class="w-4 h-4 opacity-70" /> Configurações
-          </NuxtLink>
-          <div class="border-t border-gray-100 dark:border-gray-700/50 my-1"></div>
-          <button @click="logout" class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left">
-            <Icon name="fa7-solid:arrow-right-from-bracket" class="w-4 h-4 opacity-70" /> Sair do Sistema
-          </button>
+
+          <!-- LINKS DO MENU -->
+          <div class="p-2 space-y-1">
+            <NuxtLink 
+              to="/configuracao/interface" 
+              class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200 group/item"
+              @click="menuOpen = false"
+            >
+              <div class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-800/50 flex items-center justify-center group-hover/item:bg-emerald-500/20 transition-colors">
+                <Icon name="fa7-solid:universal-access" class="w-4 h-4 opacity-70 group-hover/item:opacity-100" />
+              </div>
+              <span>Acessibilidade</span>
+            </NuxtLink>
+
+            <div class="h-px bg-gray-100 dark:bg-gray-800/50 mx-2 my-1"></div>
+
+            <button 
+              @click="logout" 
+              class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-red-500 dark:text-red-400 hover:bg-red-500/10 transition-all duration-200 w-full text-left group/logout"
+            >
+              <div class="w-8 h-8 rounded-lg bg-red-500/5 flex items-center justify-center group-hover/logout:bg-red-500/20 transition-colors">
+                <Icon name="fa7-solid:arrow-right-from-bracket" class="w-4 h-4 opacity-70 group-hover/logout:opacity-100" />
+              </div>
+              <span>Sair do Sistema</span>
+            </button>
+          </div>
         </div>
       </Transition>
     </div>
@@ -226,12 +259,23 @@ const menuItems = [
       { label: 'Tabelas Básicas', to: '/tabelaBasica', icon: 'fa7-solid:database', tags: ['configuracao', 'tabela', 'basica'] },
     ]
   },
+  { 
+    label: 'Acessibilidade', 
+    to: '/configuracao/interface',
+    icon: 'fa7-solid:universal-access'
+  },
 ]
 
 // Lógica de Ativação Inteligente
 const isRouteActive = (to: string, exact = false) => {
   if (!to) return false
   if (exact) return route.path === to
+  
+  // Evita que "Configurações" fique ativo quando estamos em "Acessibilidade"
+  if (to === '/configuracao' && route.path.startsWith('/configuracao/interface')) {
+    return false
+  }
+
   return route.path === to || route.path.startsWith(to + '/')
 }
 
