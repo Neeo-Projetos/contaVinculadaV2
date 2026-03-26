@@ -141,7 +141,7 @@
           labelVoltar="Voltar ao Início"
           labelGravar="Processar Importação"
           iconeGravar="fa7-solid:cloud-arrow-up"
-          @voltar="navigateTo('/inicio')"
+          @voltar="navigateTo('/')"
           @gravar="importarArquivo"
         />
       </form>

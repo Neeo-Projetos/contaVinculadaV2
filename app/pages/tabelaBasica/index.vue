@@ -1,126 +1,86 @@
 <template>
-  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in">
-    
-    <div class="relative overflow-hidden rounded-3xl shadow-sm bg-white dark:bg-[#1a1c23] p-6 sm:p-8 border border-gray-100 dark:border-gray-800 transition-all duration-500 group">
-      <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full border-[30px] border-emerald-500/5 dark:border-emerald-500/10 blur-sm pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
-      <div class="absolute -right-10 top-20 w-32 h-32 rounded-full border-[15px] border-emerald-500/5 dark:border-emerald-500/10 blur-sm pointer-events-none group-hover:-translate-y-4 transition-all duration-700"></div>
-      
-      <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div class="flex flex-col gap-1">
-          <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center border border-emerald-500/20 dark:border-emerald-500/30 shadow-inner shrink-0 transform group-hover:rotate-6 transition-transform">
-              <Icon name="fa7-solid:database" class="w-6 h-6 text-emerald-500 dark:text-emerald-400" />
-            </div>
-            Tabelas <span class="text-emerald-500 dark:text-emerald-400 drop-shadow-md">Básicas</span>
-          </h2>
-          <p class="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium flex items-center gap-2 mt-1 sm:ml-16 opacity-90">
-            Central de configuração e cadastros de apoio do sistema
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-      
-      <NuxtLink 
-        v-for="(item, index) in tabelas" 
-        :key="index"
-        :to="item.rota" 
-        class="group relative bg-white dark:bg-[#1e2029] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer"
-        :class="item.borderHover"
-      >
-        <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" :class="item.bgShape"></div>
-
-        <div class="flex items-start justify-between relative z-10">
-          <div class="flex-1 pr-4">
-            <h3 class="text-xl font-extrabold text-gray-900 dark:text-white mt-1 group-hover:text-opacity-80 transition-colors">
-              {{ item.titulo }}
-            </h3>
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">
-              {{ item.desc }}
-            </p>
-          </div>
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border border-white/5 shadow-inner transition-transform group-hover:scale-105" :class="item.bgLight">
-            <Icon :name="item.icone" class="w-6 h-6" :class="item.textIcon" />
-          </div>
-        </div>
-
-        <div class="mt-6 flex items-center text-xs font-bold uppercase tracking-wider transition-colors relative z-10" :class="item.textIcon">
-          <span>Acessar Tabela</span>
-          <Icon name="fa7-solid:arrow-right" class="ml-auto opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
-        </div>
-
-      </NuxtLink>
-
-    </div>
-  </div>
+  <AppPortalTelas 
+    title="Tabelas Básicas"
+    icon="fa7-solid:database"
+    description="Central de configuração e cadastros de apoio do sistema."
+    button-label="Acessar Tabela"
+    :items="[
+      {
+        label: 'Bancos',
+        description: 'Instituições financeiras e códigos de compensação.',
+        icon: 'fa7-solid:building-columns',
+        to: '/tabelaBasica/bancos',
+        tag: 'Financeiro',
+        tagColor: 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300',
+        bgLight: 'bg-blue-50 dark:bg-blue-900/20',
+        iconColor: 'text-blue-600 dark:text-blue-400',
+        bgShape: 'bg-blue-500/10',
+        borderHover: 'hover:border-blue-500/40'
+      },
+      {
+        label: 'Classificação',
+        description: 'Classificações contábeis e de ofício.',
+        icon: 'fa7-solid:tags',
+        to: '/tabelaBasica/classificacao',
+        tag: 'Fiscal',
+        tagColor: 'bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300',
+        bgLight: 'bg-purple-50 dark:bg-purple-900/20',
+        iconColor: 'text-purple-600 dark:text-purple-400',
+        bgShape: 'bg-purple-500/10',
+        borderHover: 'hover:border-purple-500/40'
+      },
+      {
+        label: 'Lançamento',
+        description: 'Tipos e categorias de lançamento financeiro.',
+        icon: 'fa7-solid:file-invoice-dollar',
+        to: '/tabelaBasica/lancamento',
+        tag: 'Contábil',
+        tagColor: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300',
+        bgLight: 'bg-emerald-50 dark:bg-emerald-900/20',
+        iconColor: 'text-emerald-600 dark:text-emerald-400',
+        bgShape: 'bg-emerald-500/10',
+        borderHover: 'hover:border-emerald-500/40'
+      },
+      {
+        label: 'Status',
+        description: 'Situações operacionais e regras do sistema.',
+        icon: 'fa7-solid:circle-check',
+        to: '/tabelaBasica/status',
+        tag: 'Sistema',
+        tagColor: 'bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300',
+        bgLight: 'bg-amber-50 dark:bg-amber-900/20',
+        iconColor: 'text-amber-600 dark:text-amber-400',
+        bgShape: 'bg-amber-500/10',
+        borderHover: 'hover:border-amber-500/40'
+      },
+      {
+        label: 'Tipo Movimentação',
+        description: 'Configuração de entradas, saídas e estornos.',
+        icon: 'fa7-solid:arrow-right-arrow-left',
+        to: '/tabelaBasica/tipoMovimentacao',
+        tag: 'Fluxo',
+        tagColor: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300',
+        bgLight: 'bg-indigo-50 dark:bg-indigo-900/20',
+        iconColor: 'text-indigo-600 dark:text-indigo-400',
+        bgShape: 'bg-indigo-500/10',
+        borderHover: 'hover:border-indigo-500/40'
+      },
+      {
+        label: 'Verbas',
+        description: 'Rubricas, repasses e cálculos financeiros.',
+        icon: 'fa7-solid:money-bills',
+        to: '/tabelaBasica/verbas',
+        tag: 'Folha',
+        tagColor: 'bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300',
+        bgLight: 'bg-rose-50 dark:bg-rose-900/20',
+        iconColor: 'text-rose-600 dark:text-rose-400',
+        bgShape: 'bg-rose-500/10',
+        borderHover: 'hover:border-rose-500/40'
+      }
+    ]"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-
-const tabelas = ref([
-  {
-    titulo: 'Bancos',
-    desc: 'Instituições financeiras e códigos de compensação.',
-    icone: 'fa7-solid:building-columns',
-    rota: '/tabelaBasica/bancos',
-    bgLight: 'bg-blue-50 dark:bg-blue-900/20',
-    textIcon: 'text-blue-600 dark:text-blue-400',
-    bgShape: 'bg-blue-500/10',
-    borderHover: 'hover:border-blue-500/40'
-  },
-  {
-    titulo: 'Classificação',
-    desc: 'Classificações contábeis e de ofício.',
-    icone: 'fa7-solid:tags',
-    rota: '/tabelaBasica/classificacao',
-    bgLight: 'bg-purple-50 dark:bg-purple-900/20',
-    textIcon: 'text-purple-600 dark:text-purple-400',
-    bgShape: 'bg-purple-500/10',
-    borderHover: 'hover:border-purple-500/40'
-  },
-  {
-    titulo: 'Lançamento',
-    desc: 'Tipos e categorias de lançamento financeiro.',
-    icone: 'fa7-solid:file-invoice-dollar',
-    rota: '/tabelaBasica/lancamento',
-    bgLight: 'bg-emerald-50 dark:bg-emerald-900/20',
-    textIcon: 'text-emerald-600 dark:text-emerald-400',
-    bgShape: 'bg-emerald-500/10',
-    borderHover: 'hover:border-emerald-500/40'
-  },
-  {
-    titulo: 'Status',
-    desc: 'Situações operacionais e regras do sistema.',
-    icone: 'fa7-solid:circle-check',
-    rota: '/tabelaBasica/status',
-    bgLight: 'bg-amber-50 dark:bg-amber-900/20',
-    textIcon: 'text-amber-600 dark:text-amber-400',
-    bgShape: 'bg-amber-500/10',
-    borderHover: 'hover:border-amber-500/40'
-  },
-  {
-    titulo: 'Tipo Movimentação',
-    desc: 'Configuração de entradas, saídas e estornos.',
-    icone: 'fa7-solid:arrow-right-arrow-left',
-    rota: '/tabelaBasica/tipoMovimentacao',
-    bgLight: 'bg-indigo-50 dark:bg-indigo-900/20',
-    textIcon: 'text-indigo-600 dark:text-indigo-400',
-    bgShape: 'bg-indigo-500/10',
-    borderHover: 'hover:border-indigo-500/40'
-  },
-  {
-    titulo: 'Verbas',
-    desc: 'Rubricas, repasses e cálculos financeiros.',
-    icone: 'fa7-solid:money-bills',
-    rota: '/tabelaBasica/verbas',
-    bgLight: 'bg-rose-50 dark:bg-rose-900/20',
-    textIcon: 'text-rose-600 dark:text-rose-400',
-    bgShape: 'bg-rose-500/10',
-    borderHover: 'hover:border-rose-500/40'
-  }
-])
+// Tabelas Básicas padronizada com componente global
 </script>
-
-<style scoped src="./index.style.css"></style>

@@ -11,7 +11,8 @@ export const useInterfaceSettings = () => {
     daltonismo: 'normal', // 'normal', 'protanopia', 'deuteranopia', 'tritanopia'
     escalaFonte: 100, // 80, 100, 120, 150
     reduzirMovimento: false,
-    altoContraste: false
+    altoContraste: false,
+    layout: 'barraLateral' as 'barraLateral' | 'barraSuperior'
   })
 
   // Aplica as configurações no nível global (html/body)
