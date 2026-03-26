@@ -233,9 +233,9 @@ const isSubmenuExpanded = (item: any) => {
 // Resetar estados forçados ao trocar substantivamente de módulo (opcional, mas recomendado)
 // Para o momento, vamos manter como solicitado: controle total do usuário.
 const menuItems = [
-  { label: 'Início', to: '/inicio', icon: 'fa7-solid:house' },
+  { label: 'Início', to: '/', icon: 'fa7-solid:house' },
   { 
-    label: 'GESTÃO DE CADASTROS', 
+    label: 'Gestão de Cadastros', 
     to: '/cadastro',
     icon: 'fa7-solid:address-card',
     children: [
@@ -244,7 +244,7 @@ const menuItems = [
     ]
   },
   { 
-    label: 'ROTINAS DE FOLHA', 
+    label: 'Rotinas de Folha', 
     to: '/operacao',
     icon: 'fa7-solid:file-invoice-dollar',
     children: [
@@ -254,7 +254,7 @@ const menuItems = [
     ]
   },
   { 
-    label: 'FINANCEIRO & REEMBOLSO', 
+    label: 'Financeiro & Reembolso', 
     to: '/operacao/financeiro',
     icon: 'fa7-solid:hand-holding-dollar',
     children: [
@@ -264,7 +264,7 @@ const menuItems = [
     ]
   },
   { 
-    label: 'RELATÓRIOS & EXTRATOS', 
+    label: 'Relatórios & Extratos', 
     to: '/operacao/relatorio',
     icon: 'fa7-solid:list-check',
     children: [
@@ -273,7 +273,7 @@ const menuItems = [
     ]
   },
   { 
-    label: 'CONFIGURAÇÕES', 
+    label: 'Configurações', 
     to: '/configuracao',
     icon: 'fa7-solid:screwdriver-wrench',
     children: [

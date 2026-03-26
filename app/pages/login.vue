@@ -14,24 +14,18 @@
   </button>
 
   <div
-    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-[#0f172a] px-4 transition-colors duration-500 relative overflow-hidden"
+    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-[#0f172a] px-4 relative overflow-hidden"
   >
     <ClientOnly>
       <FundoParticulas :color="isDark ? '#10b981' : '#64748b'" :count="60" :speed="0.4" />
     </ClientOnly>
 
     <div
-      class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl max-w-md w-full relative z-10 p-8 pt-10 rounded-3xl shadow-2xl border border-white/40 dark:border-gray-700/50 transition-colors duration-300 hover:shadow-emerald-500/10"
-      v-motion
-      :initial="{ opacity: 0, y: 50, scale: 0.95 }"
-      :enter="{ opacity: 1, y: 0, scale: 1, transition: { duration: 500, type: 'spring', stiffness: 200 } }"
+      class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl max-w-md w-full relative z-10 p-8 pt-10 rounded-3xl shadow-2xl border border-white/40 dark:border-gray-700/50 transition-colors duration-300 hover:shadow-emerald-500/10 animate-fade-in"
     >
 
       <div
         class="flex flex-col items-center text-center mb-10"
-        v-motion
-        :initial="{ opacity: 0, y: -20 }"
-        :enter="{ opacity: 1, y: 0, transition: { delay: 200, duration: 400 } }"
       >
         <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 mb-4 transform -rotate-6">
           <Icon name="fa7-solid:building-columns" class="text-white w-8 h-8 transform rotate-6" />
@@ -47,9 +41,6 @@
       <form
         @submit.prevent="handleLogin"
         class="space-y-6"
-        v-motion
-        :initial="{ opacity: 0 }"
-        :enter="{ opacity: 1, transition: { delay: 350, duration: 400 } }"
       >
         <div class="space-y-1.5">
           <label class="block text-xs font-bold text-gray-600 dark:text-emerald-400/90 uppercase tracking-wider pl-1">Usuário / CPF</label>
@@ -86,9 +77,6 @@
         <div
           v-if="error"
           class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-3 shadow-sm"
-          v-motion
-          :initial="{ opacity: 0, x: -10 }"
-          :enter="{ opacity: 1, x: 0 }"
         >
           <Icon name="fa7-solid:triangle-exclamation" class="h-5 w-5 shrink-0" />
           {{ error }}
@@ -110,7 +98,7 @@
         </button>
       </form>
 
-      <div class="mt-8 text-center" v-motion :initial="{ opacity: 0 }" :enter="{ opacity: 1, transition: { delay: 500 } }">
+      <div class="mt-8 text-center">
         <a href="#" class="text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
           Esqueceu sua senha?
         </a>
@@ -158,7 +146,7 @@ const handleLogin = async () => {
         const tokenCookie = useCookie('token')
         tokenCookie.value = userData.token
         
-        router.push('/inicio')
+        router.push('/')
       } else {
         error.value = 'Usuário ou senha incorretos. Tente novamente.'
       }

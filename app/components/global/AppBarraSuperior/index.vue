@@ -147,7 +147,7 @@ const props = defineProps<{
 const router = useRouter()
 const route = useRoute()
 
-const isInicio = computed(() => route.path === '/' || route.path === '/dashboard' || route.path === '/inicio')
+const isInicio = computed(() => route.path === '/' || route.path === '/dashboard')
 const eInicio = isInicio
 
 const userName = ref('Usuário')
@@ -171,9 +171,9 @@ const checkScroll = () => {
 onClickOutside(menuRef, () => (menuOpen.value = false))
 
 const menuItems = [
-  { label: 'Início', to: '/inicio', icon: 'fa7-solid:house' },
+  { label: 'Início', to: '/', icon: 'fa7-solid:house' },
   { 
-    label: 'GESTÃO DE CADASTROS', 
+    label: 'Gestão de Cadastros', 
     to: '/cadastro',
     icon: 'fa7-solid:address-card',
     children: [
@@ -182,7 +182,7 @@ const menuItems = [
     ]
   },
   { 
-    label: 'ROTINAS DE FOLHA', 
+    label: 'Rotinas de Folha', 
     to: '/operacao',
     icon: 'fa7-solid:file-invoice-dollar',
     children: [
@@ -192,7 +192,7 @@ const menuItems = [
     ]
   },
   { 
-    label: 'FINANCEIRO & REEMBOLSO', 
+    label: 'Financeiro & Reembolso', 
     to: '/operacao/financeiro',
     icon: 'fa7-solid:hand-holding-dollar',
     children: [
@@ -202,7 +202,7 @@ const menuItems = [
     ]
   },
   { 
-    label: 'RELATÓRIOS & EXTRATOS', 
+    label: 'Relatórios & Extratos',
     to: '/operacao/relatorio',
     icon: 'fa7-solid:list-check',
     children: [
@@ -211,7 +211,7 @@ const menuItems = [
     ]
   },
   { 
-    label: 'CONFIGURAÇÕES', 
+    label: 'Configurações', 
     to: '/configuracao',
     icon: 'fa7-solid:screwdriver-wrench',
     children: [
