@@ -103,7 +103,7 @@
                   :key="child.to" 
                   :to="child.to"
                   @click="collapsed && emit('update:collapsed', false)"
-                  class="flex items-center gap-3 px-5 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
+                  class="flex items-center gap-3 px-5 py-2.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
                 >
                   <Icon :name="child.icon" class="w-3.5 h-3.5" />
                   {{ child.label }}
@@ -125,7 +125,7 @@
                   v-for="child in item.children" 
                   :key="child.to" 
                   :to="child.to"
-                  class="flex items-center px-4 py-2 rounded-lg text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all relative overflow-hidden group/sub"
+                  class="flex items-center px-4 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all relative overflow-hidden group/sub"
                   active-class="!text-emerald-600 dark:!text-emerald-400"
                 >
                   <div 
@@ -335,7 +335,7 @@ const navigateTo = (item: any) => {
 }
 
 .menu-active {
-  @apply bg-gradient-to-r from-emerald-50 to-white dark:from-emerald-900/20 dark:to-transparent text-emerald-700 dark:text-emerald-400 font-black shadow-sm border border-emerald-200/50 dark:border-emerald-500/30;
+  @apply bg-gradient-to-r from-emerald-50 to-white dark:from-emerald-900/20 dark:to-transparent text-emerald-700 dark:text-emerald-400 font-bold shadow-sm border border-emerald-200/50 dark:border-emerald-500/30;
 }
 
 .menu-icon {
@@ -347,11 +347,11 @@ const navigateTo = (item: any) => {
 }
 
 .menu-text {
-  @apply ml-3 text-sm font-bold tracking-tight whitespace-nowrap transition-colors duration-300;
+  @apply ml-3 text-sm tracking-wide whitespace-nowrap transition-colors duration-300;
 }
 
 .menu-header {
-  @apply px-7 pt-5 pb-1 text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-[0.2em] select-none;
+  @apply px-7 pt-5 pb-1 text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-[0.15em] select-none;
 }
 
 .menu-divider {

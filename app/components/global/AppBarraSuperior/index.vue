@@ -25,11 +25,11 @@
               :to="item.to" 
               class="flex items-center gap-2 px-4 py-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-300 whitespace-nowrap border border-transparent flex-shrink-0"
               :class="{ 
-                '!text-emerald-600 dark:!text-emerald-400 !font-extrabold bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-800/30 shadow-sm': isRouteActive(item.to, true) || item.children?.some(c => isRouteActive(c.to)) 
+                '!text-emerald-600 dark:!text-emerald-400 !font-bold bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-800/30 shadow-sm': isRouteActive(item.to, true) || item.children?.some(c => isRouteActive(c.to)) 
               }"
             >
               <Icon :name="item.icon" class="w-[17px] h-[17px]" />
-              <span class="text-[12px] font-black uppercase tracking-tight leading-none">{{ item.label }}</span>
+              <span class="text-[11px] font-bold uppercase tracking-[0.15em] leading-none">{{ item.label }}</span>
             </NuxtLink>
           </template>
         </nav>
