@@ -29,6 +29,7 @@ export function useFuncionarioListagem() {
 
   onMounted(() => {
     carregarProjetos()
+    buscarLista()
   })
 
   const filtro = reactive({
@@ -205,6 +206,7 @@ export function useFuncionarioListagem() {
     fecharSugestoesDelay,
     destacarTexto,
     buscarLista,
+    filtroGlobal: paginacao.filtroGlobal,
     visaoAtual,
     abrirModalFiltroAvancado,
     abrirModalExibicao,

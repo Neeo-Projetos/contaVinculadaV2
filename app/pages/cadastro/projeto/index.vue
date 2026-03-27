@@ -38,7 +38,7 @@
       </template>
     </AppBarraFerramentas>
 
-    <AppContainerListagem :carregando="carregandoTela" :buscaRealizada="buscaRealizada" :lista="listaRegistros"
+    <AppContainerListagem v-model:filtro-global="filtroGlobal" :carregando="carregandoTela" :buscaRealizada="buscaRealizada" :lista="listaRegistros"
       :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
       :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
       :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
@@ -152,7 +152,7 @@ const {
   modalHistoricoAberto, historicoSelecionado, carregandoHistorico, abrirHistorico,
   modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
   sugestoesProjeto, mostrandoSugestoes, buscandoSugestoes, buscarSugestoesProjeto, selecionarSugestao, fecharSugestoesDelay,
-  buscarProjetos, mudarPagina, mudarItensPorPagina,
+  buscarProjetos, mudarPagina, mudarItensPorPagina, filtroGlobal,
   abrirModalConta, abrirModalVerba
 } = useProjetoListagem()
 

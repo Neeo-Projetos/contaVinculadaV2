@@ -1,4 +1,4 @@
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 
 export function useProjetoListagem() {
@@ -16,6 +16,10 @@ export function useProjetoListagem() {
     if (width.value < 640) return 'Digite o apelido...'
     if (width.value < 1024) return 'Digite o apelido do proj...'
     return 'Digite o apelido do projeto...'
+  })
+  
+  onMounted(() => {
+    buscarProjetos()
   })
 
   const filtro = reactive({
@@ -180,6 +184,7 @@ export function useProjetoListagem() {
     modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
     modalExibicaoAberto, colunasVisiveis, colunasTemp, abrirModalExibicao, aplicarExibicao,
     labelsColunas, 
+    filtroGlobal: paginacao.filtroGlobal,
     modalHistoricoAberto, historicoSelecionado, carregandoHistorico, abrirHistorico,
     abrirModalConta, abrirModalVerba,
     

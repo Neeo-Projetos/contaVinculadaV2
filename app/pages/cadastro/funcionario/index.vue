@@ -38,7 +38,7 @@
       </template>
     </AppBarraFerramentas>
 
-    <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
+    <AppContainerListagem v-model:filtro-global="filtroGlobal" :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
       :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
       :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
       :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
@@ -146,7 +146,7 @@
 <script setup lang="ts">
 const {
   carregando, buscaRealizada, visaoAtual, dados, filtro, sugestoesNome, buscandoSugestoes, mostrandoSugestoes,
-  buscarSugestoesNome, selecionarSugestao, fecharSugestoesDelay, buscarLista,
+  buscarSugestoesNome, selecionarSugestao, fecharSugestoesDelay, buscarLista, filtroGlobal,
   abrirHistorico, modalHistoricoAberto, codigoHistorico, historicoSelecionado, carregandoHistorico,
   modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
   modalExibicaoAberto, abrirModalExibicao, carregarProjetos, projetosAtivos,

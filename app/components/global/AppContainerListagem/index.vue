@@ -2,6 +2,42 @@
   <div class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col relative transition-all duration-300"
        :class="(lista || []).length === 0 ? 'flex-1' : ''">
 
+    <div v-if="buscaRealizada && ((lista || []).length > 0 || filtroGlobal)" class="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/20 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <!-- Busca na Esquerda -->
+      <AppInputBusca :model-value="filtroGlobal" @update:model-value="$emit('update:filtroGlobal', $event)" class="w-full sm:max-w-md" />
+
+      <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+        <!-- Indicador de Filtro -->
+        <div v-if="filtroGlobal" class="flex text-xs font-bold text-emerald-600 dark:text-emerald-400 items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-100 dark:border-emerald-500/20 transition-all animate-fade-in">
+          <Icon name="fa7-solid:filter" class="w-2.5 h-2.5" />
+          <span class="hidden xs:inline">Filtrando...</span>
+        </div>
+
+        <!-- Seletor de Linhas na Direita -->
+        <div class="flex items-center gap-2.5 relative">
+          <span class="text-sm font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap">Linhas por página:</span>
+          <div @click="dropdownLinhasAberto = !dropdownLinhasAberto"
+            class="bg-white dark:bg-[#15171e] border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-bold text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer shadow-sm min-w-[80px] flex items-center justify-between gap-2"
+            :class="{ 'ring-2 ring-emerald-500/50 border-emerald-500': dropdownLinhasAberto }">
+            <span>{{ itensPorPagina }}</span>
+            <Icon name="fa7-solid:chevron-down" class="w-3 h-3 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': dropdownLinhasAberto }" />
+          </div>
+          <div v-if="dropdownLinhasAberto" class="fixed inset-0 z-40" @click="dropdownLinhasAberto = false"></div>
+          <Transition name="dropdown">
+            <div v-if="dropdownLinhasAberto" class="absolute top-full mt-1 right-0 z-50 w-[65px] bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-gray-700/80 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl py-1">
+              <ul class="text-center flex flex-col">
+                <li v-for="opcao in (visaoAtual === 'cards' ? [12, 24, 48, 96] : [10, 25, 50, 100])" :key="opcao" @click="selecionarLinhas(opcao)"
+                  class="px-2 py-2 text-xs cursor-pointer transition-colors"
+                  :class="itensPorPagina === opcao ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'">
+                  {{ opcao }}
+                </li>
+              </ul>
+            </div>
+          </Transition>
+        </div>
+      </div>
+    </div>
+
     <div v-if="carregando && (lista || []).length === 0" class="flex-1 flex flex-col items-center justify-center py-12 px-6 animate-fade-in">
       <div class="relative flex items-center justify-center mb-6">
         <div class="absolute inset-0 bg-emerald-400 dark:bg-emerald-500 rounded-full animate-ping opacity-20"></div>
@@ -66,29 +102,6 @@
           de <span class="font-bold text-gray-900 dark:text-gray-100">{{ totalRegistros }}</span> registros
         </div>
 
-        <div class="flex flex-col sm:flex-row items-center gap-4">
-          <div class="flex items-center gap-2 relative">
-            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Linhas por página:</span>
-            <div @click="dropdownLinhasAberto = !dropdownLinhasAberto"
-              class="bg-white dark:bg-[#15171e] border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-sm font-bold text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer shadow-sm min-w-[70px] flex items-center justify-between"
-              :class="{ 'ring-2 ring-emerald-500/50 border-emerald-500': dropdownLinhasAberto }">
-              <span>{{ itensPorPagina }}</span>
-              <Icon name="fa7-solid:chevron-down" class="w-3 h-3 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': dropdownLinhasAberto }" />
-            </div>
-            <div v-if="dropdownLinhasAberto" class="fixed inset-0 z-40" @click="dropdownLinhasAberto = false"></div>
-            <Transition name="dropdown">
-              <div v-if="dropdownLinhasAberto" class="absolute bottom-full mb-1 right-0 z-50 w-[70px] bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-gray-700/80 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl py-1">
-                <ul class="text-center flex flex-col">
-                  <li v-for="opcao in (visaoAtual === 'cards' ? [12, 24, 48, 96] : [10, 25, 50, 100])" :key="opcao" @click="selecionarLinhas(opcao)"
-                    class="px-2 py-2 text-sm cursor-pointer transition-colors"
-                    :class="itensPorPagina === opcao ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'">
-                    {{ opcao }}
-                  </li>
-                </ul>
-              </div>
-            </Transition>
-          </div>
-
           <div v-if="totalPaginas > 1" class="flex items-center bg-white dark:bg-[#15171e] border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden divide-x divide-gray-200 dark:divide-gray-700">
             <button type="button" @click="$emit('mudarPagina', paginaAtual - 1)" :disabled="paginaAtual === 1"
               class="px-3 sm:px-4 py-2 text-sm font-bold transition-colors"
@@ -107,7 +120,6 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -124,10 +136,11 @@ const props = defineProps({
   itensPorPagina: { type: Number, default: 10 },
   totalPaginas: { type: Number, default: 1 },
   paginaAtual: { type: Number, default: 1 },
-  paginasExibidas: { type: Array as PropType<(number | string)[]>, default: () => [] }
+  paginasExibidas: { type: Array as PropType<(number | string)[]>, default: () => [] },
+  filtroGlobal: { type: String, default: '' }
 })
 
-const emit = defineEmits(['mudarPagina', 'mudarItensPorPagina'])
+const emit = defineEmits(['mudarPagina', 'mudarItensPorPagina', 'update:filtroGlobal'])
 const dropdownLinhasAberto = ref(false)
 
 const selecionarLinhas = (quantidade: number) => {

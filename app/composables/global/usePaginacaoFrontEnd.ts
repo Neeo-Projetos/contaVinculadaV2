@@ -9,7 +9,21 @@ export function usePaginacaoFrontEnd(listaCompleta: Ref<any[]>, visaoAtual: Ref<
     paginaAtual.value = 1 
   })
 
-  const totalRegistros = computed(() => listaCompleta.value.length)
+  const filtroGlobal = ref('')
+  
+  const listaFiltrada = computed(() => {
+    if (!filtroGlobal.value) return listaCompleta.value
+    
+    const termo = filtroGlobal.value.toLowerCase()
+    return listaCompleta.value.filter(item => {
+      // Busca em todas as propriedades do objeto, transformando em string
+      return Object.values(item).some(val => 
+        String(val).toLowerCase().includes(termo)
+      )
+    })
+  })
+
+  const totalRegistros = computed(() => listaFiltrada.value.length)
   const totalPaginas = computed(() => Math.ceil(totalRegistros.value / itensPorPagina.value))
 
   const registroInicial = computed(() => {
@@ -25,7 +39,7 @@ export function usePaginacaoFrontEnd(listaCompleta: Ref<any[]>, visaoAtual: Ref<
   const listaPaginada = computed(() => {
     const inicio = (paginaAtual.value - 1) * itensPorPagina.value
     const fim = inicio + itensPorPagina.value
-    return listaCompleta.value.slice(inicio, fim)
+    return listaFiltrada.value.slice(inicio, fim)
   })
 
   const paginasExibidas = computed(() => {
@@ -67,6 +81,7 @@ export function usePaginacaoFrontEnd(listaCompleta: Ref<any[]>, visaoAtual: Ref<
   return {
     paginaAtual, itensPorPagina, totalRegistros, totalPaginas,
     registroInicial, registroFinal, listaPaginada, paginasExibidas,
+    filtroGlobal, listaFiltrada,
     mudarPagina, mudarItensPorPagina, resetarPaginacao
   }
 }
