@@ -146,8 +146,8 @@ const handleLogin = async () => {
         const tokenCookie = useCookie('token')
         tokenCookie.value = userData.token
         
-        const { isPrimeiroAcessoAposLogin, isCurtainGlobal } = useStatusLogin()
-        isPrimeiroAcessoAposLogin.value = true
+        const { primeiroAcessoLogin, isCurtainGlobal } = useStatusLogin()
+        primeiroAcessoLogin.value = true
         isCurtainGlobal.value = true
         
         router.push('/')

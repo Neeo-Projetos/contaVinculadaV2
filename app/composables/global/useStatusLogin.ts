@@ -1,12 +1,10 @@
 export const useStatusLogin = () => {
-    // Estado que indica se o usuário acabou de vir da tela de login
-    const isPrimeiroAcessoAposLogin = useState('isPrimeiroAcessoAposLogin', () => false)
+    const primeiroAcessoLogin = useState('primeiroAcessoLogin', () => false)
     
-    // Estado que controla a visibilidade da cortina (pode ser fechada pela página)
     const isCurtainGlobal = useState('isCurtainGlobal', () => false)
 
     return {
-        isPrimeiroAcessoAposLogin,
+        primeiroAcessoLogin,
         isCurtainGlobal
     }
 }

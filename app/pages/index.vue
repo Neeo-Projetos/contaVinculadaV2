@@ -53,7 +53,7 @@
         <div class="flex items-start justify-between relative z-10">
           <div>
             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Funcionários Ativos</p>
-            <div v-if="loading && !isPrimeiroAcessoAposLogin" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div v-if="loading && !primeiroAcessoLogin" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
             <h3 v-else class="text-4xl font-extrabold text-gray-900 dark:text-white mt-2">{{ stats.funcionariosAtivos }}</h3>
           </div>
           <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center shrink-0 border border-emerald-100 dark:border-emerald-800/30">
@@ -71,7 +71,7 @@
         <div class="flex items-start justify-between relative z-10">
           <div>
             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contracheques</p>
-            <div v-if="loading && !isPrimeiroAcessoAposLogin" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div v-if="loading && !primeiroAcessoLogin" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
             <h3 v-else class="text-4xl font-extrabold text-gray-900 dark:text-white mt-2">{{ stats.totalContracheques }}</h3>
           </div>
           <div class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-800/30">
@@ -89,7 +89,7 @@
         <div class="flex items-start justify-between relative z-10">
           <div>
             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Lançamentos Lote</p>
-            <div v-if="loading && !isPrimeiroAcessoAposLogin" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div v-if="loading && !primeiroAcessoLogin" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
             <h3 v-else class="text-4xl font-extrabold text-gray-900 dark:text-white mt-2">{{ stats.totalLancamentosManuais }}</h3>
           </div>
           <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0 border border-amber-100 dark:border-amber-800/30">
@@ -107,7 +107,7 @@
         <div class="flex items-start justify-between relative z-10">
           <div>
             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reembolsos</p>
-            <div v-if="loading && !isPrimeiroAcessoAposLogin" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div v-if="loading && !primeiroAcessoLogin" class="mt-3 h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
             <h3 v-else class="text-4xl font-extrabold text-gray-900 dark:text-white mt-2">{{ stats.totalReembolsos }}</h3>
           </div>
           <div class="w-12 h-12 rounded-xl bg-[#a8cf45]/10 flex items-center justify-center shrink-0 border border-[#a8cf45]/30">
@@ -203,7 +203,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
-const { isPrimeiroAcessoAposLogin, isCurtainGlobal } = useStatusLogin()
+const { primeiroAcessoLogin, isCurtainGlobal } = useStatusLogin()
 const { stats, chartData, isDataLoaded, fetchDashboardData } = useDashboardData()
 
 const userName = ref('Usuário')
@@ -228,7 +228,6 @@ const horaCompleta = computed(() => {
   return dataAtual.value.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 })
 
-// ApexCharts Config
 const chartSeries = computed(() => {
   if (chartData.value.length === 0) return []
   return [
@@ -276,14 +275,16 @@ onMounted(async () => {
   }
 
   try {
-    // Agora chama a lógica encapsulada que gerencia o cache
     await fetchDashboardData()
   } catch (e) {
     console.error('Erro ao buscar dados do dashboard:', e)
   } finally {
     loading.value = false
-    isCurtainGlobal.value = false
-    isPrimeiroAcessoAposLogin.value = false
+    
+    setTimeout(() => {
+      isCurtainGlobal.value = false
+      primeiroAcessoLogin.value = false
+    }, 500)
   }
 })
 
