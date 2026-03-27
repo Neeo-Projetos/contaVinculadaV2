@@ -1,48 +1,31 @@
 <template>
-  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
+  <div class="min-h-full flex flex-col gap-4 p-4 md:p-6 animate-fade-in text-gray-900 dark:text-gray-100">
 
-    <AppCabecalhoPagina tituloFino="Base de" tituloGrosso="Funcionários"
-      descricao="Gestão e listagem de colaboradores do sistema" icone="fa7-solid:users" />
-
-    <AppBarraFerramentas v-model:visao-atual="visaoAtual" mostrar-relatorio @excel="gerarExcel" @pdf="gerarPdf">
-      <template #entradas>
-        <AppInputAutocomplete 
-          v-model="filtro.nomeParam" 
-          :sugestoes="sugestoesNome" 
-          :buscando="buscandoSugestoes"
-          :mostrarMenu="mostrandoSugestoes" 
-          :placeholder="placeholderDinamico"
-          @buscar="buscarSugestoesNome" 
-          @selecionar="selecionarSugestao" 
-          @fechar="fecharSugestoesDelay"
-          @enter="buscarLista" 
-        />
-        <AppSelecaoStatus v-model="filtro.ativoParam" />
-      </template>
-
-      <template #acoes-secundarias>
-        <AppBotao variacao="padrao" icone="fa7-solid:table-columns" @click="abrirModalExibicao">Exibição</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:filter" @click="abrirModalFiltroAvancado">Filtros Avançados</AppBotao>
-      </template>
-
-      <template #acoes-principais>
-        <AppBotao variacao="acao" icone="fa7-solid:user-plus" @click="navigateTo('/cadastro/funcionario/cadastro')">
-          Novo Funcionário
+    <AppLayoutListagemNovo 
+      v-model="filtro" 
+      v-model:viewMode="visaoAtual" 
+      :campos="camposFiltro" 
+      titulo="Colaboradores"
+      descricao="Gestão e listagem de colaboradores do sistema" 
+      icone-titulo="fa7-solid:users-gear"
+      :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Colaboradores' }]"
+      :pending="carregandoTela"
+      @buscar="filtrar"
+      @openAdvancedFilter="abrirModalFiltroAvancado"
+    >
+      <template #acoes>
+        <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao">Controle de Exibição</AppBotao>
+        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/cadastro/funcionario/cadastro?id=0')">
+          Novo Colaborador
         </AppBotao>
       </template>
 
-      <template #acoes-pesquisa>
-        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarLista">
-          Pesquisar Funcionários
-        </AppBotao>
-      </template>
-    </AppBarraFerramentas>
-
-    <AppContainerListagem v-model:filtro-global="filtroGlobal" :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
-      :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
-      :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
-      :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
-      @mudarItensPorPagina="mudarItensPorPagina">
+      <AppContainerListagem v-model:filtro-global="filtroGlobal" :carregando="carregandoTela" :buscaRealizada="buscaRealizada" :lista="listaRegistros"
+        :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
+        :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
+        :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
+        @mudarItensPorPagina="mudarItensPorPagina">
 
       <template #cabecalho-tabela>
         <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -118,6 +101,7 @@
       </template>
 
     </AppContainerListagem>
+    </AppLayoutListagemNovo>
 
     <AppModalHistorico :aberto="modalHistoricoAberto" :historico="historicoSelecionado"
       :carregando="carregandoHistorico" @close="modalHistoricoAberto = false" />
@@ -145,8 +129,8 @@
 
 <script setup lang="ts">
 const {
-  carregando, buscaRealizada, visaoAtual, dados, filtro, sugestoesNome, buscandoSugestoes, mostrandoSugestoes,
-  buscarSugestoesNome, selecionarSugestao, fecharSugestoesDelay, buscarLista, filtroGlobal,
+  carregandoTela, buscaRealizada, visaoAtual, listaRegistros, filtro,
+  filtrar, filtroGlobal,
   abrirHistorico, modalHistoricoAberto, codigoHistorico, historicoSelecionado, carregandoHistorico,
   modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
   modalExibicaoAberto, abrirModalExibicao, carregarProjetos, projetosAtivos,
@@ -155,6 +139,20 @@ const {
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = useFuncionarioListagem()
+
+const camposFiltro = computed(() => [
+  { key: 'nomeParam', label: 'Buscar', type: 'text' as const, placeholder: 'Buscar colaboradores...' },
+  {
+    key: 'statusParam',
+    label: 'Status',
+    type: 'select' as const,
+    options: [
+      { label: 'Ativos', value: '1' },
+      { label: 'Inativos', value: '0' },
+      { label: 'Todos', value: '' }
+    ]
+  }
+])
 
 const gerarExcel = () => {
     alert('📊 Gerando relatório Excel dos Funcionários...')
