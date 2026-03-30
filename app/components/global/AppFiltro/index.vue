@@ -43,35 +43,38 @@
             <div
                 class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 border-b border-gray-100 dark:border-slate-800 pb-6">
                 <h2 class="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tight flex items-center gap-3">
-                    <div class="w-1.5 h-6 bg-blue-600 rounded-full"></div>
+                    <div
+                        class="w-1.5 h-6 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]">
+                    </div>
                     Filtros
                 </h2>
 
                 <div
-                    class="flex items-center bg-gray-50/80 dark:bg-[#0f172a]/60 rounded-2xl p-1.5 self-start md:self-auto border border-gray-200/50 dark:border-slate-800">
+                    class="flex items-center bg-gray-50/80 dark:bg-[#0f172a]/60 rounded-2xl p-1.5 self-start md:self-auto border border-gray-200/50 dark:border-slate-800 shadow-inner">
                     <span
-                        class="text-[10px] text-gray-400 dark:text-gray-500 font-black px-3 mr-1 hidden md:inline uppercase tracking-[0.2em]">Visualização:</span>
+                        class="text-[9px] text-gray-400 dark:text-gray-500 font-black px-4 mr-0.5 hidden md:inline uppercase tracking-[0.25em]">Visualização:</span>
 
                     <button @click="$emit('update:viewMode', 'cards')"
-                        :class="viewMode === 'cards' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-md border border-gray-100 dark:border-slate-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-transparent'"
-                        class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2">
-                        <Icon name="fa7-solid:table-cells-large" class="h-3.5 w-3.5" />
+                        :class="viewMode === 'cards' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-lg border border-gray-100 dark:border-slate-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-transparent'"
+                        class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2.5 group">
+                        <Icon name="fa7-solid:table-cells-large"
+                            class="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
                         Cards
                     </button>
 
                     <button @click="$emit('update:viewMode', 'lista')"
-                        :class="viewMode === 'lista' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-md border border-gray-100 dark:border-slate-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-transparent'"
-                        class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2">
-                        <Icon name="fa7-solid:list" class="h-3.5 w-3.5" />
+                        :class="viewMode === 'lista' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-lg border border-gray-100 dark:border-slate-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-transparent'"
+                        class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2.5 group">
+                        <Icon name="fa7-solid:list" class="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
                         Lista
                     </button>
 
-                    <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-2 hidden md:block"></div>
+                    <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-2.5 hidden md:block opacity-50"></div>
 
                     <button v-if="exibirFiltroAvancado" @click="$emit('openAdvancedFilter')"
-                        class="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 border border-transparent"
+                        class="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 border border-transparent group"
                         title="Filtro Avançado">
-                        <Icon name="fa7-solid:filter" class="h-3.5 w-3.5"
+                        <Icon name="fa7-solid:filter" class="h-3.5 w-3.5 transition-all group-hover:scale-110"
                             :class="{ 'text-blue-600 dark:text-blue-400 font-bold': advancedFilterActive }" />
                         <span class="hidden md:inline"
                             :class="{ 'text-blue-600 dark:text-blue-400 font-bold': advancedFilterActive }">Filtro
@@ -80,23 +83,21 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <template v-for="campo in campos" :key="campo.key">
-                    <div v-if="campo.type === 'text'" class="flex flex-col gap-2.5">
-                        <label
-                            class="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">{{
-                            campo.label }}</label>
-                        <input type="text" :id="campo.key" :value="(modelValue[campo.key] as string) || ''"
-                            @input="e => atualizarModelo(campo.key, (e.target as HTMLInputElement).value)"
-                            :placeholder="campo.placeholder"
-                            class="w-full bg-gray-50/50 dark:bg-slate-800/40 border border-gray-200 dark:border-slate-700/80 text-gray-900 dark:text-white text-sm rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 block p-4 transition-all duration-300 outline-none"
-                            @keyup.enter="$emit('buscar')" autocomplete="off" />
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-end">
+                <div class="md:col-span-4 lg:col-span-5" v-for="campo in campos" :key="campo.key">
+                    <AppInputTexto v-if="campo.type === 'text'" :modelValue="(modelValue[campo.key] as string) || ''"
+                        @update:modelValue="val => atualizarModelo(campo.key, val)" :label="campo.label"
+                        :placeholder="campo.placeholder" :icone="campo.icon" @keyup.enter="$emit('buscar')" />
+
+                    <AppSelect v-else-if="campo.type === 'select'" :modelValue="(modelValue[campo.key] as string) || ''"
+                        @update:modelValue="val => atualizarModelo(campo.key, val)" :label="campo.label"
+                        :placeholder="campo.placeholder || 'Todos'" :opcoes="campo.options || []"
+                        :itemValue="campo.itemValue || 'value'" :itemLabel="campo.itemLabel || 'label'" />
 
                     <div v-else-if="campo.type === 'autocomplete'" class="flex flex-col gap-2.5">
                         <label
                             class="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">{{
-                            campo.label }}</label>
+                                campo.label }}</label>
                         <AppInputAutocomplete :modelValue="(modelValue[campo.key] as string) || ''"
                             @update:modelValue="val => atualizarModelo(campo.key, val)" :placeholder="campo.placeholder"
                             :sugestoes="campo.sugestoes || []" :buscando="campo.buscando || false"
@@ -104,35 +105,11 @@
                             @selecionar="val => $emit('selecionarSugestao', { key: campo.key, sugestao: val })"
                             @fechar="$emit('fecharSugestao', campo.key)" @enter="$emit('buscar')" />
                     </div>
+                </div>
 
-                    <div v-else-if="campo.type === 'select'" class="flex flex-col gap-2.5">
-                        <label
-                            class="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">{{
-                            campo.label }}</label>
-                        <div class="relative group">
-                            <select :value="(modelValue[campo.key] as string) || ''"
-                                @change="e => atualizarModelo(campo.key, (e.target as HTMLSelectElement).value)"
-                                class="w-full bg-gray-50/50 dark:bg-slate-800/40 border border-gray-200 dark:border-slate-700/80 text-gray-900 dark:text-white text-sm rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 block p-4 pr-10 transition-all duration-300 appearance-none cursor-pointer font-bold outline-none">
-                                <option value="" class="bg-white dark:bg-slate-800 text-gray-900 dark:text-white">{{
-                                    campo.placeholder || 'Todos' }}
-                                </option>
-                                <option v-for="(opt, idx) in campo.options" :key="`opt-${idx}`"
-                                    :value="typeof opt === 'object' ? opt.value : opt"
-                                    class="bg-white dark:bg-slate-800 text-gray-900 dark:text-white">{{ typeof opt ===
-                                        'object' ? opt.label : opt }}
-                                </option>
-                            </select>
-                            <div
-                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 dark:text-gray-500 group-hover:text-blue-500 transition-colors">
-                                <Icon name="fa7-solid:chevron-down" class="h-3.5 w-3.5" />
-                            </div>
-                        </div>
-                    </div>
-                </template>
-
-                <div class="flex items-end pt-2 md:pt-0">
+                <div class="md:col-span-4 lg:col-span-2">
                     <button @click="$emit('buscar')" :disabled="pending"
-                        class="items-center text-white font-bold bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/20 rounded-2xl text-sm px-8 py-4 w-full shadow-lg shadow-blue-500/20 shadow-blue-600/20 transition-all active:scale-[0.98] flex justify-center gap-3 disabled:opacity-70 h-[52px] border border-blue-600">
+                        class="items-center text-white font-black bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 rounded-2xl text-xs uppercase tracking-widest px-8 h-[52px] w-full shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] flex justify-center gap-3 disabled:opacity-70 border border-blue-500/50">
                         <Icon :name="pending ? 'fa7-solid:spinner' : 'fa7-solid:magnifying-glass'"
                             :class="{ 'animate-spin': pending }" class="h-4 w-4" />
                         {{ pending ? 'Processando...' : 'Buscar' }}

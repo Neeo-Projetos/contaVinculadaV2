@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-full flex flex-col gap-4 p-4 md:p-6 animate-fade-in text-gray-900 dark:text-gray-100">
 
-    <AppLayoutListagemPro 
+    <AppFiltro 
       v-model="filtro" 
       v-model:viewMode="visaoAtual" 
       :campos="camposFiltro" 
@@ -105,7 +105,7 @@
       </template>
 
     </AppContainerListagem>
-    </AppLayoutListagemPro>
+    </AppFiltro>
 
     <AppModalHistorico :aberto="modalHistoricoAberto" :historico="historicoSelecionado"
       :carregando="carregandoHistorico" @close="modalHistoricoAberto = false" />

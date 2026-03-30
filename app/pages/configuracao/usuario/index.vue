@@ -1,104 +1,93 @@
 <template>
   <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
 
-    <AppCabecalhoPagina tituloFino="Gestão de" tituloGrosso="Usuários"
-      descricao="Gerenciamento de acessos e permissões do sistema" icone="fa7-solid:user-gear" />
-
-    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
-      <template #entradas>
-        <AppInputAutocomplete 
-          v-model="filtro.nome" 
-          :placeholder="placeholderDinamico"
-          @enter="buscarLista" 
-        />
-        <AppSelecaoStatus v-model="filtro.ativo" />
-      </template>
-
-      <template #acoes-secundarias>
-        <AppBotao variacao="padrao" icone="fa7-solid:table-columns" @click="abrirModalExibicao">Exibição</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:filter" @click="abrirModalFiltroAvancado">Filtros Avançados</AppBotao>
-      </template>
-
-      <template #acoes-principais>
+    <AppFiltro 
+      v-model="filtro" 
+      v-model:viewMode="visaoAtual" 
+      :campos="camposFiltro" 
+      titulo="Usuários"
+      descricao="Gerenciamento de acessos e permissões do sistema" 
+      icone-titulo="fa7-solid:user-gear"
+      :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Configuração' }, { label: 'Usuários' }]"
+      :pending="carregando"
+      @buscar="buscarLista"
+      @openAdvancedFilter="abrirModalFiltroAvancado"
+    >
+      <template #acoes>
+        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao">Controle de Exibição</AppBotao>
         <AppBotao variacao="acao" icone="fa7-solid:user-plus" @click="navigateTo('/configuracao/usuario/cadastro')">
           Novo Usuário
         </AppBotao>
       </template>
 
-      <template #acoes-pesquisa>
-        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarLista">
-          Pesquisar Usuários
-        </AppBotao>
-      </template>
-    </AppBarraFerramentas>
+      <AppContainerListagem 
+        :carregando="carregando" 
+        :buscaRealizada="buscaRealizada" 
+        :lista="dados || []"
+        :visaoAtual="visaoAtual" 
+        :registroInicial="registroInicial" 
+        :registroFinal="registroFinal"
+        :totalRegistros="totalRegistros" 
+        :itensPorPagina="itensPorPagina" 
+        :totalPaginas="totalPaginas"
+        :paginaAtual="paginaAtual" 
+        :paginasExibidas="paginasExibidas" 
+        @mudarPagina="mudarPagina"
+        @mudarItensPorPagina="mudarItensPorPagina"
+      >
 
-    <AppContainerListagem 
-      :carregando="carregando" 
-      :buscaRealizada="buscaRealizada" 
-      :lista="dados || []"
-      :visaoAtual="visaoAtual" 
-      :registroInicial="registroInicial" 
-      :registroFinal="registroFinal"
-      :totalRegistros="totalRegistros" 
-      :itensPorPagina="itensPorPagina" 
-      :totalPaginas="totalPaginas"
-      :paginaAtual="paginaAtual" 
-      :paginasExibidas="paginasExibidas" 
-      @mudarPagina="mudarPagina"
-      @mudarItensPorPagina="mudarItensPorPagina"
-    >
+        <template #cabecalho-tabela>
+          <th scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Usuário</th>
+          <th v-show="colunas.login" scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Login</th>
+          <th v-show="colunas.cpf" scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">CPF</th>
+          <th v-show="colunas.status" scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
+          <th v-show="colunas.historico" scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Histórico</th>
+        </template>
 
-      <template #cabecalho-tabela>
-        <th scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Usuário</th>
-        <th v-show="colunas.login" scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Login</th>
-        <th v-show="colunas.cpf" scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">CPF</th>
-        <th v-show="colunas.status" scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
-        <th v-show="colunas.historico" scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Histórico</th>
-      </template>
-
-      <template #linhas-tabela="{ item }">
-        <td class="p-4">
-          <NuxtLink :to="`/configuracao/usuario/cadastro?codigo=${item.codigo}`" class="flex items-center gap-3 group">
-            <div class="w-11 h-11 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-base shrink-0 group-hover:bg-emerald-500/20 transition-all">
-              {{ (item.nome || 'U').charAt(0).toUpperCase() }}
+        <template #linhas-tabela="{ item }">
+          <td class="p-4">
+            <NuxtLink :to="`/configuracao/usuario/cadastro?codigo=${item.codigo}`" class="flex items-center gap-3 group">
+              <div class="w-11 h-11 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-base shrink-0 group-hover:bg-emerald-500/20 transition-all">
+                {{ (item.nome || 'U').charAt(0).toUpperCase() }}
+              </div>
+              <span class="text-base font-bold text-gray-800 dark:text-gray-200 truncate group-hover:text-emerald-500 transition-colors uppercase">
+                {{ item.nome }}
+              </span>
+            </NuxtLink>
+          </td>
+          <td v-show="colunas.login" class="p-4 text-base font-bold text-gray-500 dark:text-gray-400">
+            {{ item.login }}
+          </td>
+          <td v-show="colunas.cpf" class="p-4 text-base font-bold text-gray-500 dark:text-gray-400">
+            {{ item.cpf }}
+          </td>
+          <td v-show="colunas.status" class="p-4 text-center">
+            <AppAtivo :ativo="item.ativo" />
+          </td>
+          <td v-show="colunas.historico" class="p-4 text-center">
+            <div class="flex items-center justify-center">
+              <button @click.stop="abrirHistorico(item.codigo)" 
+                class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Ver Histórico">
+                <Icon name="fa6-solid:clock-rotate-left" class="w-5 h-5" />
+              </button>
             </div>
-            <span class="text-base font-bold text-gray-800 dark:text-gray-200 truncate group-hover:text-emerald-500 transition-colors uppercase">
-              {{ item.nome }}
-            </span>
-          </NuxtLink>
-        </td>
-        <td v-show="colunas.login" class="p-4 text-base font-bold text-gray-500 dark:text-gray-400">
-          {{ item.login }}
-        </td>
-        <td v-show="colunas.cpf" class="p-4 text-base font-bold text-gray-500 dark:text-gray-400">
-          {{ item.cpf }}
-        </td>
-        <td v-show="colunas.status" class="p-4 text-center">
-          <AppAtivo :ativo="item.ativo" />
-        </td>
-        <td v-show="colunas.historico" class="p-4 text-center">
-          <div class="flex items-center justify-center">
-            <button @click.stop="abrirHistorico(item.codigo)" 
-              class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Ver Histórico">
-              <Icon name="fa6-solid:clock-rotate-left" class="w-5 h-5" />
-            </button>
-          </div>
-        </td>
-      </template>
+          </td>
+        </template>
 
-      <template #cards="{ item }">
-        <AppCardListagem :titulo="item.nome" :subtituloNome="'Login'" :subtituloValor="item.login" :ativo="item.ativo"
-          :mostrarStatus="colunas.status" :mostrarHistorico="colunas.historico" 
-          :detalhes="[
-            ...(colunas.cpf ? [{ icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` }] : []),
-            ...(colunas.login ? [{ icone: 'fa7-solid:id-badge', texto: `Login: ${item.login}` }] : [])
-          ]"
-          @ver-detalhes="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}`)"
-          @ver-historico="abrirHistorico(item.codigo)"
-          @clique-titulo="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}`)" />
-      </template>
+        <template #cards="{ item }">
+          <AppCardListagem :titulo="item.nome" :subtituloNome="'Login'" :subtituloValor="item.login" :ativo="item.ativo"
+            :mostrarStatus="colunas.status" :mostrarHistorico="colunas.historico" 
+            :detalhes="[
+              ...(colunas.cpf ? [{ icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` }] : []),
+              ...(colunas.login ? [{ icone: 'fa7-solid:id-badge', texto: `Login: ${item.login}` }] : [])
+            ]"
+            @ver-detalhes="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}`)"
+            @ver-historico="abrirHistorico(item.codigo)"
+            @clique-titulo="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}`)" />
+        </template>
 
-    </AppContainerListagem>
+      </AppContainerListagem>
+    </AppFiltro>
 
     <AppModalHistorico :aberto="modalHistoricoAberto" :historico="historicoSelecionado"
       :carregando="carregandoHistorico" @close="modalHistoricoAberto = false" />
@@ -133,4 +122,18 @@ const {
   modalHistoricoAberto, abrirHistorico, historicoSelecionado, carregandoHistorico,
   projetosFormatados, placeholderDinamico
 } = useUsuarioListagem()
+
+const camposFiltro = computed(() => [
+  { key: 'nome', label: 'Usuário', type: 'text' as const, placeholder: placeholderDinamico.value },
+  {
+    key: 'ativo',
+    label: 'Status',
+    type: 'select' as const,
+    options: [
+      { label: 'Ativos', value: '1' },
+      { label: 'Inativos', value: '0' },
+      { label: 'Todos', value: '' }
+    ]
+  }
+])
 </script>
