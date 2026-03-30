@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col relative transition-all duration-300"
+  <div class="bg-white dark:bg-[#1a1c23] rounded-2xl border border-gray-100 dark:border-gray-800/60 shadow-sm overflow-hidden flex flex-col relative transition-all duration-300"
        :class="(lista || []).length === 0 ? 'flex-1' : ''">
 
     <div v-if="buscaRealizada && ((lista || []).length > 0 || filtroGlobal)" class="p-4 border-b border-gray-100 dark:border-slate-800 bg-gray-50/30 dark:bg-slate-900/40 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-6 transition-all duration-300">
