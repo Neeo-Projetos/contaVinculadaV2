@@ -14,7 +14,7 @@
                         class="flex items-center gap-2 text-[10px] font-black text-gray-400 dark:text-gray-500 mb-1.5 tracking-[0.2em] uppercase">
                         <template v-for="(crumb, idx) in breadcrumbs" :key="idx">
                             <NuxtLink v-if="crumb.to" :to="crumb.to"
-                                class="hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
+                                class="hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors">
                                 {{ crumb.label }}
                             </NuxtLink>
                             <span v-else class="text-slate-500 dark:text-gray-400">
@@ -53,29 +53,28 @@
                         class="text-[9px] text-gray-400 dark:text-gray-500 font-black px-4 mr-0.5 hidden md:inline uppercase tracking-[0.25em]">Visualização:</span>
 
                     <button @click="$emit('update:viewMode', 'lista')"
-                        :class="viewMode === 'lista' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-lg border border-gray-100 dark:border-slate-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-transparent'"
+                        :class="viewMode === 'lista' ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-lg border border-gray-100 dark:border-slate-600' : 'text-gray-500 dark:text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 border border-transparent'"
                         class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2.5 group">
-                        <Icon name="fa7-solid:list" class="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
+                        <Icon name="fa7-solid:list" class="h-3.5 w-3.5 transition-transform" />
                         Lista
                     </button>
 
                     <button @click="$emit('update:viewMode', 'cards')"
-                        :class="viewMode === 'cards' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-lg border border-gray-100 dark:border-slate-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-transparent'"
+                        :class="viewMode === 'cards' ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-lg border border-gray-100 dark:border-slate-600' : 'text-gray-500 dark:text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 border border-transparent'"
                         class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2.5 group">
                         <Icon name="fa7-solid:table-cells-large"
-                            class="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
+                            class="h-3.5 w-3.5 transition-transform" />
                         Cards
                     </button>
 
                     <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-2.5 hidden md:block opacity-50"></div>
 
                     <button v-if="exibirFiltroAvancado" @click="$emit('openAdvancedFilter')"
-                        class="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 border border-transparent group"
-                        title="Filtro Avançado">
-                        <Icon name="fa7-solid:filter" class="h-3.5 w-3.5 transition-all group-hover:scale-110"
-                            :class="{ 'text-blue-600 dark:text-blue-400 font-bold': advancedFilterActive }" />
-                        <span class="hidden md:inline"
-                            :class="{ 'text-blue-600 dark:text-blue-400 font-bold': advancedFilterActive }">Filtro
+                        class="text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 border border-transparent group">
+                        <Icon name="fa7-solid:filter" class="h-3.5 w-3.5 transition-transform"
+                            :class="{ 'text-emerald-600 dark:text-emerald-400 font-bold': advancedFilterActive }" />
+                        <span class="tracking-[0.15em]"
+                            :class="{ 'text-emerald-600 dark:text-emerald-400 font-bold': advancedFilterActive }">Filtro
                             Avançado</span>
                     </button>
                 </div>
@@ -106,7 +105,7 @@
                 </div>
 
                 <div class="md:col-span-4 lg:col-span-2">
-                    <button @click="$emit('buscar')" :disabled="pending"
+                    <button :disabled="pending" @click="$emit('buscar')"
                         class="items-center text-white font-black bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 rounded-2xl text-xs uppercase tracking-widest px-8 h-[52px] w-full shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] flex justify-center gap-3 disabled:opacity-70 border border-blue-500/50">
                         <Icon :name="pending ? 'fa7-solid:spinner' : 'fa7-solid:magnifying-glass'"
                             :class="{ 'animate-spin': pending }" class="h-4 w-4" />
