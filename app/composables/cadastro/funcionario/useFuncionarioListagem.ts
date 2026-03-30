@@ -29,7 +29,6 @@ export function useFuncionarioListagem() {
 
   onMounted(() => {
     carregarProjetos()
-    buscarLista()
   })
 
   const filtro = ref({

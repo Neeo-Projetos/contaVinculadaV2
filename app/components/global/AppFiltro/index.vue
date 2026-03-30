@@ -52,19 +52,19 @@
                     <span
                         class="text-[9px] text-gray-400 dark:text-gray-500 font-black px-4 mr-0.5 hidden md:inline uppercase tracking-[0.25em]">Visualização:</span>
 
+                    <button @click="$emit('update:viewMode', 'lista')"
+                        :class="viewMode === 'lista' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-lg border border-gray-100 dark:border-slate-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-transparent'"
+                        class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2.5 group">
+                        <Icon name="fa7-solid:list" class="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
+                        Lista
+                    </button>
+
                     <button @click="$emit('update:viewMode', 'cards')"
                         :class="viewMode === 'cards' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-lg border border-gray-100 dark:border-slate-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-transparent'"
                         class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2.5 group">
                         <Icon name="fa7-solid:table-cells-large"
                             class="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
                         Cards
-                    </button>
-
-                    <button @click="$emit('update:viewMode', 'lista')"
-                        :class="viewMode === 'lista' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-lg border border-gray-100 dark:border-slate-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-transparent'"
-                        class="px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2.5 group">
-                        <Icon name="fa7-solid:list" class="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
-                        Lista
                     </button>
 
                     <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-2.5 hidden md:block opacity-50"></div>
