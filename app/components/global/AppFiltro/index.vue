@@ -43,9 +43,7 @@
             <div
                 class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 border-b border-gray-100 dark:border-slate-800 pb-6">
                 <h2 class="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tight flex items-center gap-3">
-                    <div
-                        class="w-1.5 h-6 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]">
-                    </div>
+                    <div class="w-1.5 h-6 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)]"></div>
                     Filtros
                 </h2>
 
@@ -95,7 +93,7 @@
                         :itemValue="campo.itemValue || 'value'" :itemLabel="campo.itemLabel || 'label'" />
 
                     <div v-else-if="campo.type === 'autocomplete'" class="flex flex-col gap-2.5">
-                        <label
+                        <label v-if="campo.label"
                             class="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-1">{{
                                 campo.label }}</label>
                         <AppInputAutocomplete :modelValue="(modelValue[campo.key] as string) || ''"
@@ -135,7 +133,10 @@ interface CampoFiltro {
     label: string;
     type: 'text' | 'select' | 'autocomplete';
     placeholder?: string;
+    icon?: string;
     options?: any[]; // Para 'select'
+    itemValue?: string; // Para 'select'
+    itemLabel?: string; // Para 'select'
     // Props para 'autocomplete' (mapeadas para AppInputAutocomplete)
     sugestoes?: any[];
     buscando?: boolean;

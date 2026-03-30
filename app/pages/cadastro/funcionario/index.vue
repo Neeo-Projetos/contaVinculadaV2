@@ -4,7 +4,10 @@
     <AppFiltro v-model="filtro" v-model:viewMode="visaoAtual" :campos="camposFiltro" titulo="Colaboradores"
       descricao="Gestão e listagem de colaboradores do sistema" icone-titulo="fa7-solid:users-gear"
       :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Colaboradores' }]" :pending="carregandoTela"
-      @buscar="filtrar" @openAdvancedFilter="abrirModalFiltroAvancado">
+      @buscar="filtrar" @openAdvancedFilter="abrirModalFiltroAvancado"
+      @buscarSugestao="buscarSugestoesNome"
+      @selecionarSugestao="({ sugestao }) => selecionarSugestao(sugestao)"
+      @fecharSugestao="fecharSugestoesDelay">
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
         <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao">Controle de Exibição
@@ -131,11 +134,22 @@ const {
   colunas, labels, aplicarExibicao, colunasTemp,
   placeholderDinamico, projetosFormatados,
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
-  mudarPagina, mudarItensPorPagina
+  mudarPagina, mudarItensPorPagina,
+  // Autocomplete
+  sugestoesNome, mostrandoSugestoes, buscandoSugestoes,
+  buscarSugestoesNome, selecionarSugestao, fecharSugestoesDelay
 } = useFuncionarioListagem()
 
 const camposFiltro = computed(() => [
-  { key: 'nomeParam', label: 'Buscar', type: 'text' as const, placeholder: 'Buscar colaboradores...' },
+  { 
+    key: 'nomeParam', 
+    label: 'Buscar', 
+    type: 'autocomplete' as const, 
+    placeholder: 'Buscar colaboradores...',
+    sugestoes: sugestoesNome.value,
+    buscando: buscandoSugestoes.value,
+    mostrarMenu: mostrandoSugestoes.value
+  },
   {
     key: 'statusParam',
     label: 'Status',

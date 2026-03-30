@@ -32,7 +32,7 @@ export function useFuncionarioListagem() {
     buscarLista()
   })
 
-  const filtro = reactive({
+  const filtro = ref({
     nomeParam: '',
     cpfParam: '',
     matriculaParam: '',
@@ -73,7 +73,7 @@ export function useFuncionarioListagem() {
   let timerDebounce: ReturnType<typeof setTimeout>
 
   const buscarSugestoesNome = () => {
-    const texto = filtro.nomeParam
+    const texto = filtro.value.nomeParam
     
     if (texto.length < 3) {
       sugestoesNome.value = []
@@ -99,7 +99,7 @@ export function useFuncionarioListagem() {
   }
 
   const selecionarSugestao = (sugestao: any) => {
-    filtro.nomeParam = sugestao.descricao
+    filtro.value.nomeParam = sugestao.descricao
     mostrandoSugestoes.value = false
   }
 
@@ -137,10 +137,10 @@ export function useFuncionarioListagem() {
   }
 
   const limparFiltrosAvancados = () => {
-    filtro.cpfParam = ''
-    filtro.matriculaParam = ''
-    filtro.emailParam = ''
-    filtro.projetoParam = ''
+    filtro.value.cpfParam = ''
+    filtro.value.matriculaParam = ''
+    filtro.value.emailParam = ''
+    filtro.value.projetoParam = ''
     modalFiltroAvancadoAberto.value = false
     filtrar()
   }
