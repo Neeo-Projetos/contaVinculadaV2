@@ -144,7 +144,7 @@ const camposFiltro = computed<any>(() => [
     mostrarMenu: mostrandoSugestoes.value
   },
   {
-    key: 'statusParam',
+    key: 'ativoParam',
     label: 'Status',
     type: 'select' as const,
     options: [

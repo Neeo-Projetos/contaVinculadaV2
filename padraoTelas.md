@@ -16,6 +16,7 @@ Este documento é a referência arquitetural definitiva para a criação de TUDO
    - **Gatilho Autocomplete**: Ao escolher um item na lista de autocomplete, o disparo da busca (`filtrar()`) deve ser automático.
 3. **Filtros e Status Inicial**: Todo filtro de listagem deve iniciar com o campo `Status` (ativoParam) marcado como **"1" (Ativos)**.
 4. **Data Fetching Assíncrono Restrito**: Nunca use `useFetch` ou `useAsyncData` (isomórficos) para persistência e listagens. Use **SEMPRE o `$fetch` manual dentro de blocos `try/catch/finally`** manipulando *flags* de loading (ex: `carregandoTela.value = true`).
+   - **Retorno de API**: APIs de listagem devem retornar os dados em um objeto com a chave `results` (ex: `{ status: 'success', results: [...] }`) para compatibilidade com o padrão de paginação.
 5. **Sequência de Ações (Slot #acoes)**: No topo das listagens, a sequência visual obrigatória dos botões é: `[Relatório (excel)]` -> `[Exibição (desktop/config)]` -> `[Novo (plus + variacao-acao)]`.
 6. **Suporte a Layout Dinâmico**: O sistema suporta dois modos de navegação (`barraLateral` e `barraSuperior`). Use o composable `useInterfaceSettings` para reagir ao layout atual se necessário.
 6. **Navegação Distinta**: 

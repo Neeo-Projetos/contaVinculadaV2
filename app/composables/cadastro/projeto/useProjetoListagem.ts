@@ -17,17 +17,17 @@ export function useProjetoListagem() {
     if (width.value < 1024) return 'Digite o apelido do proj...'
     return 'Digite o apelido do projeto...'
   })
-  
+
   onMounted(() => {
     // Não executa a busca automática ao montar a tela, apenas carrega dependências de filtro se necessário.
     // carregarBancos()
   })
 
   const filtro = reactive({
-    apelidoParam: '', 
+    apelidoParam: '',
     cnpjParam: '',
-    contaParam: '', 
-    verbaParam: '', 
+    contaParam: '',
+    verbaParam: '',
     ativoParam: '1'
   })
 
@@ -51,9 +51,9 @@ export function useProjetoListagem() {
 
   const listaCompleta = ref<any[]>([])
   const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
-  
+
   const filtrar = () => {
-    paginacao.mudarPagina(1) 
+    paginacao.mudarPagina(1)
     buscarProjetos()
   }
 
@@ -64,7 +64,7 @@ export function useProjetoListagem() {
 
   const buscarSugestoesProjeto = () => {
     const texto = filtro.apelidoParam
-    
+
     if (texto.length < 3) {
       sugestoesProjeto.value = []
       mostrandoSugestoes.value = false
@@ -72,20 +72,20 @@ export function useProjetoListagem() {
     }
 
     clearTimeout(timerDebounce)
-    
+    mostrandoSugestoes.value = true
+
     timerDebounce = setTimeout(async () => {
       buscandoSugestoes.value = true
-      mostrandoSugestoes.value = true
-      
+
       try {
         const resposta = await $fetch<any>(`/api/cadastro/projeto/autocomplete?q=${texto}`)
-        sugestoesProjeto.value = resposta?.data || [] 
+        sugestoesProjeto.value = resposta?.data || []
       } catch (e) {
         console.error('Erro no autocomplete de projeto:', e)
       } finally {
         buscandoSugestoes.value = false
       }
-    }, 400) 
+    }, 400)
   }
 
   const selecionarSugestao = (sugestao: any) => {
@@ -116,7 +116,7 @@ export function useProjetoListagem() {
       })
 
       listaCompleta.value = data?.results || data?.data || []
-      paginacao.mudarPagina(1) 
+      paginacao.mudarPagina(1)
     } catch (err: any) {
       console.error(err)
     } finally {
@@ -157,14 +157,14 @@ export function useProjetoListagem() {
   const abrirHistorico = async (codigo: number) => {
     modalHistoricoAberto.value = true
     carregandoHistorico.value = true
-    historicoSelecionado.value = [] 
+    historicoSelecionado.value = []
 
     try {
       const data = await $fetch<any>('/api/cadastro/projeto/historico', {
         method: 'POST',
         body: { codigo }
       })
-      
+
       if (data && data.status === 'success') {
         historicoSelecionado.value = data.data
       } else {
@@ -184,11 +184,11 @@ export function useProjetoListagem() {
     buscarProjetos, filtrar, placeholderDinamico,
     modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
     modalExibicaoAberto, colunasVisiveis, colunasTemp, abrirModalExibicao, aplicarExibicao,
-    labelsColunas, 
+    labelsColunas,
     filtroGlobal: paginacao.filtroGlobal,
     modalHistoricoAberto, historicoSelecionado, carregandoHistorico, abrirHistorico,
     abrirModalConta, abrirModalVerba,
-    
+
     listaRegistros: paginacao.listaPaginada,
     paginaAtual: paginacao.paginaAtual,
     itensPorPagina: paginacao.itensPorPagina,
@@ -200,4 +200,4 @@ export function useProjetoListagem() {
     mudarPagina: paginacao.mudarPagina,
     mudarItensPorPagina: paginacao.mudarItensPorPagina
   }
-}
+}

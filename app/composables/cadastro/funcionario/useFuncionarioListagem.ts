@@ -60,7 +60,7 @@ export function useFuncionarioListagem() {
 
   const listaCompleta = ref<any[]>([])
   const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
-  
+
   const filtrar = () => {
     paginacao.mudarPagina(1)
     buscarLista()
@@ -73,7 +73,7 @@ export function useFuncionarioListagem() {
 
   const buscarSugestoesNome = () => {
     const texto = filtro.value.nomeParam
-    
+
     if (texto.length < 3) {
       sugestoesNome.value = []
       mostrandoSugestoes.value = false
@@ -81,20 +81,20 @@ export function useFuncionarioListagem() {
     }
 
     clearTimeout(timerDebounce)
-    
+
     timerDebounce = setTimeout(async () => {
       buscandoSugestoes.value = true
       mostrandoSugestoes.value = true
-      
+
       try {
         const resposta = await $fetch<any>(`/api/cadastro/funcionario/autocomplete?q=${texto}`)
-        sugestoesNome.value = resposta?.data || [] 
+        sugestoesNome.value = resposta?.data || []
       } catch (e) {
         console.error('Erro no autocomplete:', e)
       } finally {
         buscandoSugestoes.value = false
       }
-    }, 400) 
+    }, 400)
   }
 
   const selecionarSugestao = (sugestao: any) => {
@@ -166,14 +166,14 @@ export function useFuncionarioListagem() {
     codigoHistorico.value = codigo
     modalHistoricoAberto.value = true
     carregandoHistorico.value = true
-    historicoSelecionado.value = [] 
-    
+    historicoSelecionado.value = []
+
     try {
       const data = await $fetch<any>('/api/cadastro/funcionario/historico', {
         method: 'POST',
         body: { codigo }
       })
-      
+
       if (data && data.status === 'success') {
         historicoSelecionado.value = data.data
       }
@@ -230,7 +230,7 @@ export function useFuncionarioListagem() {
     colunasTemp,
     aplicarExibicao,
     filtrar,
-    
+
     dados: paginacao.listaPaginada,
     listaRegistros: paginacao.listaPaginada,
     paginaAtual: paginacao.paginaAtual,

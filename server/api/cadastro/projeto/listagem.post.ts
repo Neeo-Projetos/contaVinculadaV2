@@ -3,23 +3,40 @@ import { useDb } from '../../../utils/db'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
+  const db = await useDb()
   
-  let query = `
-    SELECT P.codigo, P.apelido, P.descricao, P.cnpj, P.ativo FROM cadastro.projeto P 
-    WHERE (0 = 0)
-  `
-
-  if (body.projetoId) query += ` AND P.codigo = ${Number(body.projetoId)}`
-  if (body.apelido) query += ` AND P.apelido LIKE '%${body.apelido}%'`
-  if (body.cnpj) query += ` AND P.cnpj = '${body.cnpj}'`
-  if (body.ativo && body.ativo !== '') query += ` AND P.ativo = ${Number(body.ativo)}`
-
   try {
-    const pool = await useDb()
-    const result = await pool.request().query(query)
-    return { status: 'success', data: result.recordset }
+    const request = db.request()
+    let query = `
+      SELECT P.codigo, P.apelido, P.descricao, P.cnpj, P.ativo FROM cadastro.projeto P 
+      WHERE (1 = 1)
+    `
+
+    if (body.projetoId) {
+      query += ` AND P.codigo = @projetoId`
+      request.input('projetoId', Number(body.projetoId))
+    }
+    
+    if (body.apelidoParam) {
+      query += ` AND P.apelido LIKE @apelido`
+      request.input('apelido', `%${body.apelidoParam}%`)
+    }
+
+    if (body.cnpjParam) {
+      query += ` AND P.cnpj = @cnpj`
+      request.input('cnpj', body.cnpjParam)
+    }
+
+    if (body.ativoParam && body.ativoParam !== '') {
+      query += ` AND P.ativo = @ativo`
+      request.input('ativo', Number(body.ativoParam))
+    }
+
+    const result = await request.query(query)
+    return { status: 'success', results: result.recordset }
+
   } catch (erro) {
     console.error('Erro ao listar projetos:', erro)
-    return { status: 'failed', mensagem: 'Erro ao buscar projetos no banco.' }
+    return { status: 'failed', message: 'Erro ao buscar projetos no banco.' }
   }
 })

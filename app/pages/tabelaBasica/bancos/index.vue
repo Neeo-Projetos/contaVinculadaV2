@@ -83,11 +83,11 @@ const visaoAtual = ref('lista')
 const buscaRealizada = ref(false)
 const carregando = ref(false)
 const dados = ref<any[]>([])
-const filtro = ref<any>({ descricao: '', ativo: '1' })
+const filtro = ref<any>({ nomeBanco: '', ativo: '1' })
 const filtroGlobal = ref('')
 
 const camposFiltro = computed(() => [
-  { key: 'descricao', label: 'Descrição', type: 'text' as const, placeholder: 'Buscar por nome do banco...' },
+  { key: 'nomeBanco', label: 'Descrição', type: 'text' as const, placeholder: 'Buscar por nome do banco...' },
   {
     key: 'ativo',
     label: 'Status',
