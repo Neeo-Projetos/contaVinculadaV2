@@ -70,7 +70,8 @@
                     <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-2.5 hidden md:block opacity-50"></div>
 
                     <button v-if="exibirFiltroAvancado" @click="$emit('openAdvancedFilter')"
-                        class="text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 px-5 h-[46px] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2.5 border border-transparent group">
+                        class="px-5 h-[46px] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2.5 bg-gray-100/50 hover:bg-white dark:bg-slate-800/40 dark:hover:bg-slate-800 border border-gray-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-md active:scale-95 group"
+                        :class="advancedFilterActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'">
                         <Icon name="fa7-solid:filter" class="h-3.5 w-3.5 transition-transform"
                             :class="{ 'text-emerald-600 dark:text-emerald-400 font-bold': advancedFilterActive }" />
                         <span class="tracking-[0.15em]"
