@@ -64,16 +64,16 @@
           </td>
           <td v-if="colunas.contas" class="px-6 py-4 text-center">
             <button @click="abrirModalConta(item.codigo)"
-              class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
+              class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 transition-all duration-300 shadow-sm mx-auto group ring-1 ring-slate-200/50 dark:ring-slate-700/50 active:scale-95"
               title="Ver Contas">
-              <Icon name="fa7-solid:building-columns" class="w-5 h-5" />
+              <Icon name="fa7-solid:building-columns" class="w-4 h-4 group-hover:scale-110 transition-transform" />
             </button>
           </td>
           <td v-if="colunas.verbas" class="px-6 py-4 text-center">
             <button @click="abrirModalVerba(item.codigo)"
-              class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
+              class="w-10 h-10 flex items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white dark:hover:bg-amber-600 transition-all duration-300 shadow-sm mx-auto group ring-1 ring-amber-200/50 dark:ring-amber-900/30 active:scale-95"
               title="Ver Verbas">
-              <Icon name="fa7-solid:sack-dollar" class="w-5 h-5" />
+              <Icon name="fa7-solid:sack-dollar" class="w-4 h-4 group-hover:scale-110 transition-transform" />
             </button>
           </td>
           <td v-if="colunas.status" class="px-6 py-4 text-center">

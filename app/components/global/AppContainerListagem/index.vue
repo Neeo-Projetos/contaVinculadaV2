@@ -103,7 +103,7 @@
             <tr class="divide-x divide-gray-200 dark:divide-gray-800">
               <slot name="cabecalho-tabela"></slot>
               <th
-                class="px-6 py-4 text-xs font-bold text-center text-gray-500 uppercase tracking-wider bg-gray-50/50 dark:bg-slate-800/20 dark:text-gray-400">
+                class="px-6 py-4 text-xs font-bold text-center text-gray-500 uppercase tracking-wider dark:text-gray-400">
                 Ações
               </th>
             </tr>
@@ -112,29 +112,29 @@
             <tr v-for="(item, index) in lista" :key="item.codigo || index"
               class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors group divide-x divide-gray-100 dark:divide-gray-800/60">
               <slot name="linhas-tabela" :item="item"></slot>
-              <td class="px-6 py-4 text-center bg-gray-50/5 dark:bg-slate-800/5">
+              <td class="px-6 py-4 text-center">
                 <div class="flex items-center justify-center gap-2 pl-2">
                   <button v-if="view" @click.stop="$emit('view', item)"
-                    class="w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-300 border border-blue-500/20 bg-blue-500/5 text-blue-500 hover:bg-blue-500 hover:text-white"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-blue-500/20 bg-blue-500/5 text-blue-500 hover:bg-blue-500 hover:text-white active:scale-95 shadow-sm"
                     title="Ver Detalhes">
                     <Icon v-if="loadingId === item.codigo" name="fa7-solid:spinner"
-                      class="h-3.5 w-3.5 animate-spin" />
-                    <Icon v-else :name="verIcone" class="h-3.5 w-3.5" />
+                      class="h-4 w-4 animate-spin" />
+                    <Icon v-else :name="verIcone" class="h-4 w-4" />
                   </button>
                   <button @click.stop="$emit('edit', item)"
-                    class="w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-300 border border-emerald-500/20 bg-emerald-500/5 text-emerald-500 hover:bg-emerald-500 hover:text-white"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-emerald-500/20 bg-emerald-500/5 text-emerald-500 hover:bg-emerald-500 hover:text-white active:scale-95 shadow-sm"
                     title="Editar">
-                    <Icon name="fa7-solid:pen" class="h-3.5 w-3.5" />
+                    <Icon name="fa7-solid:pen" class="h-4 w-4" />
                   </button>
                   <button v-if="history" @click.stop="$emit('history', item.codigo || item.id)"
-                    class="w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-300 border border-slate-500/20 bg-slate-500/5 text-slate-500 hover:bg-slate-500 hover:text-white"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-slate-500/20 bg-slate-500/5 text-slate-500 hover:bg-slate-500 hover:text-white active:scale-95 shadow-sm"
                     title="Ver Histórico">
-                    <Icon name="fa6-solid:clock-rotate-left" class="h-3.5 w-3.5" />
+                    <Icon name="fa6-solid:clock-rotate-left" class="h-4 w-4" />
                   </button>
                   <button v-if="isAtivo(item)" @click.stop="triggerDelete(item.codigo)"
-                    class="w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-300 border border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white active:scale-95 shadow-sm"
                     title="Excluir">
-                    <Icon name="fa7-solid:trash" class="h-3.5 w-3.5" />
+                    <Icon name="fa7-solid:trash" class="h-4 w-4" />
                   </button>
                 </div>
               </td>
