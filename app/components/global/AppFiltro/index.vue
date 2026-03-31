@@ -82,7 +82,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-end">
-                <div :class="campo.type === 'select' ? 'md:col-span-2 lg:col-span-2' : 'md:col-span-6 lg:col-span-7'" v-for="campo in campos" :key="campo.key">
+                <div :class="campo.colSpan ? campo.colSpan : (campo.type === 'select' ? 'md:col-span-2' : 'md:col-span-6 lg:col-span-7')" v-for="campo in campos" :key="campo.key">
                     <AppInputTexto v-if="campo.type === 'text'" :modelValue="(modelValue[campo.key] as string) || ''"
                         @update:modelValue="val => atualizarModelo(campo.key, val)" :label="campo.label"
                         :placeholder="campo.placeholder" :icone="campo.icon" @keyup.enter="$emit('buscar')" />
@@ -141,6 +141,7 @@ interface CampoFiltro {
     sugestoes?: any[];
     buscando?: boolean;
     mostrarMenu?: boolean;
+    colSpan?: string; // Classe do Tailwind: md:col-span-3, etc.
 }
 
 const emit = defineEmits<{
