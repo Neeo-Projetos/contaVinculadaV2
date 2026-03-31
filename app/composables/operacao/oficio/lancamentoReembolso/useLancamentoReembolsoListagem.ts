@@ -22,12 +22,43 @@ export function useLancamentoReembolsoListagem() {
     return 'Filtrar por projeto ou tipo de movimentação...'
   })
 
-  const filtro = reactive({
-    projeto: '',
+  const filtro = ref({
+    projetoId: '',
     tipoMovimentacao: '',
     dataMovimentacao: '',
-    ativoParam: '1' // Mantendo o padrão de ativos por padrão
+    ativoParam: '1'
   })
+
+  // Autocomplete Projetos
+  const projetoSearch = ref('')
+  const sugestoesProjetos = ref<any[]>([])
+  const buscandoProjetos = ref(false)
+  const mostrarMenuProjetos = ref(false)
+
+  const buscarProjetos = async () => {
+    if (!projetoSearch.value) {
+      sugestoesProjetos.value = []
+      return
+    }
+    buscandoProjetos.value = true
+    mostrarMenuProjetos.value = true
+    try {
+      const resp = await $fetch<any[]>('/api/cadastro/projeto/autocomplete', {
+        params: { busca: projetoSearch.value }
+      })
+      sugestoesProjetos.value = resp
+    } catch (error) {
+      console.error('Erro ao buscar projetos', error)
+    } finally {
+      buscandoProjetos.value = false
+    }
+  }
+
+  const selecionarProjeto = (proj: any) => {
+    filtro.value.projetoId = String(proj.projetoId)
+    projetoSearch.value = proj.apelido
+    mostrarMenuProjetos.value = false
+  }
 
   // Combos
   const projetos = ref<any[]>([])
@@ -102,6 +133,16 @@ export function useLancamentoReembolsoListagem() {
     buscarLista()
   }
 
+  const limparFiltros = () => {
+    filtro.value = {
+        projetoId: '',
+        tipoMovimentacao: '',
+        dataMovimentacao: '',
+        ativoParam: '1'
+    }
+    projetoSearch.value = ''
+  }
+
   const abrirModalDetalhes = async (id: number) => {
     try {
       const response = await $fetch<any>('/api/operacao/oficio/lancamentoReembolso/detalhes', {
@@ -146,7 +187,6 @@ export function useLancamentoReembolsoListagem() {
 
   onMounted(() => {
     carregarCombos()
-    buscarLista()
   })
 
   return {
@@ -177,6 +217,15 @@ export function useLancamentoReembolsoListagem() {
     labels: labelsColunas,
     colunasTemp,
     placeholderDinamico,
+
+    // Autocomplete Projetos
+    projetoSearch,
+    sugestoesProjetos,
+    buscandoProjetos,
+    mostrarMenuProjetos,
+    buscarProjetos,
+    selecionarProjeto,
+    limparFiltros,
 
     // Paginação
     dados: paginacao.listaPaginada,

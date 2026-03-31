@@ -10,13 +10,16 @@
       icone-titulo="fa7-solid:file-invoice-dollar"
       :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Operação' }, { label: 'Ofício' }, { label: 'Reembolso' }]"
       :pending="carregando"
-      @buscar="buscarLista"
-      @openAdvancedFilter="abrirModalExibicao"
+      @buscar="filtrar"
+      @openAdvancedFilter="modalFiltroAvancadoAberto = true"
+      @buscarSugestao="buscarProjetos"
+      @selecionarSugestao="({ sugestao }) => selecionarProjeto(sugestao)"
+      @fecharSugestao="mostrarMenuProjetos = false"
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="visaoAtual = visaoAtual === 'lista' ? 'cards' : 'lista'">Controle de Exibição</AppBotao>
-        <AppBotao variacao="acao" icone="fa7-solid:file-circle-plus" @click="novoRegistro">
+        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao">Controle de Exibição</AppBotao>
+        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="novoRegistro">
           Novo Lançamento
         </AppBotao>
       </template>
@@ -72,26 +75,27 @@
             </span>
           </td>
           <td v-if="colunas.acoes" class="p-4 text-center">
-            <div class="flex items-center justify-center gap-1.5">
+            <div class="flex items-center justify-center gap-2">
               <button @click="abrirModalFuncionarios(item.codigo)" 
-                :class="item.funcionario === 1 ? 'text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10' : 'text-gray-300 opacity-40 cursor-not-allowed'" 
-                class="p-2 rounded-xl transition-all" title="Funcionários">
+                :disabled="item.funcionario !== 1"
+                :class="item.funcionario === 1 ? 'text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20' : 'text-gray-300 opacity-40 cursor-not-allowed'" 
+                class="w-10 h-10 flex items-center justify-center rounded-xl transition-all active:scale-95 shadow-sm" title="Funcionários">
                 <Icon name="fa7-solid:users" class="w-4 h-4" />
               </button>
               <button @click="abrirModalDetalhes(item.codigo)" 
-                class="p-2 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Ver Detalhes">
+                class="w-10 h-10 flex items-center justify-center text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 rounded-xl transition-all active:scale-95 shadow-sm" title="Ver Detalhes">
                 <Icon name="fa7-solid:circle-info" class="w-4 h-4" />
               </button>
               <button @click="gerarPdfOficio(item.codigo)" 
-                class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all" title="PDF Ofício">
+                class="w-10 h-10 flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 rounded-xl transition-all active:scale-95 shadow-sm" title="PDF Ofício">
                 <Icon name="fa7-solid:file-pdf" class="w-4 h-4" />
               </button>
               <button @click="verHistorico" 
-                class="p-2 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-xl transition-all" title="Histórico">
+                class="w-10 h-10 flex items-center justify-center text-amber-600 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 rounded-xl transition-all active:scale-95 shadow-sm" title="Histórico">
                 <Icon name="fa6-solid:history" class="w-4 h-4" />
               </button>
               <NuxtLink :to="`/operacao/oficio/lancamentoReembolso/cadastro?id=${item.codigo}`"
-                class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Editar">
+                class="w-10 h-10 flex items-center justify-center text-gray-600 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl transition-all active:scale-95 shadow-sm" title="Editar">
                 <Icon name="fa7-solid:pen-to-square" class="w-4 h-4" />
               </NuxtLink>
             </div>
@@ -181,6 +185,12 @@
       @close="modalExibicaoAberto = false" 
     />
 
+    <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" @close="modalFiltroAvancadoAberto = false"
+      @aplicar="filtrar" @limpar="limparFiltros">
+      <AppSelect v-model="filtro.tipoMovimentacao" label="Tipo de Movimentação" placeholder="Todos os Tipos"
+        :opcoes="tiposMovimentacao" itemValue="codigo" itemLabel="descricao" icone="fa7-solid:filter" />
+    </AppModalFiltroAvancado>
+
   </div>
 </template>
 
@@ -192,35 +202,33 @@ const {
   modalFuncionarioAberto, listaFuncionariosModal, abrirModalFuncionarios, gerarPdfOficio,
   modalExibicaoAberto, abrirModalExibicao, aplicarExibicao, colunas, labels, colunasTemp, placeholderDinamico,
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
-  mudarPagina, mudarItensPorPagina
+  mudarPagina, mudarItensPorPagina,
+  // Autocomplete Projetos
+  projetoSearch, sugestoesProjetos, buscandoProjetos, mostrarMenuProjetos,
+  buscarProjetos, selecionarProjeto, limparFiltros
 } = useLancamentoReembolsoListagem()
+
+const modalFiltroAvancadoAberto = ref(false)
 
 const camposFiltro = computed(() => [
   { 
-    key: 'projeto', 
+    key: 'projetoId', 
     label: 'Projeto', 
-    type: 'select' as const, 
-    opcoes: projetos.value, 
-    itemValue: 'codigo', 
-    itemLabel: 'apelido',
-    placeholder: 'Projeto...'
-  },
-  { 
-    key: 'tipoMovimentacao', 
-    label: 'Tipo', 
-    type: 'select' as const, 
-    opcoes: tiposMovimentacao.value, 
-    itemValue: 'codigo', 
-    itemLabel: 'descricao',
-    placeholder: 'Tipo...'
+    type: 'autocomplete' as const, 
+    placeholder: 'Buscar projeto...',
+    sugestoes: sugestoesProjetos.value,
+    buscando: buscandoProjetos.value,
+    mostrarMenu: mostrarMenuProjetos.value,
+    colSpan: 'md:col-span-6'
   },
   { 
     key: 'dataMovimentacao', 
     label: 'Data', 
     type: 'text' as const, 
-    placeholder: 'dd/mm/aaaa',
+    placeholder: 'Ex: 01/01/2024',
     mask: '##/##/####',
-    icon: 'fa7-solid:calendar-days'
+    icon: 'fa7-solid:calendar-days',
+    colSpan: 'md:col-span-3'
   }
 ])
 
