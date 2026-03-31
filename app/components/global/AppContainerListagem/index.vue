@@ -15,20 +15,21 @@
         <!-- Seletor de Linhas na Direita -->
         <div class="flex items-center gap-4 group">
           <span class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">Linhas por página:</span>
-          <div class="relative">            <div @click="dropdownLinhasAberto = !dropdownLinhasAberto"
-                class="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl px-4 py-2 text-[11px] font-black text-gray-700 dark:text-gray-300 focus:outline-none transition-all cursor-pointer shadow-sm min-w-[70px] flex items-center justify-between gap-3 hover:border-emerald-500/50"
+          <div class="relative flex-shrink-0">
+            <div @click="dropdownLinhasAberto = !dropdownLinhasAberto"
+                class="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-lg px-5 py-2 text-sm font-black text-gray-700 dark:text-gray-300 focus:outline-none transition-all cursor-pointer shadow-sm min-w-[85px] flex items-center justify-between gap-3 hover:border-emerald-500/50"
                 :class="{ 'ring-2 ring-emerald-500/50 border-emerald-500 shadow-[0_0_15px_-5px_rgba(16,185,129,0.3)]': dropdownLinhasAberto }">
                 <span>{{ itensPorPagina }}</span>
-                <Icon name="fa7-solid:chevron-down" class="w-3 h-3 text-gray-400 group-hover:text-emerald-500 transition-all" :class="{ 'rotate-180': dropdownLinhasAberto }" />
+                <Icon name="fa7-solid:chevron-down" class="w-4 h-4 text-gray-400 group-hover:text-emerald-500 transition-all" :class="{ 'rotate-180': dropdownLinhasAberto }" />
             </div>
             
             <div v-if="dropdownLinhasAberto" class="fixed inset-0 z-40" @click="dropdownLinhasAberto = false"></div>
             
             <Transition name="dropdown">
-                <div v-if="dropdownLinhasAberto" class="absolute top-full mt-1.5 right-0 z-50 w-full min-w-[80px] bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-gray-700/80 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl py-1 animate-slide-up">
+                <div v-if="dropdownLinhasAberto" class="absolute top-full mt-1.5 right-0 z-50 w-full min-w-[85px] bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-gray-700/80 rounded-lg shadow-2xl overflow-hidden backdrop-blur-xl py-1 animate-slide-up">
                 <ul class="flex flex-col">
                     <li v-for="opcao in (visaoAtual === 'cards' ? [12, 24, 48, 96] : [10, 25, 50, 100])" :key="opcao" @click="selecionarLinhas(opcao)"
-                    class="px-4 py-2.5 text-[11px] font-bold cursor-pointer transition-colors text-center"
+                    class="px-4 py-2 text-sm font-bold cursor-pointer transition-colors text-center"
                     :class="itensPorPagina === opcao ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'">
                     {{ opcao }}
                     </li>
