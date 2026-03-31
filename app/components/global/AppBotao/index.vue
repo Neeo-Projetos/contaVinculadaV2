@@ -2,7 +2,7 @@
   <button
     :type="nativeType"
     :disabled="disabled || carregando"
-    class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+    class="w-full sm:w-auto px-6 h-[46px] rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
     :class="classesVariacao"
   >
     <Icon v-if="carregando" name="fa7-solid:spinner" class="animate-spin w-4 h-4" />

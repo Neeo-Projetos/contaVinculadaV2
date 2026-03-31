@@ -1,6 +1,6 @@
 <template>
   <div class="relative w-full sm:flex-1">
-    <Icon name="fa7-solid:magnifying-glass" class="absolute left-4 top-3.5 text-gray-400 w-4 h-4 z-10" />
+    <Icon name="fa6-solid:magnifying-glass" class="absolute left-4 top-3.5 text-gray-400 w-4 h-4 z-10" />
     <input 
       ref="inputRef"
       :value="modelValue" @input="aoDigitar" @focus="$emit('buscar')" @blur="fecharComAtraso"
@@ -24,7 +24,7 @@
           <li v-for="sugestao in sugestoes" :key="sugestao.id || sugestao.descricao"
             @mousedown.prevent="selecionar(sugestao)"
             class="flex items-center gap-3 px-5 py-3 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 cursor-pointer transition-all border-b border-gray-50 dark:border-gray-800/50 last:border-0 group">
-            <Icon name="fa7-solid:magnifying-glass"
+            <Icon name="fa6-solid:magnifying-glass"
               class="w-3.5 h-3.5 text-gray-400 group-hover:text-emerald-500 transition-colors shrink-0" />
             <span
               class="text-sm text-gray-700 dark:text-gray-300 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400"
@@ -33,7 +33,7 @@
         </ul>
         <div v-else-if="!buscando && String(modelValue).length >= 3"
           class="p-10 text-center flex flex-col items-center justify-center gap-4 text-gray-400 dark:text-gray-500">
-          <Icon name="fa7-solid:magnifying-glass" class="w-8 h-8 opacity-20" />
+          <Icon name="fa6-solid:magnifying-glass" class="w-8 h-8 opacity-20" />
           <span class="text-xs font-bold uppercase tracking-widest">Nenhum resultado encontrado.</span>
         </div>
       </div>
