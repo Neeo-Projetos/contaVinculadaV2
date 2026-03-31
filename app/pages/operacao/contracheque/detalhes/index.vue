@@ -14,10 +14,8 @@
       @openAdvancedFilter="modalFiltroAvancadoAberto = true"
     >
       <template #acoes>
+        <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
         <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="visaoAtual = visaoAtual === 'lista' ? 'cards' : 'lista'">Controle de Exibição</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:gears" @click="navigateTo('/operacao/contracheque/processamento')">
-          Processamento
-        </AppBotao>
       </template>
 
       <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
@@ -134,13 +132,29 @@ const {
 } = useContrachequeDetalhes()
 
 const camposFiltro = computed(() => [
-  { key: 'mesAno', label: 'Mês/Ano', type: 'text' as const, placeholder: '##/####', mask: '##/####' },
+  { 
+    key: 'mesAno', 
+    label: 'Mês/Ano', 
+    type: 'text' as const, 
+    placeholder: 'Ex: 03/2024', 
+    mask: '##/####',
+    colSpan: 'md:col-span-3'
+  },
   { 
     key: 'nomeFuncionario', 
     label: 'Colaborador', 
     type: 'text' as const, 
     placeholder: 'Filtrar por nome...',
-    icon: 'fa7-solid:user-magnifying-glass'
+    icon: 'fa6-solid:magnifying-glass',
+    colSpan: 'md:col-span-6'
   }
 ])
+
+const gerarExcel = () => {
+    alert('📊 Gerando relatório de histórico (Excel)...')
+}
+
+const gerarPdf = () => {
+    alert('📄 Gerando espelho de histórico (PDF)...')
+}
 </script>
