@@ -9,13 +9,6 @@
       <div class="w-full sm:max-w-sm flex items-center gap-3">
         <AppInputBusca :model-value="filtroGlobal" @update:model-value="$emit('update:filtroGlobal', $event)"
           placeholder="Buscar na listagem..." />
-
-        <!-- Indicador de Filtro Ativo (Sutil) -->
-        <div v-if="filtroGlobal"
-          class="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 animate-pulse border border-emerald-500/20"
-          title="Filtrando lista local">
-          <Icon name="fa7-solid:filter-list" class="w-3.5 h-3.5" />
-        </div>
       </div>
 
       <div class="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
