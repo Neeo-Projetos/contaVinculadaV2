@@ -1,96 +1,87 @@
 <template>
   <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
-    <AppCabecalhoPagina 
-      tituloFino="Parâmetros" 
-      tituloGrosso="Financeiros"
+    <AppFiltro 
+      v-model="filtro" 
+      v-model:viewMode="visaoAtual" 
+      :campos="camposFiltro" 
+      titulo="Parâmetros Financeiros"
       descricao="Gerencie as alíquotas e percentuais de retenção por projeto" 
-      icone="fa7-solid:percent" 
-    />
-
-    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
-      <template #entradas>
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end w-full">
-          <div class="md:col-span-8">
-            <AppInputTexto v-model="filtro.projetoNome" label="Projeto" placeholder="Digite o projeto..." icone="fa7-solid:briefcase" />
-          </div>
-          <div class="md:col-span-4">
-            <AppSelecaoStatus v-model="filtro.ativo" />
-          </div>
-        </div>
-      </template>
-
-      <template #acoes-principais>
-        <AppBotao variacao="primario" icone="fa7-solid:plus" @click="novoRegistro">
+      icone-titulo="fa7-solid:percent"
+      :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Configuração' }, { label: 'Parâmetros' }, { label: 'Financeiros' }]"
+      :pending="carregando"
+      @buscar="buscarFinanceiros"
+    >
+      <template #acoes>
+        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="visaoAtual = visaoAtual === 'lista' ? 'cards' : 'lista'">Controle de Exibição</AppBotao>
+        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="novoRegistro">
           Novo Registro
         </AppBotao>
-        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarFinanceiros">
-          Pesquisar
-        </AppBotao>
-      </template>
-    </AppBarraFerramentas>
-
-    <AppContainerListagem 
-      :carregando="carregando" 
-      :buscaRealizada="true" 
-      :lista="financeiros"
-      :visaoAtual="visaoAtual" 
-      @mudarPagina="() => {}"
-    >
-      <template #cabecalho-tabela>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Projeto</th>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Taxas</th>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Histórico</th>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Ações</th>
       </template>
 
-      <template #linhas-tabela="{ item }">
-        <td class="px-6 py-4 font-bold text-sm text-gray-900 dark:text-white">
-            <div class="flex flex-col">
-                <span>{{ item.apelido }}</span>
-                <span class="text-xs text-gray-500 font-medium">{{ item.projeto }}</span>
-            </div>
-        </td>
-        <td class="px-6 py-4 text-center">
-          <button @click="abrirModalParametros(item)" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-all" title="Ver Alíquotas">
-            <Icon name="fa7-solid:percent" class="w-5 h-5" />
-          </button>
-        </td>
-        <td class="px-6 py-4 text-center">
-            <AppAtivo :ativo="item.ativo === 1" />
-        </td>
-        <td class="px-6 py-4 text-center">
-          <button @click="abrirHistorico(item.codigo)" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-all" title="Ver Histórico">
-            <Icon name="fa7-solid:clock-rotate-left" class="w-5 h-5" />
-          </button>
-        </td>
-        <td class="px-6 py-4 text-right">
-          <NuxtLink :to="`/configuracao/parametros/financeiros/cadastro?id=${item.codigo}`" class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all inline-block" title="Editar">
-            <Icon name="fa7-solid:pen-to-square" class="w-5 h-5" />
-          </NuxtLink>
-        </td>
-      </template>
+      <AppContainerListagem 
+        :carregando="carregando" 
+        :buscaRealizada="true" 
+        :lista="financeiros"
+        :visaoAtual="visaoAtual" 
+        @mudarPagina="() => {}"
+      >
+        <template #cabecalho-tabela>
+          <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Projeto</th>
+          <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Taxas</th>
+          <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
+          <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Histórico</th>
+          <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Ações</th>
+        </template>
 
-      <template #cards="{ item }">
-        <AppCardListagem 
-          :titulo="item.apelido" 
-          :subtituloNome="'Projeto'" 
-          :subtituloValor="item.projeto"
-          :ativo="item.ativo === 1"
-          @ver-detalhes="navigateTo(`/configuracao/parametros/financeiros/cadastro?id=${item.codigo}`)"
-          @clique-titulo="navigateTo(`/configuracao/parametros/financeiros/cadastro?id=${item.codigo}`)"
-        >
-            <template #actions-extra>
-                <button @click="abrirModalParametros(item)" class="p-2 text-gray-400 hover:text-blue-500 rounded-lg transition-colors border border-gray-100 dark:border-gray-800" title="Alíquotas">
-                    <Icon name="fa7-solid:percent" class="w-4 h-4" />
-                </button>
-                <button @click="abrirHistorico(item.codigo)" class="p-2 text-gray-400 hover:text-blue-500 rounded-lg transition-colors border border-gray-100 dark:border-gray-800" title="Histórico">
-                    <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" />
-                </button>
-            </template>
-        </AppCardListagem>
-      </template>
-    </AppContainerListagem>
+        <template #linhas-tabela="{ item }">
+          <td class="px-6 py-4 font-bold text-sm text-gray-900 dark:text-white">
+              <div class="flex flex-col">
+                  <span>{{ item.apelido }}</span>
+                  <span class="text-xs text-gray-500 font-medium">{{ item.projeto }}</span>
+              </div>
+          </td>
+          <td class="px-6 py-4 text-center">
+            <button @click="abrirModalParametros(item)" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-all" title="Ver Alíquotas">
+              <Icon name="fa7-solid:percent" class="w-5 h-5" />
+            </button>
+          </td>
+          <td class="px-6 py-4 text-center">
+              <AppAtivo :ativo="item.ativo === 1" />
+          </td>
+          <td class="px-6 py-4 text-center">
+            <button @click="abrirHistorico(item.codigo)" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-all" title="Ver Histórico">
+              <Icon name="fa7-solid:clock-rotate-left" class="w-5 h-5" />
+            </button>
+          </td>
+          <td class="px-6 py-4 text-right">
+            <NuxtLink :to="`/configuracao/parametros/financeiros/cadastro?id=${item.codigo}`" class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all inline-block" title="Editar">
+              <Icon name="fa7-solid:pen-to-square" class="w-5 h-5" />
+            </NuxtLink>
+          </td>
+        </template>
+
+        <template #cards="{ item }">
+          <AppCardListagem 
+            :titulo="item.apelido" 
+            :subtituloNome="'Projeto'" 
+            :subtituloValor="item.projeto"
+            :ativo="item.ativo === 1"
+            :mostrarStatus="true"
+            @ver-detalhes="navigateTo(`/configuracao/parametros/financeiros/cadastro?id=${item.codigo}`)"
+            @clique-titulo="navigateTo(`/configuracao/parametros/financeiros/cadastro?id=${item.codigo}`)"
+          >
+              <template #actions-extra>
+                  <button @click="abrirModalParametros(item)" class="p-2 text-gray-400 hover:text-blue-500 rounded-lg transition-colors border border-gray-100 dark:border-gray-800" title="Alíquotas">
+                      <Icon name="fa7-solid:percent" class="w-4 h-4" />
+                  </button>
+                  <button @click="abrirHistorico(item.codigo)" class="p-2 text-gray-400 hover:text-blue-500 rounded-lg transition-colors border border-gray-100 dark:border-gray-800" title="Histórico">
+                      <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" />
+                  </button>
+              </template>
+          </AppCardListagem>
+        </template>
+      </AppContainerListagem>
+    </AppFiltro>
 
     <AppModalHistorico 
       :aberto="modalHistoricoAberto" 
@@ -134,10 +125,24 @@ const visaoAtual = ref('lista')
 const carregando = ref(false)
 const filtroAberto = ref(true)
 
-const filtro = ref({
+const filtro = ref<any>({
   projetoNome: '',
   ativo: '1'
 })
+
+const camposFiltro = computed(() => [
+  { key: 'projetoNome', label: 'Projeto', type: 'text' as const, placeholder: 'Digite o projeto...' },
+  {
+    key: 'ativo',
+    label: 'Status',
+    type: 'select' as const,
+    options: [
+      { label: 'Ativos', value: '1' },
+      { label: 'Inativos', value: '0' },
+      { label: 'Todos', value: '' }
+    ]
+  }
+])
 
 interface Financeiro {
   codigo: number

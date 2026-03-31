@@ -1,127 +1,106 @@
 <template>
-  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
+  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100 font-bold">
 
-    <AppCabecalhoPagina tituloFino="Extrato" tituloGrosso="Projeto"
-      descricao="Visualize saldos e movimentações detalhadas por projeto" icone="fa7-solid:chart-pie" />
-
-    <AppBarraFerramentas v-model:visao-atual="visaoAtual" mostrar-relatorio @excel="gerarExcel" @pdf="gerarPdf">
-      <template #entradas>
-        <AppInputAutocomplete 
-          v-model="filtro.nomeParam" 
-          :sugestoes="sugestoesNome" 
-          :buscando="buscandoSugestoes"
-          :mostrarMenu="mostrandoSugestoes" 
-          :placeholder="placeholderDinamico"
-          @buscar="buscarSugestoesNome" 
-          @selecionar="selecionarSugestao" 
-          @fechar="fecharSugestoesDelay"
-          @enter="buscarLista" 
-        />
-      </template>
-
-      <template #acoes-secundarias>
-        <AppBotao variacao="padrao" icone="fa7-solid:table-columns" @click="abrirModalExibicao">Exibição</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:filter" @click="abrirModalFiltroAvancado">Filtros Avançados</AppBotao>
-      </template>
-
-      <template #acoes-principais>
+    <AppFiltro 
+      v-model="filtro" 
+      v-model:viewMode="visaoAtual" 
+      :campos="camposFiltro" 
+      titulo="Extrato por Projeto"
+      descricao="Analise o fluxo financeiro e o saldo consolidado de projetos específicos" 
+      icone-titulo="fa7-solid:chart-pie"
+      :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Operação' }, { label: 'Tesouraria' }, { label: 'Extrato Projeto' }]"
+      :pending="carregando"
+      @buscar="buscarLista"
+      @openAdvancedFilter="abrirModalExibicao"
+    >
+      <template #acoes>
+        <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="visaoAtual = visaoAtual === 'lista' ? 'cards' : 'lista'">Controle de Exibição</AppBotao>
         <AppBotao variacao="padrao" icone="fa7-solid:user-tag" @click="navigateTo('/operacao/movimentacaoBancaria/extratoFuncionario')">
-          Ir para Extrato Funcionário
+          Extrato Funcionário
         </AppBotao>
       </template>
 
-      <template #acoes-pesquisa>
-        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarLista">
-          Atualizar Saldos
-        </AppBotao>
-      </template>
-    </AppBarraFerramentas>
+      <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
+        :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
+        :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
+        :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
+        @mudarItensPorPagina="mudarItensPorPagina">
 
-    <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
-      :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
-      :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
-      :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
-      @mudarItensPorPagina="mudarItensPorPagina">
+        <template #cabecalho-tabela>
+          <th v-if="colunas.projeto" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Projeto</th>
+          <th v-if="colunas.conta" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Conta Vinculada</th>
+          <th v-if="colunas.saldo" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Saldo Atual</th>
+          <th v-if="colunas.ultMov" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Última Mov.</th>
+          <th v-if="colunas.acoes" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center w-28">Ações</th>
+        </template>
 
-      <template #cabecalho-tabela>
-        <th v-if="colunas.projeto" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Projeto</th>
-        <th v-if="colunas.banco" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center w-60">Banco Principal</th>
-        <th v-if="colunas.saldo" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center w-48">Saldo Consolidado</th>
-        <th v-if="colunas.acoes" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center w-28">Extrato</th>
-      </template>
-
-      <template #linhas-tabela="{ item }">
-        <td v-if="colunas.projeto" class="px-6 py-4">
-          <div class="flex items-center gap-3">
-            <div
-              class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0">
-              {{ item.apelido.charAt(0).toUpperCase() }}
-            </div>
-            <div class="flex flex-col min-w-0">
-              <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{{ item.apelido }}</span>
-              <span class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ item.projeto }}</span>
-            </div>
-          </div>
-        </td>
-        <td v-if="colunas.banco" class="px-6 py-4 text-center w-60">
-          <span class="text-sm text-gray-600 dark:text-gray-400">{{ item.nomeBanco || 'Não vinculado' }}</span>
-        </td>
-        <td v-if="colunas.saldo" class="px-6 py-4 text-center font-black w-48" :class="Number(item.saldoProjeto) >= 0 ? 'text-emerald-600' : 'text-red-500'">
-          R$ {{ formatarMoeda(item.saldoProjeto) }}
-        </td>
-        <td v-if="colunas.acoes" class="px-6 py-4 text-center w-28">
-           <div class="flex items-center justify-center">
+        <template #linhas-tabela="{ item }">
+          <td v-if="colunas.projeto" class="px-6 py-4">
+             <div class="flex flex-col">
+               <span class="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-tight">{{ item.projeto }}</span>
+               <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{{ item.apelido }}</span>
+             </div>
+          </td>
+          <td v-if="colunas.conta" class="px-6 py-4">
+            <span class="text-xs text-gray-500 dark:text-gray-400 font-medium italic">{{ item.contaVinculada }}</span>
+          </td>
+          <td v-if="colunas.saldo" class="px-6 py-4 text-center">
+            <span class="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1.5 rounded-lg tabular-nums border border-emerald-500/10">
+              R$ {{ formatarMoeda(item.saldoProjeto) }}
+            </span>
+          </td>
+          <td v-if="colunas.ultMov" class="px-6 py-4 text-center font-bold text-gray-500 tabular-nums text-xs">
+            {{ item.dataUltimaMovimentacao }}
+          </td>
+          <td v-if="colunas.acoes" class="px-6 py-4 text-center">
             <button @click.stop="abrirModalExtrato(item.codigoProjeto)"
               class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
-              title="Ver Histórico Completo">
-              <Icon name="fa7-solid:clock-rotate-left" class="w-5 h-5" />
+              title="Ver Extrato Detalhado">
+              <Icon name="fa7-solid:chart-line" class="w-5 h-5" />
             </button>
-          </div>
-        </td>
-      </template>
+          </td>
+        </template>
 
-      <template #cards="{ item }">
-        <AppCardListagem :titulo="item.apelido" :subtituloNome="'Projeto'" :subtituloValor="item.projeto"
-          :ativo="true" :mostrarStatus="false" :mostrarHistorico="false"
-          :detalhes="[
-            { icone: 'fa7-solid:building-columns', texto: item.nomeBanco || 'Sem Banco' },
-            { icone: 'fa7-solid:sack-dollar', texto: `Saldo: R$ ${formatarMoeda(item.saldoProjeto)}` }
-          ]" 
-          @ver-detalhes="abrirModalExtrato(item.codigoProjeto)">
-          <template #footer-actions>
-             <AppBotao variacao="acao" icone="fa7-solid:chart-line" class="flex-1" @click="abrirModalExtrato(item.codigoProjeto)">Ver Extrato</AppBotao>
-          </template>
-        </AppCardListagem>
-      </template>
+        <template #cards="{ item }">
+          <AppCardListagem :titulo="item.projeto" subtituloNome="Conta" :subtituloValor="item.contaVinculada"
+            :ativo="true" :mostrarStatus="false" :mostrarHistorico="false"
+            :detalhes="[
+              { icone: 'fa7-solid:piggy-bank', texto: `Saldo: R$ ${formatarMoeda(item.saldoProjeto)}` },
+              { icone: 'fa7-solid:calendar-check', texto: `Última Mov: ${item.dataUltimaMovimentacao}` }
+            ]">
+            <template #footer-actions>
+               <AppBotao variacao="acao" icone="fa7-solid:chart-line" class="flex-1 font-black uppercase tracking-widest text-[10px] h-10" @click="abrirModalExtrato(item.codigoProjeto)">Ver Extrato</AppBotao>
+            </template>
+          </AppCardListagem>
+        </template>
+      </AppContainerListagem>
+    </AppFiltro>
 
-    </AppContainerListagem>
+    <!-- Modais -->
+    <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labels" @aplicar="aplicarExibicao"
+      @close="modalExibicaoAberto = false" />
 
     <AppExtratoDetalhadoModal
       :isOpen="modalExtratoAberto"
-      :id="projetoSelecionado"
       tipo="projeto"
+      :id="projetoSelecionado"
       @close="modalExtratoAberto = false"
     />
 
     <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" @close="modalFiltroAvancadoAberto = false"
       @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
-
       <div class="md:col-span-2">
          <AppSelect v-model="filtro.projetoParam" label="Filtrar por Projeto" placeholder="Todos os Projetos"
           itemValue="codigo" itemLabel="descricao"
           :opcoes="projetosFormatados" />
       </div>
-
       <div class="md:col-span-2">
         <AppSelect v-model="filtro.contaVinculadaParam" label="Filtrar por Conta" placeholder="Todas as Contas"
           itemValue="codigo" itemLabel="descricao"
           :opcoes="contasAtivas.map(c => ({ codigo: c.codigo, descricao: c.nomeBanco }))" />
       </div>
-
     </AppModalFiltroAvancado>
-
-    <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labels" @aplicar="aplicarExibicao"
-      @close="modalExibicaoAberto = false" />
 
   </div>
 </template>
@@ -139,6 +118,32 @@ const {
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = useExtratoProjetoListagem()
+
+const camposFiltro = computed(() => [
+  { 
+    key: 'nomeParam', 
+    label: 'Descrição / Projeto', 
+    type: 'text' as const, 
+    placeholder: placeholderDinamico.value || 'Projeto...',
+    icon: 'fa7-solid:magnifying-glass'
+  },
+  { 
+    key: 'dataInicioParam', 
+    label: 'Início', 
+    type: 'text' as const, 
+    placeholder: 'Data Início',
+    mask: '##/##/####',
+    icon: 'fa7-solid:calendar-day'
+  },
+  { 
+    key: 'dataFimParam', 
+    label: 'Fim', 
+    type: 'text' as const, 
+    placeholder: 'Data Fim',
+    mask: '##/##/####',
+    icon: 'fa7-solid:calendar-day'
+  }
+])
 
 const gerarExcel = () => {
     alert('📊 Gerando extrato de projetos (Excel)...')

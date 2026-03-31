@@ -31,16 +31,30 @@
       </div>
     </div>
 
-    <div class="mt-auto pt-4 flex items-center gap-3 w-full">
-      
-      <button @click="$emit('ver-detalhes')" class="flex-1 flex items-center justify-center gap-2 px-5 py-3 text-sm font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl transition-all border border-emerald-200 dark:border-emerald-800/60 hover:border-emerald-300 dark:hover:border-emerald-700 shadow-sm">
-        <Icon name="fa7-solid:folder-open" class="w-5 h-5" /> Abrir
+    <div class="mt-auto pt-4 flex items-center justify-center gap-3 w-full">
+      <button @click="$emit('ver-detalhes')" 
+        class="w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300 border border-blue-500/20 bg-blue-500/5 text-blue-500 hover:bg-blue-500 hover:text-white"
+        title="Ver Detalhes">
+        <Icon name="fa7-solid:eye" class="h-5 w-5" />
       </button>
 
-      <button v-show="mostrarHistorico" @click="$emit('ver-historico')" class="flex-1 flex items-center justify-center gap-2 px-5 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl transition-all border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 shadow-sm">
-        <Icon name="fa7-solid:clock-rotate-left" class="w-5 h-5 opacity-80" /> Histórico
+      <button @click="$emit('editar')" 
+        class="w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300 border border-emerald-500/20 bg-emerald-500/5 text-emerald-500 hover:bg-emerald-500 hover:text-white"
+        title="Editar">
+        <Icon name="fa7-solid:pen" class="h-5 w-5" />
       </button>
-      
+
+      <button v-show="mostrarHistorico" @click="$emit('ver-historico')" 
+        class="w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300 border border-slate-500/20 bg-slate-500/5 text-slate-500 hover:bg-slate-500 hover:text-white"
+        title="Ver Histórico">
+        <Icon name="fa6-solid:clock-rotate-left" class="h-5 w-5" />
+      </button>
+
+      <button @click="$emit('excluir')" 
+        class="w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300 border border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white"
+        title="Excluir">
+        <Icon name="fa7-solid:trash" class="h-5 w-5" />
+      </button>
     </div>
 
   </div>
@@ -66,5 +80,5 @@ defineProps({
   mostrarHistorico: { type: Boolean, default: true }
 })
 
-defineEmits(['clique-titulo', 'ver-detalhes', 'ver-historico'])
+defineEmits(['clique-titulo', 'ver-detalhes', 'ver-historico', 'editar', 'excluir'])
 </script>

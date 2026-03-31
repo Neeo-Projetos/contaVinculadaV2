@@ -1,7 +1,7 @@
 <template>
   <div class="relative w-full sm:max-w-md">
     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-      <Icon name="fa7-solid:magnifying-glass" class="h-4 w-4 text-gray-400" />
+      <Icon name="fa6-solid:magnifying-glass" class="h-4 w-4 text-gray-400" />
     </div>
     <input
       :value="modelValue"

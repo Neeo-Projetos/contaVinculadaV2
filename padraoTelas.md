@@ -32,12 +32,12 @@ Este documento é a referência arquitetural definitiva para a criação de TUDO
 ## 1. Blueprint da Camada de View (O Arquivo `.vue`)
 
 ### 1.1 View de Listagem (`index.vue`)
-Use a trindade nativa do sistema:
-1. `AppCabecalhoPagina` (exclusivo p/ lists).
-2. `AppBarraFerramentas` (Pesquisa lateral esquerda/direita contendo filtros rápidos, ex: `AppInputAutocomplete` e `AppSelecaoStatus`).
-3. `AppContainerListagem` (com slots responsivos).
-   - Extraia a reatividade de `use[A]Listagem()` com *destructuring*. O container exige mapeamento rígido: `:lista="listaRegistros"`, `:paginaAtual="paginaAtual"`, etc.
-   - Use `#cabecalho-tabela` e `#linhas-tabela`. Condicionais atadas via `v-if="colunasVisiveis.nomeColuna"`.
+Use o componente wrapper definitivo:
+1. **`AppFiltro`**: Centraliza o título, breadcrumbs, ações de topo (botões Novo/Relatório) e a lógica de filtros (Autocomplete + Select + Busca).
+2. **`AppContainerListagem`**: Injetado dentro do slot padrão do `AppFiltro`.
+   - Extraia a reatividade de `use[A]Listagem()` com *destructuring*.
+   - **Obrigatório**: Vincule as ações via eventos nativos (`@view`, `@edit`, `@history`, `@delete-success`) e passe a prop `endpointDelete` e `nomeTela` para automação do CRUD.
+   - Use `#cabecalho-tabela`, `#linhas-tabela` e `#cards`. Condicionais atadas via `v-if="colunas.nomeColuna"`.
 
 ### 1.2 View de Cadastro Simples vs Multi-Etapas
 - **Simples (`funcionario/cadastro.vue`)**: Ideal para fluxos curtos. Usa `AppBarraNavegacao` -> `AppCartaoFormulario` -> `AppSobreposicaoCarregamento` -> `<form @submit.prevent="gravarRegistro">` -> `AppFormularioSecao` -> `<AppRodapeFormulario>`.
@@ -60,14 +60,15 @@ Use a trindade nativa do sistema:
 
 | Componente | Contexto Ouro e Uso Obrigatório |
 | :--- | :--- |
+| `AppFiltro` | **Essencial p/ Listagens**. Wrapper que unifica Header, Breadcrumbs, Busca e Modos de Visão. |
+| `AppContainerListagem` | Container de dados com suporte nativo a Tabela/Cards, Paginação e Deleção. |
 | `AppBarraSuperior` | Cabeçalho global. Gerencia perfil, logout e navegação (no modo `barraSuperior`). |
 | `AppBarraLateral` | Menu retrátil. Possui busca rápida de menu e sistema de favoritos. |
-| `AppInputAutocomplete` | Busca principal no header de telas de Listagem. |
+| `AppInputAutocomplete` | Busca principal no header de telas de Listagem (via AppFiltro). |
 | `AppInputCpf` / `Cnpj` / `Cep` | Inputs mascarados e validados por regras de negócio nativas. |
 | `AppSelect` | Listas de seleção (Sempre passe props `itemValue="codigo"` e `itemLabel="descricao"`). |
 | `AppBotao` | Use variações engessadas: `acao` (azul), `primario` (verde/gravar), `perigo` (vermelho/inativar). |
-| `AppSobreposicaoCarregamento` | Layer de opacidade durante qualquer `$fetch` crítico p/ a UI que renderiza dados lidos. |
-| `AppCarregamentoPagina` | Cortina de carregamento global para transições de login ou trocas de layout. |
+| `AppSobreposicaoCarregamento` | Layer de opacidade durante qualquer `$fetch` crítico p/ a UI. |
 | `AppAtivo` | Exibe pills do sistema com o status "Ativo/Inativo" usando cores padronizadas. |
 | `AppNotificacao` | Toast de feedback (Sucesso, Erro, Alerta). Integrado via `useAppNotificacao`. |
 | `AppCampoObrigatorio` | Card de aviso Âmbar para sinalizar campos que devem ser preenchidos. |
@@ -144,10 +145,10 @@ Para criar uma nova base para uma tela:
 
 **LEI ABSOLUTA: Você deve SEMPRE usar as telas e Composables de 'Funcionário' ou 'Projeto' como "molde arquitetural" de base. Abra os arquivos originais deles, entenda os padrões e extraia as estruturas (Grid, Nomenclaturas, funções e wrappers de UX). Adapte essas fundações de ponta a ponta para o contexto da sua nova entidade.**
 
-Quando for solicitado criar uma tela, não tente inventar o design do zero. Em vez disso, inicie transportando o esqueleto modular do 'Funcionário' (se for tela única) e molde o seu objetivo em cima dele:
-1. **Slots Ouro da Barra de Ferramentas**: Divida em `#entradas`, `#acoes-secundarias`, `#acoes-principais`, e `#acoes-pesquisa`.
-2. **Modais Periféricos**: Toda listagem madura contém `AppModalFiltroAvancado`, `AppModalExibicao` e `AppModalHistorico`.
-3. **Travamento Condicional (Novo vs Editando)**: Verifique se `id=0` para derivar flag booleana `editando`.
-4. **Padrão de Alerta e Campos Obrigatórios (Âmbar)**: Utilize o componente **`AppCampoObrigatorio`**.
-5. **O "Grand Finale" (Modal de Sucesso)**: Após gravar, dispare o `AppModal` com a animação `animate-success-pop` e um **Resumo dos Dados**.
+Ao criar uma nova tela de listagem:
+1. **Wrapper `AppFiltro`**: Configure o título, ícone e breadcrumbs.
+2. **Ações**: Use o slot `#acoes` para os botões de controle lateral.
+3. **Container**: Use `AppContainerListagem` com os eventos `@edit`, `@view` e `endpointDelete` preenchidos.
+4. **Slots de Dados**: Mantenha a simetria entre a visualização de **Tabela** e **Cards**.
+5. **Composables**: Siga o padrão de retorno de flags de loading, listagens e paginação via `usePaginacaoFrontEnd`.
 
