@@ -39,7 +39,7 @@
         </div>
 
         <div
-            class="bg-white dark:bg-[#1a1c23] p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-gray-800/60 transition-all duration-300">
+            class="bg-white dark:bg-[#1a1c23] p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-gray-800/60 transition-all duration-300">
             <div
                 class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 border-b border-gray-100 dark:border-slate-800 pb-6">
                 <h2 class="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tight flex items-center gap-3">
@@ -99,7 +99,7 @@
                             @update:modelValue="val => atualizarModelo(campo.key, val)" :placeholder="campo.placeholder"
                             :sugestoes="campo.sugestoes || []" :buscando="campo.buscando || false"
                             :mostrarMenu="campo.mostrarMenu || false" @buscar="$emit('buscarSugestao', campo.key)"
-                            @selecionar="val => $emit('selecionarSugestao', { key: campo.key, sugestao: val })"
+                            @selecionar="val => selecionarComBusca(campo, val)"
                             @fechar="$emit('fecharSugestao', campo.key)" @enter="$emit('buscar')" />
                     </div>
                 </div>
@@ -123,7 +123,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
 
 type ValorCampo = string | number | boolean | null;
 
@@ -174,4 +174,10 @@ const props = withDefaults(defineProps<{
 const atualizarModelo = (key: string, valor: ValorCampo) => {
     emit('update:modelValue', { ...props.modelValue, [key]: valor });
 };
+
+const selecionarComBusca = (campo: CampoFiltro, val: any) => {
+    atualizarModelo(campo.key, val.descricao);
+    emit('selecionarSugestao', { key: campo.key, sugestao: val });
+    setTimeout(() => emit('buscar'), 100);
+}
 </script>

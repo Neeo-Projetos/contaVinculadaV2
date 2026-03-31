@@ -120,7 +120,7 @@ export function useFuncionarioListagem() {
     try {
       const data = await $fetch<any>('/api/cadastro/funcionario/listagem', {
         method: 'POST',
-        body: filtro
+        body: filtro.value
       })
       listaCompleta.value = data?.results || []
       paginacao.mudarPagina(1)
