@@ -19,7 +19,8 @@ export function useProjetoListagem() {
   })
   
   onMounted(() => {
-    buscarProjetos()
+    // Não executa a busca automática ao montar a tela, apenas carrega dependências de filtro se necessário.
+    // carregarBancos()
   })
 
   const filtro = reactive({

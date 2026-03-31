@@ -4,7 +4,7 @@
     <AppFiltro v-model="filtro" v-model:viewMode="visaoAtual" :campos="camposFiltro" titulo="Verbas"
       descricao="Cadastro e gestão de rubricas e verbas do sistema" icone-titulo="fa7-solid:sack-dollar"
       :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Tabela Básica' }, { label: 'Verbas' }]" :pending="carregando"
-      @buscar="buscarLista" @openAdvancedFilter="() => {}"
+      @buscar="filtrar" @openAdvancedFilter="() => {}"
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
@@ -23,7 +23,7 @@
         :history="true" nomeTela="Verba" endpointDelete="/api/tabelaBasica/verba/excluir"
         @view="item => navigateTo(`/tabelaBasica/verbas/cadastro?codigo=${item.codigo}`)"
         @edit="item => navigateTo(`/tabelaBasica/verbas/cadastro?codigo=${item.codigo}`)"
-        @history="codigo => abrirHistorico(Number(codigo))" @delete-success="buscarLista">
+        @history="codigo => abrirHistorico(Number(codigo))" @delete-success="filtrar">
 
         <template #cabecalho-tabela>
           <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
@@ -80,7 +80,7 @@
 
 <script setup lang="ts">
 const visaoAtual = ref('lista')
-const buscaRealizada = ref(true)
+const buscaRealizada = ref(false)
 const carregando = ref(false)
 const dados = ref<any[]>([])
 const filtro = ref<any>({ descricao: '', ativo: '1' })
@@ -105,6 +105,9 @@ const historicoSelecionado = ref<any[]>([])
 const carregandoHistorico = ref(false)
 
 const mudarPagina = (p: number) => { }
+const filtrar = () => {
+    buscarLista()
+}
 const buscarLista = () => { }
 const abrirHistorico = (id: number) => {
   modalHistoricoAberto.value = true

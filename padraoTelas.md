@@ -13,9 +13,11 @@ Este documento é a referência arquitetural definitiva para a criação de TUDO
 
 1. **Separação Estrita View/Controller**: O `.vue` é **estritamente View**. Todas as propriedades reativas de form, variáveis de *loading*, *modais de alerta* e funções async/fetch devem ser injetadas a partir de um `use[Modulo]Formulario` ou `use[Modulo]Listagem`. Nenhum fetch avulso no vue.
 2. **Zero Auto-Load Funcional**: Listagens começam vazias. A chamada de API para buscar lista só ocorre no clique de "Pesquisar" ou submissão de filtro explícita pelo usuário.
-3. **Data Fetching Assíncrono Restrito**: Nunca use `useFetch` ou `useAsyncData` (isomórficos) para persistência e listagens. Use **SEMPRE o `$fetch` manual dentro de blocos `try/catch/finally`** manipulando *flags* de loading (ex: `carregandoTela.value = true`).
-4. **Suporte a Layout Dinâmico**: O sistema suporta dois modos de navegação (`barraLateral` e `barraSuperior`). Use o composable `useInterfaceSettings` para reagir ao layout atual se necessário.
-5. **Acessibilidade Nativa**: Toda nova implementação deve respeitar as variáveis de escala de fonte (`--cv-font-scale`), suporte a Daltonismo (classes `.mode-protanopia`, etc.) e modo de Alto Contraste.
+   - **Gatilho Autocomplete**: Ao escolher um item na lista de autocomplete, o disparo da busca (`filtrar()`) deve ser automático.
+3. **Filtros e Status Inicial**: Todo filtro de listagem deve iniciar com o campo `Status` (ativoParam) marcado como **"1" (Ativos)**.
+4. **Data Fetching Assíncrono Restrito**: Nunca use `useFetch` ou `useAsyncData` (isomórficos) para persistência e listagens. Use **SEMPRE o `$fetch` manual dentro de blocos `try/catch/finally`** manipulando *flags* de loading (ex: `carregandoTela.value = true`).
+5. **Sequência de Ações (Slot #acoes)**: No topo das listagens, a sequência visual obrigatória dos botões é: `[Relatório (excel)]` -> `[Exibição (desktop/config)]` -> `[Novo (plus + variacao-acao)]`.
+6. **Suporte a Layout Dinâmico**: O sistema suporta dois modos de navegação (`barraLateral` e `barraSuperior`). Use o composable `useInterfaceSettings` para reagir ao layout atual se necessário.
 6. **Navegação Distinta**: 
    - **Listagens (`index.vue`)**: Sem barra de navegação no topo. Usam apenas `AppCabecalhoPagina`.
    - **Cadastros (`cadastro.vue`)**: Uso OBRIGATÓRIO de `AppBarraNavegacao` (Simples) ou `AppTrilhaNavegacao` (Complexos) no topo.

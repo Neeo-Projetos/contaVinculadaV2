@@ -4,7 +4,7 @@
     <AppFiltro v-model="filtro" v-model:viewMode="visaoAtual" :campos="camposFiltro" titulo="Gestão de Projetos"
       descricao="Gerenciamento de projetos, contas e verbas do sistema" icone-titulo="fa7-solid:briefcase"
       :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Cadastro' }, { label: 'Projetos' }]" :pending="carregandoTela"
-      @buscar="buscarProjetos" @openAdvancedFilter="abrirModalFiltroAvancado"
+      @buscar="filtrar" @openAdvancedFilter="abrirModalFiltroAvancado"
       @buscarSugestao="buscarSugestoesProjeto"
       @selecionarSugestao="({ sugestao }) => selecionarSugestao(sugestao)"
       @fecharSugestao="fecharSugestoesDelay">
@@ -25,7 +25,7 @@
         :history="true" nomeTela="Projeto" endpointDelete="/api/cadastro/projeto/excluir"
         @view="item => navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}`)"
         @edit="item => navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}`)"
-        @history="codigo => abrirHistorico(Number(codigo))" @delete-success="buscarProjetos">
+        @history="codigo => abrirHistorico(Number(codigo))" @delete-success="filtrar">
 
         <template #cabecalho-tabela>
           <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -127,7 +127,7 @@ const {
   modalHistoricoAberto, historicoSelecionado, carregandoHistorico, abrirHistorico,
   modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
   sugestoesProjeto, mostrandoSugestoes, buscandoSugestoes, buscarSugestoesProjeto, selecionarSugestao, fecharSugestoesDelay,
-  buscarProjetos, mudarPagina, mudarItensPorPagina, filtroGlobal,
+  buscarProjetos, filtrar, mudarPagina, mudarItensPorPagina, filtroGlobal,
   abrirModalConta, abrirModalVerba
 } = useProjetoListagem()
 

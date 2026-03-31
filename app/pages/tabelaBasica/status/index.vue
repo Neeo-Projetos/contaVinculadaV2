@@ -4,9 +4,10 @@
     <AppFiltro v-model="filtro" v-model:viewMode="visaoAtual" :campos="camposFiltro" titulo="Status"
       descricao="Gerenciamento de estados e situações dos registros" icone-titulo="fa7-solid:toggle-on"
       :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Tabela Básica' }, { label: 'Status' }]" :pending="carregando"
-      @buscar="buscarLista" @openAdvancedFilter="() => {}"
+      @buscar="filtrar" @openAdvancedFilter="() => {}"
     >
       <template #acoes>
+        <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="() => {}">Relatório</AppBotao>
         <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="() => {}">Controle de Exibição
         </AppBotao>
         <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/tabelaBasica/status/cadastro?id=0')">
@@ -19,7 +20,7 @@
         :history="true" nomeTela="Status" endpointDelete="/api/tabelaBasica/status/excluir"
         @view="item => navigateTo(`/tabelaBasica/status/cadastro?codigo=${item.codigo}`)"
         @edit="item => navigateTo(`/tabelaBasica/status/cadastro?codigo=${item.codigo}`)"
-        @history="codigo => abrirHistorico(Number(codigo))" @delete-success="buscarLista">
+        @history="codigo => abrirHistorico(Number(codigo))" @delete-success="filtrar">
 
         <template #cabecalho-tabela>
           <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
@@ -76,7 +77,7 @@
 
 <script setup lang="ts">
 const visaoAtual = ref('lista')
-const buscaRealizada = ref(true)
+const buscaRealizada = ref(false)
 const carregando = ref(false)
 const dados = ref<any[]>([])
 const filtro = ref<any>({ descricao: '', ativo: '1' })
@@ -101,6 +102,9 @@ const historicoSelecionado = ref<any[]>([])
 const carregandoHistorico = ref(false)
 
 const mudarPagina = (p: number) => { }
+const filtrar = () => {
+  buscarLista()
+}
 const buscarLista = () => { }
 const abrirHistorico = (id: number) => {
   modalHistoricoAberto.value = true

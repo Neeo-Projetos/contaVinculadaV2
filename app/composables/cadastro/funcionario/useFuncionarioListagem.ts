@@ -100,6 +100,7 @@ export function useFuncionarioListagem() {
   const selecionarSugestao = (sugestao: any) => {
     filtro.value.nomeParam = sugestao.descricao
     mostrandoSugestoes.value = false
+    filtrar()
   }
 
   const fecharSugestoesDelay = () => {
