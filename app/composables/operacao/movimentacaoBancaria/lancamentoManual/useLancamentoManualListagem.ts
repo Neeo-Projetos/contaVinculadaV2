@@ -21,13 +21,43 @@ export function useLancamentoManualListagem() {
     return 'Digite o projeto ou tipo de movimentação...'
   })
 
-  const filtro = reactive({
-    nomeParam: '', // Termo de busca principal (Autocomplete)
-    projetoParam: '',
+  const filtro = ref({
+    projetoId: '',
     tipoMovimentacaoParam: '',
     dataMovimentacaoParam: '',
     ativoParam: '1'
   })
+
+  // Autocomplete Projetos (Padrão Ouro)
+  const projetoSearch = ref('')
+  const sugestoesProjetos = ref<any[]>([])
+  const buscandoProjetos = ref(false)
+  const mostrarMenuProjetos = ref(false)
+
+  const buscarProjetosAutocomplete = async () => {
+    if (!projetoSearch.value) {
+      sugestoesProjetos.value = []
+      return
+    }
+    buscandoProjetos.value = true
+    mostrarMenuProjetos.value = true
+    try {
+      const resp = await $fetch<any[]>('/api/cadastro/projeto/autocomplete', {
+        params: { busca: projetoSearch.value }
+      })
+      sugestoesProjetos.value = resp
+    } catch (error) {
+      console.error('Erro ao buscar projetos', error)
+    } finally {
+      buscandoProjetos.value = false
+    }
+  }
+
+  const selecionarProjetoAutocomplete = (proj: any) => {
+    filtro.value.projetoId = String(proj.projetoId)
+    projetoSearch.value = proj.apelido
+    mostrarMenuProjetos.value = false
+  }
 
   const colunasVisiveis = reactive({
     valor: true,
@@ -67,41 +97,10 @@ export function useLancamentoManualListagem() {
   const buscandoSugestoes = ref(false)
   let timerDebounce: ReturnType<typeof setTimeout>
 
-  const buscarSugestoes = () => {
-    const texto = filtro.nomeParam
-    if (texto.length < 2) {
-      sugestoesBusca.value = []
-      mostrandoSugestoes.value = false
-      return
-    }
-
-    clearTimeout(timerDebounce)
-    timerDebounce = setTimeout(async () => {
-      buscandoSugestoes.value = true
-      mostrandoSugestoes.value = true
-      // Aqui poderíamos ter um endpoint de autocomplete específico, 
-      // mas por enquanto vamos simular ou usar parte da busca.
-      try {
-        // Simulação rápida ou buscar da lista local se já carregada
-        sugestoesBusca.value = listaCompleta.value
-          .filter(i => i.projeto.toLowerCase().includes(texto.toLowerCase()) || i.tipoMovimentacao.toLowerCase().includes(texto.toLowerCase()))
-          .slice(0, 5)
-          .map(i => ({ codigo: i.codigo, descricao: `${i.projeto} - ${i.tipoMovimentacao}` }))
-      } finally {
-        buscandoSugestoes.value = false
-      }
-    }, 300)
-  }
-
-  const selecionarSugestao = (sugestao: any) => {
-    filtro.nomeParam = sugestao.descricao
-    mostrandoSugestoes.value = false
-    buscarLista()
-  }
 
   const fecharSugestoesDelay = () => {
     setTimeout(() => {
-      mostrandoSugestoes.value = false
+      mostrarMenuProjetos.value = false
     }, 200)
   }
 
@@ -125,10 +124,10 @@ export function useLancamentoManualListagem() {
       const response = await $fetch<any>('/api/operacao/movimentacaoBancaria/lancamentoManual/listagem', {
         method: 'POST', 
         body: {
-          projeto: filtro.projetoParam,
-          tipoMovimentacao: filtro.tipoMovimentacaoParam,
-          dataMovimentacao: filtro.dataMovimentacaoParam,
-          termo: filtro.nomeParam
+          projeto: filtro.value.projetoId,
+          tipoMovimentacao: filtro.value.tipoMovimentacaoParam,
+          dataMovimentacao: filtro.value.dataMovimentacaoParam,
+          status: filtro.value.ativoParam
         }
       })
       listaCompleta.value = response.data || []
@@ -143,9 +142,13 @@ export function useLancamentoManualListagem() {
   const abrirModalFiltroAvancado = () => { modalFiltroAvancadoAberto.value = true }
   const aplicarFiltroAvancado = () => { modalFiltroAvancadoAberto.value = false; buscarLista() }
   const limparFiltrosAvancados = () => {
-    filtro.projetoParam = ''
-    filtro.tipoMovimentacaoParam = ''
-    filtro.dataMovimentacaoParam = ''
+    filtro.value = {
+        projetoId: '',
+        tipoMovimentacaoParam: '',
+        dataMovimentacaoParam: '',
+        ativoParam: '1'
+    }
+    projetoSearch.value = ''
     modalFiltroAvancadoAberto.value = false
     buscarLista()
   }
@@ -201,12 +204,13 @@ export function useLancamentoManualListagem() {
     buscaRealizada,
     visaoAtual,
     filtro,
-    placeholderDinamico,
-    sugestoesBusca,
-    buscandoSugestoes,
-    mostrandoSugestoes,
-    buscarSugestoes,
-    selecionarSugestao,
+    // Autocomplete Projetos
+    projetoSearch,
+    sugestoesProjetos,
+    buscandoProjetos,
+    mostrarMenuProjetos,
+    buscarProjetosAutocomplete,
+    selecionarProjetoAutocomplete,
     fecharSugestoesDelay,
     buscarLista,
     abrirModalFiltroAvancado,

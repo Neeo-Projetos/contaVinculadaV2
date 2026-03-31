@@ -12,6 +12,9 @@
       :pending="carregando"
       @buscar="buscarLista"
       @openAdvancedFilter="abrirModalFiltroAvancado"
+      @buscarSugestao="buscarProjetosAutocomplete"
+      @selecionarSugestao="({ sugestao }) => selecionarProjetoAutocomplete(sugestao)"
+      @fecharSugestao="fecharSugestoesDelay"
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
@@ -71,16 +74,17 @@
           </td>
           <td v-if="colunas.funcionarios" class="px-6 py-4 text-center">
             <button @click="abrirModalFuncionarios(item.codigo)"
-              class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
-              :class="{ 'text-emerald-500 bg-emerald-50 shadow-sm border border-emerald-500/10': item.funcionario === 1 }">
-              <Icon name="fa7-solid:users" class="w-5 h-5" />
+              class="w-10 h-10 mx-auto flex items-center justify-center transition-all active:scale-95 rounded-xl shadow-sm"
+              :class="item.funcionario === 1 ? 'text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20' : 'text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 opacity-40'"
+              title="Funcionários">
+              <Icon name="fa7-solid:users" class="w-4 h-4" />
             </button>
           </td>
           <td v-if="colunas.detalhes" class="px-6 py-4 text-center">
             <button @click="abrirModalDetalhes(item.codigo)"
-              class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
+              class="w-10 h-10 mx-auto flex items-center justify-center text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all active:scale-95 shadow-sm"
               title="Ver Detalhes">
-              <Icon name="fa7-solid:indent" class="w-5 h-5" />
+              <Icon name="fa7-solid:indent" class="w-4 h-4" />
             </button>
           </td>
         </template>
@@ -100,9 +104,10 @@
 
     <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" @close="modalFiltroAvancadoAberto = false"
       @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
-      <AppSelect v-model="filtro.projetoParam" label="Projeto" :opcoes="projetosAtivos.map(p => ({ codigo: p.codigo, descricao: `${p.apelido} - ${p.descricao}` }))" />
-      <AppSelect v-model="filtro.tipoMovimentacaoParam" label="Tipo de Movimentação" :opcoes="tiposMovimentacao.map(t => ({ codigo: t.codigo, descricao: t.descricao }))" />
-      <AppInputTexto v-model="filtro.dataMovimentacaoParam" label="Data da Movimentação" placeholder="DD/MM/AAAA" v-maska data-maska="##/##/####" icone="fa7-solid:calendar-days" />
+      <AppSelect v-model="filtro.tipoMovimentacaoParam" label="Tipo de Movimentação" :opcoes="tiposMovimentacao" itemValue="codigo" itemLabel="descricao" icone="fa7-solid:filter" />
+      <AppSelect v-model="filtro.ativoParam" label="Status do Lançamento" 
+        :opcoes="[{ codigo: '1', descricao: 'Ativos' }, { codigo: '0', descricao: 'Inativos' }, { codigo: '', descricao: 'Todos' }]" 
+        itemValue="codigo" itemLabel="descricao" icone="fa7-solid:shield-check" />
     </AppModalFiltroAvancado>
 
     <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labels" @aplicar="aplicarExibicao"
@@ -156,37 +161,37 @@
 
 <script setup lang="ts">
 const {
-  carregando, buscaRealizada, visaoAtual, dados, filtro, sugestoesBusca, buscandoSugestoes, mostrandoSugestoes,
-  buscarSugestoes, selecionarSugestao, fecharSugestoesDelay, buscarLista,
-  abrirModalFiltroAvancado, modalFiltroAvancadoAberto, limparFiltrosAvancados, aplicarFiltroAvancado,
+  carregando, buscaRealizada, visaoAtual, dados, filtro, 
+  buscarLista, abrirModalFiltroAvancado, modalFiltroAvancadoAberto, limparFiltrosAvancados, aplicarFiltroAvancado,
   abrirModalExibicao, modalExibicaoAberto, colunas, labels, aplicarExibicao, colunasTemp,
-  placeholderDinamico, projetosAtivos, tiposMovimentacao,
-  modalDetalhesAberto, detalhes, modalFuncionarioAberto, listaFuncionariosModal,
-  abrirModalDetalhes, abrirModalFuncionarios,
-  formatarMoeda, novoRegistro,
+  tiposMovimentacao, modalDetalhesAberto, detalhes, modalFuncionarioAberto, listaFuncionariosModal,
+  abrirModalDetalhes, abrirModalFuncionarios, formatarMoeda, novoRegistro,
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
-  mudarPagina, mudarItensPorPagina
+  mudarPagina, mudarItensPorPagina,
+  // Autocomplete Projetos
+  projetoSearch, sugestoesProjetos, buscandoProjetos, mostrarMenuProjetos,
+  buscarProjetosAutocomplete, selecionarProjetoAutocomplete, fecharSugestoesDelay
 } = useLancamentoManualListagem()
 
 const camposFiltro = computed(() => [
   { 
-    key: 'nomeParam', 
-    label: 'Descrição / Nome', 
-    type: 'text' as const, 
-    placeholder: placeholderDinamico.value || 'Pesquisar...',
-    icon: 'fa7-solid:magnifying-glass'
+    key: 'projetoId', 
+    label: 'Projeto', 
+    type: 'autocomplete' as const, 
+    placeholder: 'Buscar projeto pelo apelido...',
+    sugestoes: sugestoesProjetos.value,
+    buscando: buscandoProjetos.value,
+    mostrarMenu: mostrarMenuProjetos.value,
+    colSpan: 'md:col-span-6'
   },
-  {
-    key: 'ativoParam',
-    label: 'Status',
-    type: 'select' as const,
-    opcoes: [
-      { codigo: '1', descricao: 'Ativos' },
-      { codigo: '0', descricao: 'Inativos' },
-      { codigo: '', descricao: 'Todos' }
-    ],
-    itemValue: 'codigo',
-    itemLabel: 'descricao'
+  { 
+    key: 'dataMovimentacaoParam', 
+    label: 'Data', 
+    type: 'text' as const, 
+    placeholder: 'Ex: 01/01/2024',
+    mask: '##/##/####',
+    icon: 'fa7-solid:calendar-day',
+    colSpan: 'md:col-span-3'
   }
 ])
 
