@@ -108,12 +108,42 @@
           <thead class="bg-gray-50 dark:bg-[#1a1c23] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-20">
             <tr class="divide-x divide-gray-200 dark:divide-gray-800">
               <slot name="cabecalho-tabela"></slot>
+              <th
+                class="px-6 py-4 text-xs font-bold text-center text-gray-500 uppercase tracking-wider bg-gray-50/50 dark:bg-slate-800/20 dark:text-gray-400">
+                Ações
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-800/80 bg-white dark:bg-[#1e2029]">
             <tr v-for="(item, index) in lista" :key="item.codigo || index"
               class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors group divide-x divide-gray-100 dark:divide-gray-800/60">
               <slot name="linhas-tabela" :item="item"></slot>
+              <td class="px-6 py-4 text-center bg-gray-50/5 dark:bg-slate-800/5">
+                <div class="flex items-center justify-center gap-2 pl-2">
+                  <button v-if="view" @click.stop="$emit('view', item)"
+                    class="w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-300 border border-blue-500/20 bg-blue-500/5 text-blue-500 hover:bg-blue-500 hover:text-white"
+                    title="Ver Detalhes">
+                    <Icon v-if="loadingId === item.codigo" name="fa7-solid:spinner"
+                      class="h-3.5 w-3.5 animate-spin" />
+                    <Icon v-else :name="verIcone" class="h-3.5 w-3.5" />
+                  </button>
+                  <button @click.stop="$emit('edit', item)"
+                    class="w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-300 border border-emerald-500/20 bg-emerald-500/5 text-emerald-500 hover:bg-emerald-500 hover:text-white"
+                    title="Editar">
+                    <Icon name="fa7-solid:pen" class="h-3.5 w-3.5" />
+                  </button>
+                  <button v-if="history" @click.stop="$emit('history', item.codigo || item.id)"
+                    class="w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-300 border border-slate-500/20 bg-slate-500/5 text-slate-500 hover:bg-slate-500 hover:text-white"
+                    title="Ver Histórico">
+                    <Icon name="fa6-solid:clock-rotate-left" class="h-3.5 w-3.5" />
+                  </button>
+                  <button v-if="isAtivo(item)" @click.stop="triggerDelete(item.codigo)"
+                    class="w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-300 border border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white"
+                    title="Excluir">
+                    <Icon name="fa7-solid:trash" class="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -148,6 +178,40 @@
 
       </div>
     </div>
+
+    <!-- Modais de Exclusão e Feedback -->
+    <AppModal :isOpen="modalConfirm.visivel" title="Confirmar Exclusão" icon="fa7-solid:triangle-exclamation" @close="modalConfirm.visivel = false">
+      <div class="flex flex-col items-center justify-center p-4 text-center">
+          <div class="w-16 h-16 bg-rose-50 dark:bg-rose-500/10 rounded-full flex items-center justify-center mb-4 border border-rose-100 dark:border-rose-900/30">
+              <Icon name="fa7-solid:trash" class="w-8 h-8 text-rose-500" />
+          </div>
+          <p class="text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
+              {{ mensagemExcluir || 'Tem certeza que deseja excluir este registro?' }}
+          </p>
+      </div>
+      <template #footer>
+          <button @click="modalConfirm.visivel = false" class="px-6 py-2.5 text-[11px] font-black uppercase tracking-widest text-gray-500 hover:text-gray-700 transition-colors">Cancelar</button>
+          <AppBotao variacao="erro" class="!px-8" @click="handleConfirmDelete">Sim, Excluir</AppBotao>
+      </template>
+    </AppModal>
+
+    <AppModal :isOpen="modalFeedback.visivel" :title="modalFeedback.titulo" :icon="modalFeedback.tipo === 'sucesso' ? 'fa7-solid:circle-check' : 'fa7-solid:circle-xmark'" @close="handleFeedbackClose">
+      <div class="flex flex-col items-center justify-center p-4 text-center">
+          <div :class="[
+              'w-16 h-16 rounded-full flex items-center justify-center mb-4 border',
+              modalFeedback.tipo === 'sucesso' ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-900/30 text-emerald-500' : 'bg-rose-50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-900/30 text-rose-500'
+          ]">
+              <Icon :name="modalFeedback.tipo === 'sucesso' ? 'fa7-solid:circle-check' : 'fa7-solid:circle-xmark'" class="w-8 h-8" />
+          </div>
+          <p class="text-gray-600 dark:text-gray-300 font-medium">
+              {{ modalFeedback.mensagem }}
+          </p>
+      </div>
+      <template #footer>
+          <AppBotao :variacao="modalFeedback.tipo === 'sucesso' ? 'acao' : 'erro'" @click="handleFeedbackClose">Ok, entendi</AppBotao>
+      </template>
+    </AppModal>
+
   </div>
 </template>
 
@@ -166,14 +230,112 @@ const props = defineProps({
   totalPaginas: { type: Number, default: 1 },
   paginaAtual: { type: Number, default: 1 },
   paginasExibidas: { type: Array as PropType<(number | string)[]>, default: () => [] },
-  filtroGlobal: { type: String, default: '' }
+  filtroGlobal: { type: String, default: '' },
+  
+  // Novas props para Ações
+  view: { type: Boolean, default: true },
+  history: { type: Boolean, default: false },
+  verIcone: { type: String, default: 'fa7-solid:eye' },
+  loadingId: { type: [Number, String] as PropType<number | string | null>, default: null },
+  endpointDelete: { type: String, default: '' },
+  funcaoDelete: { type: String, default: 'excluir' },
+  nomeTela: { type: String, default: '' },
+  mensagemExcluir: { type: String, default: '' }
 })
 
-const emit = defineEmits(['mudarPagina', 'mudarItensPorPagina', 'update:filtroGlobal'])
+const emit = defineEmits(['mudarPagina', 'mudarItensPorPagina', 'update:filtroGlobal', 'view', 'edit', 'delete', 'delete-success', 'history'])
 const dropdownLinhasAberto = ref(false)
 
 const selecionarLinhas = (quantidade: number) => {
   dropdownLinhasAberto.value = false
   emit('mudarItensPorPagina', quantidade)
 }
+
+// Lógica de Exclusão
+const modalConfirm = ref({
+    visivel: false,
+    codigo: null as number | string | null
+});
+
+const modalFeedback = ref({
+    visivel: false,
+    tipo: 'sucesso',
+    titulo: '',
+    mensagem: ''
+});
+
+const deveAtualizarAposFeedback = ref(false);
+
+const triggerDelete = (codigo: number | string) => {
+    modalConfirm.value = {
+        visivel: true,
+        codigo
+    };
+};
+
+const handleFeedbackClose = () => {
+    modalFeedback.value.visivel = false;
+
+    if (deveAtualizarAposFeedback.value) {
+        deveAtualizarAposFeedback.value = false;
+        emit('delete-success');
+    }
+};
+
+const handleConfirmDelete = async () => {
+    const codigo = modalConfirm.value.codigo;
+    modalConfirm.value.visivel = false;
+
+    if (codigo === null) return;
+
+    // Se tiver endpoint, faz a exclusão automática
+    if (props.endpointDelete) {
+        try {
+            const response = await $fetch<any>(props.endpointDelete, {
+                method: 'POST',
+                body: {
+                    funcao: props.funcaoDelete,
+                    codigo: Number(codigo)
+                }
+            });
+
+            if (response.status === 'success') {
+                modalFeedback.value = {
+                    visivel: true,
+                    tipo: 'sucesso',
+                    titulo: 'Sucesso',
+                    mensagem: `${props.nomeTela || 'Registro'} excluído com sucesso.`
+                };
+                deveAtualizarAposFeedback.value = true;
+            } else {
+                throw new Error(response.message || 'Erro ao excluir');
+            }
+        } catch (error: any) {
+            deveAtualizarAposFeedback.value = false;
+            modalFeedback.value = {
+                visivel: true,
+                tipo: 'erro',
+                titulo: 'Erro',
+                mensagem: error.message || 'Não foi possível excluir o registro.'
+            };
+        }
+    } else {
+        // Caso contrário, apenas emite o evento para a página pai tratar
+        emit('delete', codigo);
+    }
+};
+
+const isAtivo = (item: any) => {
+    const atv = item.ativo;
+    const sts = item.status;
+
+    if (atv === 1 || atv === true || sts === 1 || sts === true) return true;
+    if (typeof atv === 'string' && atv.toLowerCase() !== 'inativo' && atv !== '0') return true;
+    if (typeof sts === 'string' && sts.toLowerCase() !== 'inativo' && sts !== '0') return true;
+
+    // Se não tiver nenhum dos campos, consideramos ativo por padrão
+    if (atv === undefined && sts === undefined) return true;
+
+    return false;
+};
 </script>

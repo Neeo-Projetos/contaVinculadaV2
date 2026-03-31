@@ -21,7 +21,11 @@
         :buscaRealizada="buscaRealizada" :lista="listaRegistros" :visaoAtual="visaoAtual"
         :registroInicial="registroInicial" :registroFinal="registroFinal" :totalRegistros="totalRegistros"
         :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas" :paginaAtual="paginaAtual"
-        :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina" @mudarItensPorPagina="mudarItensPorPagina">
+        :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina" @mudarItensPorPagina="mudarItensPorPagina"
+        :history="true" nomeTela="Funcionário" endpointDelete="/api/cadastro/funcionario/excluir"
+        @view="item => navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
+        @edit="item => navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
+        @history="codigo => abrirHistorico(Number(codigo))" @delete-success="filtrar">
 
         <template #cabecalho-tabela>
           <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -38,9 +42,6 @@
           <th v-if="colunas.status" scope="col"
             class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
             Status</th>
-          <th v-if="colunas.historico" scope="col"
-            class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-            Histórico</th>
         </template>
 
         <template #linhas-tabela="{ item }">
@@ -74,21 +75,12 @@
           <td v-if="colunas.status" class="px-6 py-4 text-center">
             <AppAtivo :ativo="Number(item.ativo) === 1 || item.ativo === true" />
           </td>
-          <td v-if="colunas.historico" class="px-6 py-4 text-center">
-            <div class="flex items-center justify-center">
-              <button @click.stop="abrirHistorico(item.codigo)"
-                class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
-                title="Ver Histórico">
-                <Icon name="fa6-solid:clock-rotate-left" class="w-5 h-5" />
-              </button>
-            </div>
-          </td>
         </template>
 
         <template #cards="{ item }">
           <AppCardListagem :titulo="item.nomeAbreviado || item.nomeCompleto" subtituloNome="E-mail"
             :subtituloValor="item.email" :ativo="Number(item.ativo) === 1 || item.ativo === true"
-            :mostrarStatus="colunas.status" :mostrarHistorico="colunas.historico" :detalhes="[
+            :mostrarStatus="colunas.status" :mostrarHistorico="false" :detalhes="[
               ...(colunas.matricula ? [{ icone: 'fa7-solid:id-badge', texto: `Matrícula: ${item.matricula}` }] : []),
               ...(colunas.projeto ? [{ icone: 'fa7-solid:id-card', texto: `Projeto: ${item.projeto || 'Sem Projeto'}` }] : []),
               ...(colunas.cpf ? [{ icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` }] : [])
