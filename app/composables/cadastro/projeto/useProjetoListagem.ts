@@ -23,8 +23,9 @@ export function useProjetoListagem() {
     // carregarBancos()
   })
 
-  const filtro = reactive({
+  const filtro = ref({
     apelidoParam: '',
+    projetoId: '' as string | number,
     cnpjParam: '',
     contaParam: '',
     verbaParam: '',
@@ -63,7 +64,10 @@ export function useProjetoListagem() {
   let timerDebounce: ReturnType<typeof setTimeout>
 
   const buscarSugestoesProjeto = () => {
-    const texto = filtro.apelidoParam
+    const texto = filtro.value.apelidoParam
+
+    // Limpa o projetoId ao começar a digitar uma nova busca
+    filtro.value.projetoId = ''
 
     if (texto.length < 3) {
       sugestoesProjeto.value = []
@@ -89,7 +93,8 @@ export function useProjetoListagem() {
   }
 
   const selecionarSugestao = (sugestao: any) => {
-    filtro.apelidoParam = sugestao.apelido || sugestao.descricao
+    filtro.value.apelidoParam = sugestao.apelido || sugestao.descricao
+    filtro.value.projetoId = sugestao.id
     mostrandoSugestoes.value = false
     filtrar()
   }
@@ -112,7 +117,7 @@ export function useProjetoListagem() {
     try {
       const data = await $fetch<any>('/api/cadastro/projeto/listagem', {
         method: 'POST',
-        body: filtro
+        body: filtro.value
       })
 
       listaCompleta.value = data?.results || data?.data || []
@@ -129,9 +134,10 @@ export function useProjetoListagem() {
   }
 
   const limparFiltrosAvancados = () => {
-    filtro.cnpjParam = ''
-    filtro.contaParam = ''
-    filtro.verbaParam = ''
+    filtro.value.cnpjParam = ''
+    filtro.value.projetoId = ''
+    filtro.value.contaParam = ''
+    filtro.value.verbaParam = ''
     modalFiltroAvancadoAberto.value = false
     filtrar()
   }

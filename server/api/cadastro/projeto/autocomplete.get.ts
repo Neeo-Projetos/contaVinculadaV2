@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
         request.input('term', `%${term}%`)
 
         let sql = `
-            SELECT codigo as id, apelido as descricao, apelido
+            SELECT codigo as id, (apelido + ' - ' + descricao) as descricao, apelido
             FROM cadastro.projeto 
             WHERE (apelido LIKE @term COLLATE Latin1_general_CI_AI OR descricao LIKE @term COLLATE Latin1_general_CI_AI)
             AND ativo = 1
