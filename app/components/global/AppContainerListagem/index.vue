@@ -338,4 +338,8 @@ const isAtivo = (item: any) => {
 
     return false;
 };
+
+defineExpose({
+    triggerDelete
+});
 </script>

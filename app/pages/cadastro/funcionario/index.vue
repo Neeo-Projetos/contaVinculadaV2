@@ -17,7 +17,7 @@
         </AppBotao>
       </template>
 
-      <AppContainerListagem v-model:filtro-global="filtroGlobal" :carregando="carregandoTela"
+      <AppContainerListagem ref="listagemRef" v-model:filtro-global="filtroGlobal" :carregando="carregandoTela"
         :buscaRealizada="buscaRealizada" :lista="listaRegistros" :visaoAtual="visaoAtual"
         :registroInicial="registroInicial" :registroFinal="registroFinal" :totalRegistros="totalRegistros"
         :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas" :paginaAtual="paginaAtual"
@@ -80,11 +80,13 @@
         <template #cards="{ item }">
           <AppCardListagem :titulo="item.nomeAbreviado || item.nomeCompleto" subtituloNome="E-mail"
             :subtituloValor="item.email" :ativo="Number(item.ativo) === 1 || item.ativo === true"
-            :mostrarStatus="colunas.status" :mostrarHistorico="false" :detalhes="[
+            :mostrarStatus="colunas.status" :mostrarHistorico="colunas.historico" :detalhes="[
               ...(colunas.matricula ? [{ icone: 'fa7-solid:id-badge', texto: `Matrícula: ${item.matricula}` }] : []),
               ...(colunas.projeto ? [{ icone: 'fa7-solid:id-card', texto: `Projeto: ${item.projeto || 'Sem Projeto'}` }] : []),
               ...(colunas.cpf ? [{ icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` }] : [])
             ]" @ver-detalhes="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
+            @editar="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
+            @excluir="() => listagemRef?.triggerDelete(item.codigo)"
             @ver-historico="abrirHistorico(item.codigo)"
             @clique-titulo="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)" />
         </template>
@@ -161,4 +163,7 @@ const gerarExcel = () => {
 const gerarPdf = () => {
   alert('📄 Gerando PDF da Base de Funcionários...')
 }
+
+// Referência para abrir o modal de exclusão a partir dos cards
+const listagemRef = ref<any>(null)
 </script>
