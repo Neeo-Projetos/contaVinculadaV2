@@ -27,6 +27,43 @@ export function useLancamentoEstornoListagem() {
     estornadoParam: '0'
   })
 
+  // Autocomplete Projetos (Padrão Ouro)
+  const projetoSearch = ref('')
+  const sugestoesProjetos = ref<any[]>([])
+  const buscandoProjetos = ref(false)
+  const mostrarMenuProjetos = ref(false)
+
+  const buscarProjetosAutocomplete = async () => {
+    if (!projetoSearch.value) {
+      sugestoesProjetos.value = []
+      return
+    }
+    buscandoProjetos.value = true
+    mostrarMenuProjetos.value = true
+    try {
+      const resp = await $fetch<any[]>('/api/cadastro/projeto/autocomplete', {
+        params: { busca: projetoSearch.value }
+      })
+      sugestoesProjetos.value = resp
+    } catch (error) {
+      console.error('Erro ao buscar projetos', error)
+    } finally {
+      buscandoProjetos.value = false
+    }
+  }
+
+  const selecionarProjetoAutocomplete = (proj: any) => {
+    filtro.projetoParam = String(proj.projetoId)
+    projetoSearch.value = proj.apelido
+    mostrarMenuProjetos.value = false
+  }
+
+  const fecharSugestoesDelay = () => {
+    setTimeout(() => {
+      mostrarMenuProjetos.value = false
+    }, 200)
+  }
+
   const colunasVisiveis = reactive({
     projeto: true,
     conta: true,
@@ -104,6 +141,8 @@ export function useLancamentoEstornoListagem() {
   const abrirModalFiltroAvancado = () => { modalFiltroAvancadoAberto.value = true }
   const aplicarFiltroAvancado = () => { modalFiltroAvancadoAberto.value = false; buscarLista() }
   const limparFiltrosAvancados = () => {
+    filtro.projetoParam = ''
+    projetoSearch.value = ''
     filtro.funcionarioParam = ''
     filtro.tipoLancamentoParam = ''
     filtro.estornadoParam = '0'
@@ -224,6 +263,13 @@ export function useLancamentoEstornoListagem() {
     buscaRealizada,
     visaoAtual,
     filtro,
+    projetoSearch,
+    sugestoesProjetos,
+    buscandoProjetos,
+    mostrarMenuProjetos,
+    buscarProjetosAutocomplete,
+    selecionarProjetoAutocomplete,
+    fecharSugestoesDelay,
     placeholderDinamico,
     buscarLista,
     abrirModalFiltroAvancado,
