@@ -19,9 +19,11 @@ export function useExtratoFuncionarioListagem() {
   const funcionariosAtivos = ref<any[]>([])
 
   const filtro = reactive({
-    nomeParam: '', // Termo de busca principal
+    nomeParam: '', // Termo de busca principal (Autocomplete)
     projetoParam: '',
-    funcionarioParam: ''
+    funcionarioParam: '',
+    dataInicioParam: '',
+    dataFimParam: ''
   })
 
   const colunasVisiveis = reactive({
@@ -86,6 +88,8 @@ export function useExtratoFuncionarioListagem() {
         body: {
           projeto: filtro.projetoParam,
           funcionarioId: filtro.funcionarioParam,
+          dataInicio: filtro.dataInicioParam,
+          dataFim: filtro.dataFimParam,
           termo: filtro.nomeParam
         }
       })
@@ -103,6 +107,8 @@ export function useExtratoFuncionarioListagem() {
   const limparFiltrosAvancados = () => {
     filtro.projetoParam = ''
     filtro.funcionarioParam = ''
+    filtro.dataInicioParam = ''
+    filtro.dataFimParam = ''
     modalFiltroAvancadoAberto.value = false
     buscarLista()
   }
@@ -118,8 +124,18 @@ export function useExtratoFuncionarioListagem() {
   }
 
   const buscarSugestoesNome = () => {
-     // Mock ou busca real se houver endpoint. 
-     // Por agora, apenas toggle para ver o funcionamento no template.
+    if (filtro.nomeParam.length < 2) {
+      sugestoesNome.value = []
+      mostrandoSugestoes.value = false
+      return
+    }
+
+    const termo = filtro.nomeParam.toLowerCase()
+    sugestoesNome.value = funcionariosAtivos.value
+      .filter(f => f.nomeCompleto.toLowerCase().includes(termo))
+      .map(f => f.nomeCompleto)
+    
+    mostrandoSugestoes.value = sugestoesNome.value.length > 0
   }
   const selecionarSugestao = (val: string) => { 
     filtro.nomeParam = val

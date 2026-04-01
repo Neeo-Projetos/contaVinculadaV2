@@ -11,14 +11,14 @@
       :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Operação' }, { label: 'Tesouraria' }, { label: 'Extrato Funcionário' }]"
       :pending="carregando"
       @buscar="buscarLista"
-      @openAdvancedFilter="abrirModalExibicao"
+      @openAdvancedFilter="abrirModalFiltroAvancado"
+      @buscarSugestao="buscarSugestoesNome"
+      @selecionarSugestao="(data: any) => selecionarSugestao(data.sugestao)"
+      @fecharSugestao="fecharSugestoesDelay"
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
         <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="visaoAtual = visaoAtual === 'lista' ? 'cards' : 'lista'">Controle de Exibição</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:chart-pie" @click="navigateTo('/operacao/movimentacaoBancaria/extratoProjeto')">
-          Extrato Projeto
-        </AppBotao>
       </template>
 
       <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
@@ -99,6 +99,12 @@
           itemValue="codigo" itemLabel="descricao"
           :opcoes="projetosFormatados" />
       </div>
+      <div class="md:col-span-1">
+        <AppInputTexto v-model="filtro.dataInicioParam" label="Início" placeholder="DD/MM/AAAA" mask="##/##/####" icone="fa7-solid:calendar-day" />
+      </div>
+      <div class="md:col-span-1">
+        <AppInputTexto v-model="filtro.dataFimParam" label="Fim" placeholder="DD/MM/AAAA" mask="##/##/####" icone="fa7-solid:calendar-day" />
+      </div>
     </AppModalFiltroAvancado>
 
     <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labels" @aplicar="aplicarExibicao"
@@ -108,13 +114,17 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
 const {
   carregando, buscaRealizada, visaoAtual, dados, filtro, buscarLista,
   abrirModalExibicao, modalExibicaoAberto, colunas, labels, aplicarExibicao, colunasTemp,
   projetosAtivos, projetosFormatados,
   modalExtratoAberto, funcionarioSelecionado, abrirModalExtrato,
+  sugestoesNome, buscandoSugestoes, mostrandoSugestoes,
+  buscarSugestoesNome, selecionarSugestao, fecharSugestoesDelay,
   placeholderDinamico,
-  modalFiltroAvancadoAberto, limparFiltrosAvancados, aplicarFiltroAvancado,
+  modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
   formatarMoeda,
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
@@ -124,25 +134,12 @@ const camposFiltro = computed(() => [
   { 
     key: 'nomeParam', 
     label: 'Descrição / Funcionário', 
-    type: 'text' as const, 
+    type: 'autocomplete' as const, 
     placeholder: placeholderDinamico.value || 'Funcionário...',
-    icon: 'fa7-solid:magnifying-glass'
-  },
-  { 
-    key: 'dataInicioParam', 
-    label: 'Início', 
-    type: 'text' as const, 
-    placeholder: 'Data Início',
-    mask: '##/##/####',
-    icon: 'fa7-solid:calendar-day'
-  },
-  { 
-    key: 'dataFimParam', 
-    label: 'Fim', 
-    type: 'text' as const, 
-    placeholder: 'Data Fim',
-    mask: '##/##/####',
-    icon: 'fa7-solid:calendar-day'
+    icon: 'fa7-solid:magnifying-glass',
+    sugestoes: sugestoesNome.value,
+    buscando: buscandoSugestoes.value,
+    mostrarMenu: mostrandoSugestoes.value
   }
 ])
 

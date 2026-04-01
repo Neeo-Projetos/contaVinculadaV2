@@ -11,14 +11,15 @@
       :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Operação' }, { label: 'Tesouraria' }, { label: 'Extrato Projeto' }]"
       :pending="carregando"
       @buscar="buscarLista"
-      @openAdvancedFilter="abrirModalExibicao"
+      @openAdvancedFilter="abrirModalFiltroAvancado"
+      @buscarSugestao="buscarSugestoesNome"
+      @selecionarSugestao="(data: any) => selecionarSugestao(data.sugestao)"
+      @fecharSugestao="fecharSugestoesDelay"
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
         <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="visaoAtual = visaoAtual === 'lista' ? 'cards' : 'lista'">Controle de Exibição</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:user-tag" @click="navigateTo('/operacao/movimentacaoBancaria/extratoFuncionario')">
-          Extrato Funcionário
-        </AppBotao>
+
       </template>
 
       <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
@@ -100,12 +101,20 @@
           itemValue="codigo" itemLabel="descricao"
           :opcoes="contasAtivas.map(c => ({ codigo: c.codigo, descricao: c.nomeBanco }))" />
       </div>
+      <div class="md:col-span-1">
+        <AppInputTexto v-model="filtro.dataInicioParam" label="Início" placeholder="DD/MM/AAAA" mask="##/##/####" icone="fa7-solid:calendar-day" />
+      </div>
+      <div class="md:col-span-1">
+        <AppInputTexto v-model="filtro.dataFimParam" label="Fim" placeholder="DD/MM/AAAA" mask="##/##/####" icone="fa7-solid:calendar-day" />
+      </div>
     </AppModalFiltroAvancado>
 
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
 const {
   carregando, buscaRealizada, visaoAtual, dados, filtro, buscarLista,
   abrirModalExibicao, modalExibicaoAberto, colunas, labels, aplicarExibicao, colunasTemp,
@@ -123,25 +132,12 @@ const camposFiltro = computed(() => [
   { 
     key: 'nomeParam', 
     label: 'Descrição / Projeto', 
-    type: 'text' as const, 
+    type: 'autocomplete' as const, 
     placeholder: placeholderDinamico.value || 'Projeto...',
-    icon: 'fa7-solid:magnifying-glass'
-  },
-  { 
-    key: 'dataInicioParam', 
-    label: 'Início', 
-    type: 'text' as const, 
-    placeholder: 'Data Início',
-    mask: '##/##/####',
-    icon: 'fa7-solid:calendar-day'
-  },
-  { 
-    key: 'dataFimParam', 
-    label: 'Fim', 
-    type: 'text' as const, 
-    placeholder: 'Data Fim',
-    mask: '##/##/####',
-    icon: 'fa7-solid:calendar-day'
+    icon: 'fa7-solid:magnifying-glass',
+    sugestoes: sugestoesNome.value,
+    buscando: buscandoSugestoes.value,
+    mostrarMenu: mostrandoSugestoes.value
   }
 ])
 

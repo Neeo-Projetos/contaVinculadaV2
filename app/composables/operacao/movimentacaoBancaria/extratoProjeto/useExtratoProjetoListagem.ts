@@ -23,13 +23,16 @@ export function useExtratoProjetoListagem() {
   const filtro = reactive({
     nomeParam: '', // Autocomplete de projeto
     projetoParam: '',
-    contaVinculadaParam: ''
+    contaVinculadaParam: '',
+    dataInicioParam: '',
+    dataFimParam: ''
   })
 
   const colunasVisiveis = reactive({
     projeto: true,
-    banco: true,
+    conta: true,
     saldo: true,
+    ultMov: true,
     acoes: true
   })
 
@@ -56,9 +59,10 @@ export function useExtratoProjetoListagem() {
 
   const labelsColunas = {
     projeto: 'Projeto',
-    banco: 'Banco Principal',
+    conta: 'Conta Vinculada',
     saldo: 'Saldo Atual',
-    acoes: 'Extrato'
+    ultMov: 'Última Mov.',
+    acoes: 'Ações'
   }
 
   const carregarCombos = async () => {
@@ -82,6 +86,8 @@ export function useExtratoProjetoListagem() {
         body: {
           projeto: filtro.projetoParam,
           contaVinculada: filtro.contaVinculadaParam,
+          dataInicio: filtro.dataInicioParam,
+          dataFim: filtro.dataFimParam,
           termo: filtro.nomeParam
         }
       })
@@ -99,6 +105,8 @@ export function useExtratoProjetoListagem() {
   const limparFiltrosAvancados = () => {
     filtro.projetoParam = ''
     filtro.contaVinculadaParam = ''
+    filtro.dataInicioParam = ''
+    filtro.dataFimParam = ''
     modalFiltroAvancadoAberto.value = false
     buscarLista()
   }
@@ -114,7 +122,21 @@ export function useExtratoProjetoListagem() {
   }
 
   const buscarSugestoesNome = () => { 
-    // Mock ou busca real se houver endpoint
+    if (filtro.nomeParam.length < 2) {
+      sugestoesNome.value = []
+      mostrandoSugestoes.value = false
+      return
+    }
+
+    const termo = filtro.nomeParam.toLowerCase()
+    sugestoesNome.value = projetosAtivos.value
+      .filter(p => 
+        (p.apelido && p.apelido.toLowerCase().includes(termo)) || 
+        (p.descricao && p.descricao.toLowerCase().includes(termo))
+      )
+      .map(p => p.descricao ? `${p.apelido} - ${p.descricao}` : p.apelido)
+    
+    mostrandoSugestoes.value = sugestoesNome.value.length > 0
   }
   const selecionarSugestao = (val: string) => { 
     filtro.nomeParam = val
