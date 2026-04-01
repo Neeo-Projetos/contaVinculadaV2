@@ -12,13 +12,10 @@
         @keydown.space.prevent="aberto = !aberto"
         @keydown.enter.prevent="aberto = !aberto"
         @keydown.esc="aberto = false"
-        class="w-full rounded-xl px-4 py-3 text-sm transition-all cursor-pointer flex items-center justify-between border focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+        class="w-full rounded-xl px-4 py-3 text-sm transition-all cursor-pointer flex items-center justify-between border focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-gray-50 dark:bg-gray-900/50 shadow-sm border-gray-200 dark:border-gray-700/70"
         :class="[
-          aberto ? 'ring-2 ring-emerald-500/50 border-emerald-500 shadow-[0_0_15px_-5px_rgba(16,185,129,0.3)]' : 'border-gray-200 dark:border-gray-700/70',
-          !modelValue ? 'text-gray-400 dark:text-gray-500' : (required ? 'text-gray-900 dark:text-gray-100' : 'text-gray-800 dark:text-gray-200'),
-          required
-            ? 'bg-[#fffcc0] border-yellow-400 dark:bg-yellow-500/10 dark:border-yellow-500/30'
-            : 'bg-gray-50 dark:bg-gray-900/50 shadow-sm'
+          aberto ? 'ring-2 ring-emerald-500/50 border-emerald-500 shadow-[0_0_15px_-5px_rgba(16,185,129,0.3)]' : '',
+          !modelValue ? 'text-gray-400 dark:text-gray-500' : 'text-gray-800 dark:text-gray-200'
         ]">
         <span class="truncate pr-4">{{ textoSelecionado || placeholder }}</span>
         <Icon name="fa7-solid:chevron-down" class="w-3 h-3 text-gray-400 transition-transform duration-200 shrink-0"

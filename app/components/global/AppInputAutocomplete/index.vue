@@ -5,10 +5,7 @@
       ref="inputRef"
       :value="modelValue" @input="aoDigitar" @focus="$emit('buscar')" @blur="fecharComAtraso"
       @keyup.enter="$emit('enter')" type="text"
-      class="w-full rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 transition-all placeholder-gray-400 truncate border"
-      :class="required 
-        ? 'bg-[#fffcc0] text-gray-900 border-yellow-400 focus:border-yellow-500 shadow-sm dark:bg-yellow-500/10 dark:text-gray-100 dark:border-yellow-500/30' 
-        : 'bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700/70 text-gray-800 dark:text-gray-200 focus:ring-emerald-500/50 focus:border-emerald-500'"
+      class="w-full rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 transition-all placeholder-gray-400 truncate border bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700/70 text-gray-800 dark:text-gray-200 focus:ring-emerald-500/50 focus:border-emerald-500"
       :placeholder="placeholder" autocomplete="off" />
     <Icon v-if="buscando" name="fa7-solid:spinner"
       class="animate-spin absolute right-4 top-3.5 text-emerald-500 w-4 h-4" />
