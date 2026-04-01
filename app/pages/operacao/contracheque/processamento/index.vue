@@ -4,11 +4,11 @@
         <AppFiltro v-model="filtro" v-model:viewMode="visaoAtual" :campos="camposFiltro" titulo="Processamento"
             descricao="Analise e aprove as retenções processadas via importação" icone-titulo="fa7-solid:gears"
             :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Operação' }, { label: 'Contracheques' }, { label: 'Processamento' }]"
-            :pending="carregando" @buscar="buscarProcessamentos" @openAdvancedFilter="modalFiltroAvancadoAberto = true">
+            :pending="carregando" :erros="erros" @buscar="buscarProcessamentos" @openAdvancedFilter="modalFiltroAvancadoAberto = true">
             <template #acoes>
                 <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
                 <AppBotao variacao="padrao" icone="fa7-solid:desktop"
-                    @click="visaoAtual = visaoAtual === 'lista' ? 'cards' : 'lista'">Controle de Exibição</AppBotao>
+                    @click="abrirModalExibicao">Controle de Exibição</AppBotao>
                 <template v-if="filtro.status === '2' && dados.length > 0">
                     <AppBotao variacao="acao" icone="fa7-solid:check-double" @click="processarContracheque(1)">
                         Aprovar Selecionados
@@ -23,10 +23,13 @@
                 <AppSobreposicaoCarregamento :carregando="carregando" mensagem="Buscando registros..." />
 
                 <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
+                    v-model:filtroGlobal="filtroGlobal"
                     :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
                     :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
                     :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
-                    @mudarItensPorPagina="mudarItensPorPagina">
+                    @mudarItensPorPagina="mudarItensPorPagina"
+                    :verIcone="'fa7-solid:magnifying-glass-chart'"
+                    @view="item => abrirModalDetalhes(item.codigo)">
                     <template #cabecalho-tabela>
                         <th v-if="filtro.status === '2'" scope="col" class="px-6 py-4 text-center w-20">
                             <button @click="marcarDesmarcarTodos"
@@ -37,27 +40,23 @@
                         </th>
                         <th scope="col"
                             class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">
-                            {{ labelsColunas.funcionario }}
+                            Funcionário
                         </th>
-                        <th scope="col"
+                        <th v-if="colunas.projeto" scope="col"
                             class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">
-                            {{ labelsColunas.projeto }}
+                            {{ labels.projeto }}
                         </th>
-                        <th scope="col"
+                        <th v-if="colunas.valorLiquido" scope="col"
                             class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">
-                            {{ labelsColunas.valorLiquido }}
+                            {{ labels.valorLiquido }}
                         </th>
-                        <th scope="col"
+                        <th v-if="colunas.valorRetencao" scope="col"
                             class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">
-                            {{ labelsColunas.valorRetencao }}
+                            {{ labels.valorRetencao }}
                         </th>
-                        <th scope="col"
+                        <th v-if="colunas.status" scope="col"
                             class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                            {{ labelsColunas.status }}
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">
-                            Ação
+                            {{ labels.status }}
                         </th>
                     </template>
 
@@ -85,19 +84,19 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
+                        <td v-if="colunas.projeto" class="px-6 py-4">
                             <span
                                 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 px-2 py-1 rounded-lg border border-emerald-500/10">
                                 {{ item.projeto }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-right">
+                        <td v-if="colunas.valorLiquido" class="px-6 py-4 text-right">
                             <span class="text-sm font-medium text-gray-600 dark:text-gray-400 tabular-nums">
                                 {{ Number(item.valorLiquido).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
                                 }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-right">
+                        <td v-if="colunas.valorRetencao" class="px-6 py-4 text-right">
                             <div class="flex flex-col items-end">
                                 <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
                                     {{ Number(item.valorRetencao).toLocaleString('pt-BR', {
@@ -108,7 +107,7 @@
                                     class="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-0.5">Retenção</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-center">
+                        <td v-if="colunas.status" class="px-6 py-4 text-center">
                             <span v-if="item.statusAprovacao === 0"
                                 class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 border border-rose-500/10">
                                 <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span> Reprovado
@@ -122,22 +121,17 @@
                                 <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Pendente
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-right">
-                            <button @click="abrirModalDetalhes(item.codigo)"
-                                class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
-                                title="Ver Detalhes">
-                                <Icon name="fa7-solid:magnifying-glass-chart" class="w-5 h-5" />
-                            </button>
-                        </td>
                     </template>
 
 
                     <template #cards="{ item }">
-                        <AppCardListagem :titulo="item.funcionario" :subtituloNome="item.projeto"
-                            :subtituloValor="Number(item.valorRetencao).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })"
-                            :ativo="true" :detalhes="[
+                        <AppCardListagem :titulo="item.funcionario" :subtituloNome="labels.projeto"
+                            :subtituloValor="item.projeto"
+                            :ativo="true" :mostrarStatus="colunas.status" :detalhes="[
                                 { icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` },
-                                { icone: 'fa7-solid:id-badge', texto: `Matricula: ${item.matricula}` }
+                                { icone: 'fa7-solid:id-badge', texto: `Matricula: ${item.matricula}` },
+                                ...(colunas.valorLiquido ? [{ icone: 'fa7-solid:money-bill-wave', texto: `Líquido: ${Number(item.valorLiquido).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}` }] : []),
+                                ...(colunas.valorRetencao ? [{ icone: 'fa7-solid:hand-holding-dollar', texto: `Retenção: ${Number(item.valorRetencao).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}` }] : [])
                             ]" @ver-detalhes="abrirModalDetalhes(item.codigo)" @clique-titulo="abrirModalDetalhes(item.codigo)">
                             <template #badge>
                                 <div v-if="filtro.status === '2'" class="absolute top-4 right-4 z-20">
@@ -301,49 +295,24 @@
         </AppModal>
 
         <!-- Modal de Alerta / Validação (Padrão Premium) -->
-        <AppModal :isOpen="modalAlertaAberto" tamanho="sm" @close="modalAlertaAberto = false" semCabecalho>
-            <div class="flex flex-col items-center py-10 px-8 text-center">
-                <div class="relative mb-8">
-                    <div class="absolute inset-0 bg-amber-500/20 blur-2xl rounded-full"></div>
-                    <div
-                        class="relative w-16 h-16 bg-white dark:bg-gray-800 border-2 border-amber-500/30 rounded-2xl flex items-center justify-center shadow-xl shadow-amber-500/10 overflow-hidden group">
-                        <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-amber-500/5 to-transparent">
-                        </div>
-                        <Icon name="fa7-solid:triangle-exclamation" class="w-8 h-8 text-amber-500" />
-                    </div>
-                </div>
-
-                <h4 class="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight mb-2">
-                    {{ modalAlertaTitulo }}
-                </h4>
-
-                <div class="w-10 h-1 bg-amber-500/20 mb-4 rounded-full mx-auto"></div>
-
-                <p class="text-sm text-gray-500 dark:text-gray-400 font-bold leading-relaxed max-w-[280px]">
-                    {{ modalAlertaMensagem }}
-                </p>
-
-                <AppBotao variacao="primario" @click="modalAlertaAberto = false"
-                    class="w-full mt-10 h-13 shadow-xl active:scale-95 transition-all text-[10px] font-black uppercase tracking-[0.2em]">
-                    Entendi
-                </AppBotao>
-            </div>
-        </AppModal>
+        <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labels"
+            @aplicar="aplicarExibicao" @close="modalExibicaoAberto = false" />
 
     </div>
 </template>
 
 <script setup lang="ts">
 const {
-    carregando, buscaRealizada, visaoAtual, dados, filtro, labelsColunas,
+    carregando, buscaRealizada, visaoAtual, dados, filtro, erros, labelsColunas,
     buscarProcessamentos, projetos, funcionarios, detalhesVerba, modalDetalhesAberto, abrirModalDetalhes,
-    modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, modalSucessoAberto,
+    modalSucessoAberto,
     processarContracheque, marcarDesmarcarTodos,
     nomeFuncionarioSearch, sugestoesFuncionarios, buscandoFuncionarios, mostrarMenuFuncionarios,
     buscarFuncionarios, selecionarFuncionario,
     modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
     registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
-    mudarPagina, mudarItensPorPagina
+    mudarPagina, mudarItensPorPagina, filtroGlobal,
+    colunas, colunasTemp, labels, modalExibicaoAberto, abrirModalExibicao, aplicarExibicao
 } = useContrachequeProcessamento()
 
 const camposFiltro = computed(() => [
@@ -353,6 +322,7 @@ const camposFiltro = computed(() => [
     type: 'text' as const, 
     placeholder: 'Ex: 03/2024', 
     mask: '##/####',
+    required: true,
     colSpan: 'md:col-span-3'
   },
   { 

@@ -11,7 +11,7 @@ Este documento é a referência arquitetural definitiva para a criação de TUDO
 
 ## 0. Regras de Ouro (Invioláveis e Restritas)
 
-1. **Separação Estrita View/Controller**: O `.vue` é **estritamente View**. Todas as propriedades reativas de form, variáveis de *loading*, *modais de alerta* e funções async/fetch devem ser injetadas a partir de um `use[Modulo]Formulario` ou `use[Modulo]Listagem`. Nenhum fetch avulso no vue.
+1. **Separação Estrita View/Controller**: O `.vue` é **estritamente View**. Todas as propriedades reativas de form, variáveis de *loading*, *notificações/alertas* e funções async/fetch devem ser injetadas a partir de um `use[Modulo]Formulario` ou `use[Modulo]Listagem`. Nenhum fetch avulso no vue.
 2. **Zero Auto-Load Funcional**: Listagens começam vazias. A chamada de API para buscar lista só ocorre no clique de "Pesquisar" ou submissão de filtro explícita pelo usuário.
    - **Gatilho Autocomplete**: Ao escolher um item na lista de autocomplete, o disparo da busca (`filtrar()`) deve ser automático.
 3. **Filtros e Status Inicial**: Todo filtro de listagem deve iniciar com o campo `Status` (ativoParam) marcado como **"1" (Ativos)**.
@@ -23,7 +23,7 @@ Este documento é a referência arquitetural definitiva para a criação de TUDO
    - **Listagens (`index.vue`)**: Sem barra de navegação no topo. Usam apenas `AppCabecalhoPagina`.
    - **Cadastros (`cadastro.vue`)**: Uso OBRIGATÓRIO de `AppBarraNavegacao` (Simples) ou `AppTrilhaNavegacao` (Complexos) no topo.
 7. **Inativação Lógica**: Nunca crie fluxos de "Delete" físico. Sempre "Inativar" o registro (`ativo = 0` ou `false`).
-8. **Theme CSS & Layout**: Tudo requer suporte via classes `dark:`. Formulários usam sempre matriz em Grid responsiva (`grid grid-cols-1 md:grid-cols-12 gap-6 items-end`). A tela principal (View root) deve iniciar com `<div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">`.
+8. **Theme CSS & Layout**: Tudo requer suporte via classes `dark:`. Formulários usam sempre matriz em Grid responsiva (`grid grid-cols-1 md:grid-cols-12 gap-6 items-start`). O uso de `items-start` é obrigatório para garantir que as mensagens de erro abaixo dos inputs não desalinhem o topo dos campos na mesma linha.
 9. **Estilos Embutidos vs Externos**: 
    - **Componentes (`components/`)**: Devem ser auto-contidos. O CSS deve estar dentro do arquivo `.vue` usando `<style scoped>`.
    - **Páginas (`pages/`)**: Devem manter seus estilos em arquivos `.css` externos (vinculados via `<style scoped src="./estilo.css">`) para manter o arquivo `.vue` limpo e focado na estrutura.
@@ -46,15 +46,22 @@ Use o componente wrapper definitivo:
 - **Simples (`funcionario/cadastro.vue`)**: Ideal para fluxos curtos. Usa `AppBarraNavegacao` -> `AppCartaoFormulario` -> `AppSobreposicaoCarregamento` -> `<form @submit.prevent="gravarRegistro">` -> `AppFormularioSecao` -> `<AppRodapeFormulario>`.
 - **Complexo (`projeto/cadastro.vue`)**: Quando o volume de campos exige carga cognitiva dividida. Usa `AppTrilhaNavegacao` e o componente chave `AppPassosFormulario`. A submissão bloqueia avanço: `<form @submit.prevent="passoAtual === x ? gravarRegistro() : avancarPasso()">`.
 
-### 1.3 Validação Visual "Shake"
+### 1.3 Validação Visual e Mensagens de Erro
 - Os campos nunca são nativos HTML. Use `AppInputTexto`, `AppInputCnpj`, `AppSelect`, etc.
-- **Implementação Visual de Erro**: O framework exige tremulação e highlights automáticos vermelhos nos erros do form:
+- **Implementação Visual de Erro**: O framework utiliza a prop `:erro` para exibir mensagens de validação diretamente abaixo do campo, sem deformar o layout.
+- **Obrigatoriedade**: Use a prop `required` para exibir o asterisco vermelho `*`.
+- **Alinhamento Resiliente**: O container pai (Grid) deve usar `items-start` para que o surgimento da mensagem de erro em um campo não desalinhe os outros campos da mesma linha.
+
 ```vue
-<div :class="{ 'animate-shake': erros.has('cnpj') }">
-   <AppInputCnpj v-model="form.cnpj" required />
-</div>
+<AppInputTexto 
+  v-model="form.email" 
+  label="E-mail"
+  required
+  :erro="erros.email" 
+/>
 ```
-**Dica Técnica**: Use seletores `:deep(input)` ou `:deep(select)` no CSS do componente pai para garantir que o contorno vermelho (`border-red-500`) seja aplicado mesmo em inputs encapsulados.
+
+**Dica Técnica**: O uso de `AppNotificacao` via `dispararAlerta()` deve acompanhar a validação para erros globais ou impeditivos de busca/gravação.
 
 
 ---
@@ -73,7 +80,7 @@ Use o componente wrapper definitivo:
 | `AppBotao` | Use variações engessadas: `acao` (azul), `primario` (verde/gravar), `perigo` (vermelho/inativar). |
 | `AppSobreposicaoCarregamento` | Layer de opacidade durante qualquer `$fetch` crítico p/ a UI. |
 | `AppAtivo` | Exibe pills do sistema com o status "Ativo/Inativo" usando cores padronizadas. |
-| `AppNotificacao` | Toast de feedback (Sucesso, Erro, Alerta). Integrado via `useAppNotificacao`. |
+| `AppNotificacao` | **Padrão para Alertas**. Substitui o alert() nativo e modais de erro. Use `useAppNotificacao().dispararAlerta()`. |
 | `AppCampoObrigatorio` | Card de aviso Âmbar para sinalizar campos que devem ser preenchidos. |
 
 
@@ -96,8 +103,8 @@ A lógica vital reside aqui (`app/composables/cadastro/[modulo]/...`). Estas var
 1. **Identificadores Iniciais**: Resgate via `const registroId = useRoute().query.id as string`.
 2. **Interface TS Forte**: Defina tipos rígidos, ex: `interface ModuloForm { codigo: string | number, ... }`.
 3. **Reatividade e Edição**: `const form = reactive<ModuloForm>({ codigo: registroId || '0', ... })`.
-4. **Tratamento de Erros via `Set`**: `const erros = reactive(new Set<string>())`.
-5. **Modais Seguros**: Nunca acesse o nativo `alert()`. Invoque métodos abstratos como `mostrarAlerta(titulo, msg)`.
+4. **Tratamento de Erros via Objeto**: `const erros = reactive<Record<string, string>>({ campo: '' })` para armazenar mensagens de erro individuais.
+5. **Notificações Seguras**: Nunca acesse o nativo `alert()`. Invoque `dispararAlerta(titulo, msg, tipo)` do `useAppNotificacao`.
 6. **Integração CRUD**: Funções `carregarDados()`, `gravarRegistro()` e `excluirRegistro()` manipulando métodos `$fetch`.
 
 ### 3.3 Composable de Interface (`useInterfaceSettings.ts`)

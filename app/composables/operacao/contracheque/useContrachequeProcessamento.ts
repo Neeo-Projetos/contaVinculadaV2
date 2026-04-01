@@ -1,4 +1,6 @@
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, type Ref } from 'vue'
+import { useAppNotificacao } from '../../global/useAppNotificacao'
+import { usePaginacaoFrontEnd } from '../../global/usePaginacaoFrontEnd'
 
 interface FiltroProcessamento {
   mesAno: string
@@ -25,25 +27,41 @@ interface ProcessamentoItem {
 }
 
 export function useContrachequeProcessamento() {
+  const { dispararAlerta } = useAppNotificacao()
   const carregando = ref(false)
   const buscaRealizada = ref(false)
   const visaoAtual = ref<'lista' | 'cards'>('lista')
 
-  const filtro = reactive<FiltroProcessamento>({
+  const filtro = ref<FiltroProcessamento>({
     mesAno: '',
     projeto: '',
     funcionarioId: '',
     status: '2' // Pendentes por padrão
   })
 
+  const colunasVisiveis = reactive({
+    projeto: true,
+    valorLiquido: true,
+    valorRetencao: true,
+    status: true
+  })
+
+  const erros = reactive<Record<string, string>>({
+    mesAno: '',
+    projeto: '',
+    funcionarioId: ''
+  })
+
   // Labels das colunas para padronização (Item 3.1 do padraoTelas.md)
   const labelsColunas = {
-      funcionario: 'Funcionário',
-      projeto: 'Projeto',
-      valorLiquido: 'Vlr. Líquido',
-      valorRetencao: 'Vlr. Retido',
+      projeto: 'Projeto / Unidade',
+      valorLiquido: 'Valor Líquido',
+      valorRetencao: 'Valor Retido',
       status: 'Situação'
   }
+
+  const colunasTemp = reactive({ ...colunasVisiveis })
+  const modalExibicaoAberto = ref(false)
 
   const listaCompleta = ref<ProcessamentoItem[]>([])
   const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
@@ -61,16 +79,8 @@ export function useContrachequeProcessamento() {
   
   // Estados para Modais
   const modalDetalhesAberto = ref(false)
-  const modalAlertaAberto = ref(false)
-  const modalAlertaTitulo = ref('Atenção')
-  const modalAlertaMensagem = ref('')
   const modalSucessoAberto = ref(false)
-
-  const exibirAlerta = (titulo: string, mensagem: string) => {
-    modalAlertaTitulo.value = titulo
-    modalAlertaMensagem.value = mensagem
-    modalAlertaAberto.value = true
-  }
+  const modalFiltroAvancadoAberto = ref(false)
 
   const carregarCombos = async () => {
     try {
@@ -96,7 +106,7 @@ export function useContrachequeProcessamento() {
     mostrarMenuFuncionarios.value = true
     try {
         const res = await $fetch<any>('/api/cadastro/funcionario/autocomplete', {
-            query: { q: termo, projeto: filtro.projeto }
+            query: { q: termo, projeto: filtro.value.projeto }
         })
         sugestoesFuncionarios.value = res.data || []
     } catch (e) {
@@ -107,14 +117,16 @@ export function useContrachequeProcessamento() {
   }
 
   const selecionarFuncionario = (sugestao: any) => {
-    filtro.funcionarioId = sugestao.id
+    filtro.value.funcionarioId = String(sugestao.id)
     nomeFuncionarioSearch.value = sugestao.descricao
     mostrarMenuFuncionarios.value = false
   }
 
   const buscarProcessamentos = async () => {
-    if (!filtro.mesAno || filtro.mesAno.length < 7) {
-        return exibirAlerta('Filtro Obrigatório', 'Informe o Mês/Ano de referência no formato MM/AAAA para realizar a busca.')
+    erros.mesAno = ''
+    if (!filtro.value.mesAno || filtro.value.mesAno.replace(/\D/g, '').length < 6) {
+        erros.mesAno = 'Preencha o campo Mês/Ano'
+        return dispararAlerta('Filtro Obrigatório', 'Informe o Mês/Ano de referência no formato MM/AAAA.', 'error')
     }
     
     carregando.value = true
@@ -122,21 +134,23 @@ export function useContrachequeProcessamento() {
     try {
       const response = await $fetch<any>('/api/operacao/contracheque/processamento/listagem', {
         method: 'POST',
-        body: filtro
+        body: filtro.value
       })
       listaCompleta.value = (response.data || []).map((item: any) => ({ ...item, selecionado: true }))
       paginacao.mudarPagina(1)
     } catch (error) {
-      exibirAlerta('Erro na Busca', 'Houve um problema ao consultar os registros no servidor.')
+      dispararAlerta('Erro na Busca', 'Houve um problema ao consultar os registros no servidor.', 'error')
     } finally {
       carregando.value = false
     }
   }
 
   const marcarDesmarcarTodos = () => {
-    const todosMarcados = paginacao.listaPaginada.value.filter(i => i.statusAprovacao === 2).every(i => i.selecionado)
+    const lista = paginacao.listaPaginada.value as ProcessamentoItem[]
+    const todosMarcados = lista.filter(i => i.statusAprovacao === 2).every(i => i.selecionado)
     const novoEstado = !todosMarcados
-    paginacao.listaPaginada.value.forEach(item => {
+    
+    lista.forEach(item => {
       if (item.statusAprovacao === 2) item.selecionado = novoEstado
     })
   }
@@ -147,7 +161,7 @@ export function useContrachequeProcessamento() {
       .map(item => item.matricula)
 
     if (matriculasSelecionadas.length === 0) {
-        return exibirAlerta('Seleção Obrigatória', 'Por favor, selecione ao menos um contracheque na lista para realizar esta ação.')
+        return dispararAlerta('Seleção Obrigatória', 'Por favor, selecione ao menos um contracheque na lista para realizar esta ação.', 'warning')
     }
 
     carregando.value = true
@@ -162,16 +176,26 @@ export function useContrachequeProcessamento() {
 
       if (res.status === 'success') {
         modalSucessoAberto.value = true
-        filtro.status = statusAprovacao.toString()
+        filtro.value.status = statusAprovacao.toString()
         buscarProcessamentos()
       } else {
-        exibirAlerta('Falha na Operação', res.mensagem || 'Não foi possível gravar as alterações.')
+        dispararAlerta('Falha na Operação', res.mensagem || 'Não foi possível gravar as alterações.', 'error')
       }
     } catch (error) {
-      exibirAlerta('Erro de Conexão', 'Erro técnico ao tentar se comunicar com o servidor de processamento.')
+      dispararAlerta('Erro de Conexão', 'Erro técnico ao tentar se comunicar com o servidor de processamento.', 'error')
     } finally {
       carregando.value = false
     }
+  }
+
+  const abrirModalExibicao = () => {
+    Object.assign(colunasTemp, colunasVisiveis)
+    modalExibicaoAberto.value = true
+  }
+
+  const aplicarExibicao = () => {
+    Object.assign(colunasVisiveis, colunasTemp)
+    modalExibicaoAberto.value = false
   }
 
   const abrirModalDetalhes = async (id: number) => {
@@ -184,7 +208,7 @@ export function useContrachequeProcessamento() {
       modalDetalhesAberto.value = true
     } catch (error) {
       console.error('Erro ao buscar detalhes:', error)
-      exibirAlerta('Erro de Detalhamento', 'Não foi possível carregar as verbas deste registro.')
+      dispararAlerta('Erro de Detalhamento', 'Não foi possível carregar as verbas deste registro.', 'error')
     }
   }
 
@@ -192,36 +216,40 @@ export function useContrachequeProcessamento() {
     carregarCombos()
   })
 
+  const abrirModalFiltroAvancado = () => { modalFiltroAvancadoAberto.value = true }
+  
+  const limparFiltrosAvancados = () => {
+    filtro.value = { mesAno: '', projeto: '', funcionarioId: '', status: '2' }
+    nomeFuncionarioSearch.value = ''
+  }
+
+  const aplicarFiltroAvancado = () => {
+    modalFiltroAvancadoAberto.value = false
+    buscarProcessamentos()
+  }
+
   return {
     carregando,
     buscaRealizada,
     visaoAtual,
     filtro,
+    erros,
     labelsColunas,
     buscarProcessamentos,
     projetos,
     funcionarios,
     detalhesVerba,
     modalDetalhesAberto,
-    modalAlertaAberto,
-    modalAlertaTitulo,
-    modalAlertaMensagem,
     modalSucessoAberto,
     abrirModalDetalhes,
     processarContracheque,
     marcarDesmarcarTodos,
 
     // Filtro Avançado
-    modalFiltroAvancadoAberto: ref(false),
-    abrirModalFiltroAvancado() { this.modalFiltroAvancadoAberto.value = true },
-    limparFiltrosAvancados() {
-        Object.assign(filtro, { mesAno: '', projeto: '', funcionarioId: '', status: '2' })
-        nomeFuncionarioSearch.value = ''
-    },
-    aplicarFiltroAvancado() {
-        this.modalFiltroAvancadoAberto.value = false
-        buscarProcessamentos()
-    },
+    modalFiltroAvancadoAberto,
+    abrirModalFiltroAvancado,
+    limparFiltrosAvancados,
+    aplicarFiltroAvancado,
 
     // Autocomplete Funcionário
     nomeFuncionarioSearch,
@@ -241,6 +269,15 @@ export function useContrachequeProcessamento() {
     registroFinal: paginacao.registroFinal,
     paginasExibidas: paginacao.paginasExibidas,
     mudarPagina: paginacao.mudarPagina,
-    mudarItensPorPagina: paginacao.mudarItensPorPagina
+    mudarItensPorPagina: paginacao.mudarItensPorPagina,
+    filtroGlobal: paginacao.filtroGlobal,
+
+    // Exibição
+    colunas: colunasVisiveis,
+    colunasTemp,
+    labels: labelsColunas,
+    modalExibicaoAberto,
+    abrirModalExibicao,
+    aplicarExibicao
   }
 }

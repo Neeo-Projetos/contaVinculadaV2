@@ -9,13 +9,18 @@
         <Icon :name="icone" />
       </div>
       <input ref="inputRef" :id="id" :value="modelValue" @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+        v-maska :data-maska="mask"
         :type="tipo" :maxlength="maxlength" :placeholder="placeholder"
         class="w-full rounded-xl py-3 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 transition-all placeholder-gray-400 border bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700/70 focus:border-emerald-500/20 focus:ring-emerald-500/10"
         :class="[
           icone ? 'pl-11 pr-4' : 'px-4',
-          centralizado ? 'text-center' : 'text-left'
+          centralizado ? 'text-center' : 'text-left',
+          erro ? 'border-red-500 bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700/70 focus:border-emerald-500/20 focus:ring-emerald-500/10'
         ]" />
     </div>
+    <span v-if="erro" class="text-red-500 text-[10px] font-bold mt-1.5 block uppercase tracking-wider animate-fade-in pl-1 transition-all">
+      <Icon name="fa7-solid:circle-exclamation" class="mr-1" /> {{ erro }}
+    </span>
   </div>
 </template>
 
@@ -31,6 +36,8 @@ defineProps({
   required: { type: Boolean, default: false },
   maxlength: { type: [Number, String], default: null },
   icone: { type: String, default: '' },
+  mask: { type: String, default: null },
+  erro: { type: String, default: '' },
   centralizado: { type: Boolean, default: false }
 })
 

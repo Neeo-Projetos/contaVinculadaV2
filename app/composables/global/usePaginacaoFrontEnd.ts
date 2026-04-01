@@ -1,6 +1,6 @@
 import { ref, computed, watch, type Ref } from 'vue'
 
-export function usePaginacaoFrontEnd(listaCompleta: Ref<any[]>, visaoAtual: Ref<string> = ref('lista')) {
+export function usePaginacaoFrontEnd<T>(listaCompleta: Ref<T[]>, visaoAtual: Ref<any> = ref('lista')) {
   const paginaAtual = ref(1)
   const itensPorPagina = ref(visaoAtual.value === 'cards' ? 12 : 10)
 
@@ -17,7 +17,7 @@ export function usePaginacaoFrontEnd(listaCompleta: Ref<any[]>, visaoAtual: Ref<
     const termo = filtroGlobal.value.toLowerCase()
     return listaCompleta.value.filter(item => {
       // Busca em todas as propriedades do objeto, transformando em string
-      return Object.values(item).some(val => 
+      return Object.values(item as any).some(val => 
         String(val).toLowerCase().includes(termo)
       )
     })

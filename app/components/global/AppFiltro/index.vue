@@ -81,16 +81,18 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-end">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
                 <div :class="campo.colSpan ? campo.colSpan : (campo.type === 'select' ? 'md:col-span-2' : 'md:col-span-6 lg:col-span-7')" v-for="campo in campos" :key="campo.key">
                     <AppInputTexto v-if="campo.type === 'text'" :modelValue="(modelValue[campo.key] as string) || ''"
                         @update:modelValue="val => atualizarModelo(campo.key, val)" :label="campo.label"
-                        :placeholder="campo.placeholder" :icone="campo.icon" @keyup.enter="$emit('buscar')" />
+                        :placeholder="campo.placeholder" :icone="campo.icon" @keyup.enter="$emit('buscar')"
+                        :mask="campo.mask" :required="campo.required" :erro="erros[campo.key]" />
 
                     <AppSelect v-else-if="campo.type === 'select'" :modelValue="(modelValue[campo.key] as string) || ''"
                         @update:modelValue="val => atualizarModelo(campo.key, val)" :label="campo.label"
                         :placeholder="campo.placeholder || 'Todos'" :opcoes="campo.options || []"
-                        :itemValue="campo.itemValue || 'value'" :itemLabel="campo.itemLabel || 'label'" />
+                        :itemValue="campo.itemValue || 'value'" :itemLabel="campo.itemLabel || 'label'"
+                        :required="campo.required" :erro="erros[campo.key]" />
 
                     <div v-else-if="campo.type === 'autocomplete'" class="flex flex-col gap-2.5">
                         <label v-if="campo.label"
@@ -106,6 +108,7 @@
                 </div>
 
                 <div class="md:col-span-4 lg:col-span-3">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 invisible">Pesquisar</label>
                     <button :disabled="pending" @click="$emit('buscar')"
                         class="items-center text-white font-black bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 rounded-2xl text-xs uppercase tracking-widest px-12 h-[46px] w-full shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] flex justify-center gap-3 disabled:opacity-70 border border-blue-500/50">
                         <Icon :name="pending ? 'fa7-solid:spinner' : 'fa6-solid:magnifying-glass'"
@@ -142,6 +145,8 @@ interface CampoFiltro {
     buscando?: boolean;
     mostrarMenu?: boolean;
     colSpan?: string; // Classe do Tailwind: md:col-span-3, etc.
+    mask?: string;
+    required?: boolean;
 }
 
 const emit = defineEmits<{
@@ -165,12 +170,14 @@ const props = withDefaults(defineProps<{
     iconeTitulo?: string;
     breadcrumbs?: { label: string, to?: string }[];
     exibirFiltroAvancado?: boolean;
+    erros?: Record<string, string>;
 }>(), {
     viewMode: 'cards',
     pending: false,
     advancedFilterActive: false,
     breadcrumbs: () => [],
-    exibirFiltroAvancado: true
+    exibirFiltroAvancado: true,
+    erros: () => ({})
 });
 
 const atualizarModelo = (key: string, valor: ValorCampo) => {

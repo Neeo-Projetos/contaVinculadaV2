@@ -12,14 +12,19 @@
         @keydown.space.prevent="aberto = !aberto"
         @keydown.enter.prevent="aberto = !aberto"
         @keydown.esc="aberto = false"
-        class="w-full rounded-xl px-4 py-3 text-sm transition-all cursor-pointer flex items-center justify-between border focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-gray-50 dark:bg-gray-900/50 shadow-sm border-gray-200 dark:border-gray-700/70"
+        class="w-full rounded-xl px-4 py-3 text-sm transition-all cursor-pointer flex items-center justify-between border focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-gray-50 dark:bg-gray-900/50 shadow-sm transition-all"
         :class="[
           aberto ? 'ring-2 ring-emerald-500/50 border-emerald-500 shadow-[0_0_15px_-5px_rgba(16,185,129,0.3)]' : '',
+          erro ? 'border-red-500 bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700/70',
           !modelValue ? 'text-gray-400 dark:text-gray-500' : 'text-gray-800 dark:text-gray-200'
         ]">
         <span class="truncate pr-4">{{ textoSelecionado || placeholder }}</span>
         <Icon name="fa7-solid:chevron-down" class="w-3 h-3 text-gray-400 transition-transform duration-200 shrink-0"
           :class="{ 'rotate-180': aberto }" />
+      </div>
+ 
+      <div v-if="erro" class="text-red-500 text-[10px] font-bold mt-1.5 block uppercase tracking-wider animate-fade-in pl-1 transition-all">
+        <Icon name="fa7-solid:circle-exclamation" class="mr-1" /> {{ erro }}
       </div>
 
       <div v-if="aberto" class="fixed inset-0 z-40" @click="aberto = false"></div>
@@ -58,6 +63,7 @@ const props = defineProps({
   id: { type: String, default: () => `select-${Math.random().toString(36).substr(2, 9)}` },
   placeholder: { type: String, default: 'Selecione uma opção...' },
   required: { type: Boolean, default: false },
+  erro: { type: String, default: '' },
   opcoes: { type: Array as PropType<any[]>, default: () => [] },
   itemValue: { type: String, default: 'codigo' },
   itemLabel: { type: String, default: 'descricao' }
