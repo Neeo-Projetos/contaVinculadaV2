@@ -14,7 +14,7 @@
     
     <!-- Ações à direita -->
     <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-      <AppBotao variacao="padrao" icone="fa7-solid:file" @click="$emit('limpar')">
+      <AppBotao variacao="acao" icone="fa7-solid:file" @click="$emit('limpar')">
         {{ labelLimpar }}
       </AppBotao>
       
@@ -33,8 +33,8 @@ defineProps({
   labelVoltar: { type: String, default: 'Voltar' },
   labelExcluir: { type: String, default: 'Excluir' },
   iconeExcluir: { type: String, default: 'fa7-solid:trash-can' },
-  labelLimpar: { type: String, default: 'Limpar / Novo' },
-  labelGravar: { type: String, default: 'Gravar Dados' }
+  labelLimpar: { type: String, default: 'Novo' },
+  labelGravar: { type: String, default: 'Gravar' }
 })
 
 defineEmits(['voltar', 'excluir', 'limpar', 'gravar'])

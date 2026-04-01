@@ -11,7 +11,7 @@
         ref="inputRef"
         :id="id" :value="modelValue" @input="aoDigitar" @blur="validar" type="email" :maxlength="maxlength"
         :placeholder="placeholder"
-        class="w-full rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 transition-all placeholder-gray-400 border bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700/70 text-gray-800 dark:text-gray-200 focus:ring-emerald-500/50 focus:border-emerald-500" />
+        class="w-full rounded-xl pl-11 pr-4 py-4 text-sm focus:outline-none focus:ring-2 transition-all placeholder-gray-400 border bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700/70 text-gray-800 dark:text-gray-200 focus:ring-emerald-500/50 focus:border-emerald-500" />
     </div>
     <span v-if="erroInterno" class="text-red-500 text-[10px] font-bold mt-1.5 block uppercase tracking-wider animate-fade-in pl-1">
       <Icon name="fa7-solid:circle-exclamation" class="mr-1" /> {{ erroInterno }}
