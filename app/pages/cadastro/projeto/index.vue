@@ -84,7 +84,7 @@
         <template #cards="{ item }">
           <AppCardListagem :titulo="item.apelido" subtituloNome="Descrição" :subtituloValor="item.descricao"
             :ativo="Number(item.ativo) === 1 || item.ativo === true" :mostrarStatus="colunas.status"
-            :mostrarHistorico="colunas.historico" :detalhes="[
+            :mostrarHistorico="true" :detalhes="[
               ...(colunas.cnpj ? [{ icone: 'fa7-solid:address-card', texto: `CNPJ: ${item.cnpj}` }] : [])
             ]" @ver-detalhes="navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}`)"
             @editar="navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}`)"
@@ -104,10 +104,10 @@
       <AppInputCnpj v-model="filtro.cnpjParam" label="CNPJ do Projeto" />
 
       <AppSelect v-model="filtro.contaParam" label="Conta Vinculada (Banco)"
-        :opcoes="[{ codigo: '1', descricao: 'Banco do Brasil' }, { codigo: '2', descricao: 'Caixa' }]" />
+        :opcoes="listaBancos" />
 
       <AppSelect v-model="filtro.verbaParam" label="Verba"
-        :opcoes="[{ codigo: '1', descricao: 'Verba CLT' }, { codigo: '2', descricao: 'Verba Estágio' }]" />
+        :opcoes="listaVerbas" />
 
     </AppModalFiltroAvancado>
 
@@ -128,7 +128,8 @@ const {
   modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
   sugestoesProjeto, mostrandoSugestoes, buscandoSugestoes, buscarSugestoesProjeto, selecionarSugestao, fecharSugestoesDelay,
   buscarProjetos, filtrar, mudarPagina, mudarItensPorPagina, filtroGlobal,
-  abrirModalConta, abrirModalVerba
+  abrirModalConta, abrirModalVerba,
+  listaVerbas, listaBancos
 } = useProjetoListagem()
 
 const colunas = colunasVisiveis

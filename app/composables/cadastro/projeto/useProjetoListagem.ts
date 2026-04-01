@@ -10,6 +10,8 @@ export function useProjetoListagem() {
   const carregandoHistorico = ref(false)
   const modalFiltroAvancadoAberto = ref(false)
   const modalExibicaoAberto = ref(false)
+  const listaVerbas = ref<any[]>([])
+  const listaBancos = ref<any[]>([])
   const { width } = useWindowSize()
 
   const placeholderDinamico = computed(() => {
@@ -19,8 +21,8 @@ export function useProjetoListagem() {
   })
 
   onMounted(() => {
-    // Não executa a busca automática ao montar a tela, apenas carrega dependências de filtro se necessário.
-    // carregarBancos()
+    carregarVerbas()
+    carregarBancos()
   })
 
   const filtro = ref({
@@ -36,16 +38,14 @@ export function useProjetoListagem() {
     cnpj: true,
     contas: true,
     verbas: true,
-    status: true,
-    historico: true
+    status: true
   })
 
   const labelsColunas = {
     cnpj: 'CNPJ do Projeto',
     contas: 'Contas (Bancos)',
     verbas: 'Verbas',
-    status: 'Status',
-    historico: 'Botão de Histórico'
+    status: 'Status'
   }
 
   const colunasTemp = reactive({ ...colunasVisiveis })
@@ -160,6 +160,30 @@ export function useProjetoListagem() {
   const abrirModalConta = (id: number) => { console.log('Abrir Contas do projeto', id) }
   const abrirModalVerba = (id: number) => { console.log('Abrir Verbas do projeto', id) }
 
+  const carregarVerbas = async () => {
+    try {
+      const resp = await $fetch<any>('/api/tabelaBasica/verbas/listagem', {
+        method: 'POST', body: { ativo: '1' }
+      })
+      listaVerbas.value = (resp?.data || []).map((v: any) => ({
+        codigo: v.codigo,
+        descricao: `${v.codigoReferencia} - ${v.descricao}`
+      }))
+    } catch (e) { console.error('Falha ao carregar verbas:', e) }
+  }
+
+  const carregarBancos = async () => {
+    try {
+      const resp = await $fetch<any>('/api/tabelaBasica/bancos/listagem', {
+        method: 'POST', body: { ativo: '1' }
+      })
+      listaBancos.value = (resp?.data || []).map((b: any) => ({
+        codigo: b.codigo,
+        descricao: `${b.codigoBanco} - ${b.nomeBanco}`
+      }))
+    } catch (e) { console.error('Falha ao carregar bancos:', e) }
+  }
+
   const abrirHistorico = async (codigo: number) => {
     modalHistoricoAberto.value = true
     carregandoHistorico.value = true
@@ -194,6 +218,7 @@ export function useProjetoListagem() {
     filtroGlobal: paginacao.filtroGlobal,
     modalHistoricoAberto, historicoSelecionado, carregandoHistorico, abrirHistorico,
     abrirModalConta, abrirModalVerba,
+    listaVerbas, listaBancos,
 
     listaRegistros: paginacao.listaPaginada,
     paginaAtual: paginacao.paginaAtual,

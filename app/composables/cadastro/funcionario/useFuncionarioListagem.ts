@@ -44,16 +44,14 @@ export function useFuncionarioListagem() {
     cpf: true,
     matricula: true,
     projeto: true,
-    status: true,
-    historico: true
+    status: true
   })
 
   const labelsColunas = {
     cpf: 'Documento (CPF)',
     matricula: 'Matrícula',
     projeto: 'Projeto / Alocação',
-    status: 'Status',
-    historico: 'Botão de Histórico'
+    status: 'Status'
   }
 
   const colunasTemp = reactive({ ...colunasVisiveis })

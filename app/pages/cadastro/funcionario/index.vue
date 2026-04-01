@@ -80,7 +80,7 @@
         <template #cards="{ item }">
           <AppCardListagem :titulo="item.nomeAbreviado || item.nomeCompleto" subtituloNome="E-mail"
             :subtituloValor="item.email" :ativo="Number(item.ativo) === 1 || item.ativo === true"
-            :mostrarStatus="colunas.status" :mostrarHistorico="colunas.historico" :detalhes="[
+            :mostrarStatus="colunas.status" :mostrarHistorico="true" :detalhes="[
               ...(colunas.matricula ? [{ icone: 'fa7-solid:id-badge', texto: `Matrícula: ${item.matricula}` }] : []),
               ...(colunas.projeto ? [{ icone: 'fa7-solid:id-card', texto: `Projeto: ${item.projeto || 'Sem Projeto'}` }] : []),
               ...(colunas.cpf ? [{ icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` }] : [])

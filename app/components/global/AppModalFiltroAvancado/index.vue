@@ -34,7 +34,7 @@
             </button>
             <div class="flex gap-3 w-full sm:w-auto mt-4 sm:mt-0">
               <AppBotao variacao="padrao" @click="$emit('close')">Cancelar</AppBotao>
-              <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="$emit('aplicar')">Consultar</AppBotao>
+              <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="$emit('aplicar')">Consultar</AppBotao>
             </div>
           </div>
  
