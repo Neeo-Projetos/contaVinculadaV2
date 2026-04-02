@@ -10,9 +10,7 @@
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
         <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="() => {}">Controle de Exibição
         </AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:download" @click="navigateTo('/tabelaBasica/verbas/importar')">
-          Importação
-        </AppBotao>
+
         <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/tabelaBasica/verbas/cadastro?id=0')">
           Nova Verba
         </AppBotao>
