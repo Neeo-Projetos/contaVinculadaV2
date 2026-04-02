@@ -25,7 +25,8 @@ export function useExtratoProjetoListagem() {
     projetoParam: '',
     contaVinculadaParam: '',
     dataInicioParam: '',
-    dataFimParam: ''
+    dataFimParam: '',
+    comSaldoParam: 'S'
   })
 
   const colunasVisiveis = reactive({
@@ -88,7 +89,8 @@ export function useExtratoProjetoListagem() {
           contaVinculada: filtro.contaVinculadaParam,
           dataInicio: filtro.dataInicioParam,
           dataFim: filtro.dataFimParam,
-          termo: filtro.nomeParam
+          termo: filtro.nomeParam,
+          comSaldo: filtro.comSaldoParam
         }
       })
       listaCompleta.value = response.data || []
@@ -107,6 +109,7 @@ export function useExtratoProjetoListagem() {
     filtro.contaVinculadaParam = ''
     filtro.dataInicioParam = ''
     filtro.dataFimParam = ''
+    filtro.comSaldoParam = ''
     modalFiltroAvancadoAberto.value = false
     buscarLista()
   }

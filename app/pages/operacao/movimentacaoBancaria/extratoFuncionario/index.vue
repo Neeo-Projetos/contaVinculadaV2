@@ -139,7 +139,20 @@ const camposFiltro = computed(() => [
     icon: 'fa7-solid:magnifying-glass',
     sugestoes: sugestoesNome.value,
     buscando: buscandoSugestoes.value,
-    mostrarMenu: mostrandoSugestoes.value
+    mostrarMenu: mostrandoSugestoes.value,
+    colSpan: 'md:col-span-7'
+  },
+  {
+    key: 'comSaldoParam',
+    label: 'Com Saldo',
+    type: 'select' as const,
+    placeholder: 'Todos',
+    options: [
+      { value: '', label: 'Todos' },
+      { value: 'S', label: 'Sim' },
+      { value: 'N', label: 'Não' }
+    ],
+    colSpan: 'md:col-span-2'
   }
 ])
 

@@ -23,7 +23,8 @@ export function useExtratoFuncionarioListagem() {
     projetoParam: '',
     funcionarioParam: '',
     dataInicioParam: '',
-    dataFimParam: ''
+    dataFimParam: '',
+    comSaldoParam: 'S'
   })
 
   const colunasVisiveis = reactive({
@@ -90,7 +91,8 @@ export function useExtratoFuncionarioListagem() {
           funcionarioId: filtro.funcionarioParam,
           dataInicio: filtro.dataInicioParam,
           dataFim: filtro.dataFimParam,
-          termo: filtro.nomeParam
+          termo: filtro.nomeParam,
+          comSaldo: filtro.comSaldoParam
         }
       })
       listaCompleta.value = response.data || []
@@ -109,6 +111,7 @@ export function useExtratoFuncionarioListagem() {
     filtro.funcionarioParam = ''
     filtro.dataInicioParam = ''
     filtro.dataFimParam = ''
+    filtro.comSaldoParam = ''
     modalFiltroAvancadoAberto.value = false
     buscarLista()
   }
