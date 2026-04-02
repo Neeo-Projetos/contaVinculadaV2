@@ -17,13 +17,13 @@ Este documento é a referência arquitetural definitiva para a criação de TUDO
 3. **Filtros e Status Inicial**: Todo filtro de listagem deve iniciar com o campo `Status` (ativoParam) marcado como **"1" (Ativos)**.
 4. **Data Fetching Assíncrono Restrito**: Nunca use `useFetch` ou `useAsyncData` (isomórficos) para persistência e listagens. Use **SEMPRE o `$fetch` manual dentro de blocos `try/catch/finally`** manipulando *flags* de loading (ex: `carregandoTela.value = true`).
    - **Retorno de API**: APIs de listagem devem retornar os dados em um objeto com a chave `results` (ex: `{ status: 'success', results: [...] }`) para compatibilidade com o padrão de paginação.
-5. **Sequência de Ações (Slot #acoes)**: No topo das listagens, a sequência visual obrigatória dos botões é: `[Relatório (excel)]` -> `[Exibição (desktop/config)]` -> `[Novo (plus + variacao-acao)]`.
+5. **Sequência de Ações (Slot #acoes)**: No topo das listagens, a sequência visual obrigatória dos botões é: `[Relatório (variacao="padrao")]` -> `[Exibição (variacao="padrao")]` -> `[Novo (variacao="acao")]`.
 6. **Suporte a Layout Dinâmico**: O sistema suporta dois modos de navegação (`barraLateral` e `barraSuperior`). Use o composable `useInterfaceSettings` para reagir ao layout atual se necessário.
 6. **Navegação Distinta**: 
    - **Listagens (`index.vue`)**: Sem barra de navegação no topo. Usam apenas `AppCabecalhoPagina`.
    - **Cadastros (`cadastro.vue`)**: Uso OBRIGATÓRIO de `AppBarraNavegacao` (Simples) ou `AppTrilhaNavegacao` (Complexos) no topo.
 7. **Inativação Lógica**: Nunca crie fluxos de "Delete" físico. Sempre "Inativar" o registro (`ativo = 0` ou `false`).
-8. **Theme CSS & Layout**: Tudo requer suporte via classes `dark:`. Formulários usam sempre matriz em Grid responsiva (`grid grid-cols-1 md:grid-cols-12 gap-6 items-start`). O uso de `items-start` é obrigatório para garantir que as mensagens de erro abaixo dos inputs não desalinhem o topo dos campos na mesma linha.
+8. **Theme CSS & Layout**: Tudo requer suporte via classes `dark:`. Formulários usam sempre matriz em Grid responsiva (`grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8 items-start`). O uso de `items-start` é fundamental para estabilidade visual durante validações.
 9. **Estilos Embutidos vs Externos**: 
    - **Componentes (`components/`)**: Devem ser auto-contidos. O CSS deve estar dentro do arquivo `.vue` usando `<style scoped>`.
    - **Páginas (`pages/`)**: Devem manter seus estilos em arquivos `.css` externos (vinculados via `<style scoped src="./estilo.css">`) para manter o arquivo `.vue` limpo e focado na estrutura.
@@ -41,27 +41,27 @@ Use o componente wrapper definitivo:
    - Extraia a reatividade de `use[A]Listagem()` com *destructuring*.
    - **Obrigatório**: Vincule as ações via eventos nativos (`@view`, `@edit`, `@history`, `@delete-success`) e passe a prop `endpointDelete` e `nomeTela` para automação do CRUD.
    - Use `#cabecalho-tabela`, `#linhas-tabela` e `#cards`. Condicionais atadas via `v-if="colunas.nomeColuna"`.
+   - **Filtros Dinâmicos**: Defina o array de campos (`camposFiltro`) usando uma `computed` para permitir reatividade total e labels dinâmicos conforme o contexto.
 
 ### 1.2 View de Cadastro Simples vs Multi-Etapas
 - **Simples (`funcionario/cadastro.vue`)**: Ideal para fluxos curtos. Usa `AppBarraNavegacao` -> `AppCartaoFormulario` -> `AppSobreposicaoCarregamento` -> `<form @submit.prevent="gravarRegistro">` -> `AppFormularioSecao` -> `<AppRodapeFormulario>`.
 - **Complexo (`projeto/cadastro.vue`)**: Quando o volume de campos exige carga cognitiva dividida. Usa `AppTrilhaNavegacao` e o componente chave `AppPassosFormulario`. A submissão bloqueia avanço: `<form @submit.prevent="passoAtual === x ? gravarRegistro() : avancarPasso()">`.
 
-### 1.3 Validação Visual e Mensagens de Erro
-- Os campos nunca são nativos HTML. Use `AppInputTexto`, `AppInputCnpj`, `AppSelect`, etc.
-- **Implementação Visual de Erro**: O framework utiliza a prop `:erro` para exibir mensagens de validação diretamente abaixo do campo, sem deformar o layout.
+### 1.3 Validação Visual e Experiência de Erro (UX)
+- **Padrão Absoluto (Focus & Toast)**: A validação deve ser feita de forma sequencial no Composable. Ao detectar erro, dispara-se um `AppNotificacao` e retorna-se o nome do campo para que a View execute o `.focus()` via `refsMap`.
+- **Alternativa (Inline)**: O framework ainda suporta a prop `:erro` para exibir mensagens diretamente abaixo do campo, útil em formulários muito longos ou critério específico do projeto.
 - **Obrigatoriedade**: Use a prop `required` para exibir o asterisco vermelho `*`.
-- **Alinhamento Resiliente**: O container pai (Grid) deve usar `items-start` para que o surgimento da mensagem de erro em um campo não desalinhe os outros campos da mesma linha.
+- **Inativação Premium**: Modais de inativação devem seguir o design do Funcionário: `AppModal` com gradiente âmbar/vermelho, ícone centralizado com blur e uso de `AppCampoObrigatorio` para avisos de retenção de histórico.
 
 ```vue
-<AppInputTexto 
-  v-model="form.email" 
-  label="E-mail"
-  required
-  :erro="erros.email" 
-/>
+// Exemplo de focus management na View
+async function handleSubmit() {
+  const result = await gravarRegistro()
+  if (result?.erro) {
+    refsMap[result.campo].value?.focus()
+  }
+}
 ```
-
-**Dica Técnica**: O uso de `AppNotificacao` via `dispararAlerta()` deve acompanhar a validação para erros globais ou impeditivos de busca/gravação.
 
 
 ---
@@ -103,7 +103,7 @@ A lógica vital reside aqui (`app/composables/cadastro/[modulo]/...`). Estas var
 1. **Identificadores Iniciais**: Resgate via `const registroId = useRoute().query.id as string`.
 2. **Interface TS Forte**: Defina tipos rígidos, ex: `interface ModuloForm { codigo: string | number, ... }`.
 3. **Reatividade e Edição**: `const form = reactive<ModuloForm>({ codigo: registroId || '0', ... })`.
-4. **Tratamento de Erros via Objeto**: `const erros = reactive<Record<string, string>>({ campo: '' })` para armazenar mensagens de erro individuais.
+4. **Tratamento de Erros Sequencial**: Valide campo a campo no `gravarRegistro`. Se faltar algo, use `dispararAlerta(..., 'warning')` e retorne `{ erro: true, campo: 'nomeDoCampo' }`.
 5. **Notificações Seguras**: Nunca acesse o nativo `alert()`. Invoque `dispararAlerta(titulo, msg, tipo)` do `useAppNotificacao`.
 6. **Integração CRUD**: Funções `carregarDados()`, `gravarRegistro()` e `excluirRegistro()` manipulando métodos `$fetch`.
 
