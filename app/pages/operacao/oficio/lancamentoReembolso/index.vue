@@ -10,7 +10,7 @@
       icone-titulo="fa7-solid:file-invoice-dollar"
       :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Operação' }, { label: 'Ofício' }, { label: 'Reembolso' }]"
       :pending="carregando"
-      @buscar="filtrar"
+      @buscar="tentarBuscar"
       @openAdvancedFilter="modalFiltroAvancadoAberto = true"
       @buscarSugestao="buscarProjetos"
       @selecionarSugestao="({ sugestao }) => selecionarProjeto(sugestao)"
@@ -208,9 +208,31 @@ const {
   buscarProjetos, selecionarProjeto, limparFiltros
 } = useLancamentoReembolsoListagem()
 
+const { dispararAlerta } = useAppNotificacao()
+
 const modalFiltroAvancadoAberto = ref(false)
 
 const camposFiltro = computed(() => [
+  {
+    key: 'dataInicioParam',
+    label: 'Início',
+    type: 'text' as const,
+    placeholder: 'Data Início',
+    mask: '##/##/####',
+    icon: 'fa7-solid:calendar-day',
+    colSpan: 'md:col-span-2',
+    required: true
+  },
+  {
+    key: 'dataFimParam',
+    label: 'Fim',
+    type: 'text' as const,
+    placeholder: 'Data Fim',
+    mask: '##/##/####',
+    icon: 'fa7-solid:calendar-day',
+    colSpan: 'md:col-span-2',
+    required: true
+  },
   { 
     key: 'projetoId', 
     label: 'Projeto', 
@@ -219,18 +241,17 @@ const camposFiltro = computed(() => [
     sugestoes: sugestoesProjetos.value,
     buscando: buscandoProjetos.value,
     mostrarMenu: mostrarMenuProjetos.value,
-    colSpan: 'md:col-span-6'
-  },
-  { 
-    key: 'dataMovimentacao', 
-    label: 'Data', 
-    type: 'text' as const, 
-    placeholder: 'Ex: 01/01/2024',
-    mask: '##/##/####',
-    icon: 'fa7-solid:calendar-days',
-    colSpan: 'md:col-span-3'
+    colSpan: 'md:col-span-5'
   }
 ])
+
+const tentarBuscar = () => {
+  if (!filtro.value.dataInicioParam || !filtro.value.dataFimParam) {
+    dispararAlerta('Campos Obrigatórios', 'As datas de início e fim são obrigatórias para a busca.', 'warning')
+    return
+  }
+  filtrar()
+}
 
 const verHistorico = () => {
     alert('📜 Ver Histórico...')

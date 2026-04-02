@@ -25,7 +25,8 @@ export function useLancamentoReembolsoListagem() {
   const filtro = ref({
     projetoId: '',
     tipoMovimentacao: '',
-    dataMovimentacao: '',
+    dataInicioParam: '',
+    dataFimParam: '',
     ativoParam: '1'
   })
 
@@ -117,7 +118,13 @@ export function useLancamentoReembolsoListagem() {
     try {
       const response = await $fetch<{ data: any[] }>('/api/operacao/oficio/lancamentoReembolso/listagem', {
         method: 'POST',
-        body: filtro
+        body: {
+          projeto: filtro.value.projetoId,
+          tipoMovimentacao: filtro.value.tipoMovimentacao,
+          dataInicio: filtro.value.dataInicioParam,
+          dataFim: filtro.value.dataFimParam,
+          status: filtro.value.ativoParam
+        }
       })
       listaCompleta.value = response.data || []
       paginacao.mudarPagina(1)
@@ -137,7 +144,8 @@ export function useLancamentoReembolsoListagem() {
     filtro.value = {
         projetoId: '',
         tipoMovimentacao: '',
-        dataMovimentacao: '',
+        dataInicioParam: '',
+        dataFimParam: '',
         ativoParam: '1'
     }
     projetoSearch.value = ''

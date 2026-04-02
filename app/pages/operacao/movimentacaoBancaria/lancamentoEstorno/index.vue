@@ -12,8 +12,8 @@
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
         <AppBotao variacao="padrao" icone="fa7-solid:desktop"
           @click="visaoAtual = visaoAtual === 'lista' ? 'cards' : 'lista'">Controle de Exibição</AppBotao>
-        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="novoReembolso">
-          Novo Reembolso
+        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="novoEstorno">
+          Novo Estorno
         </AppBotao>
       </template>
 
@@ -208,21 +208,6 @@
     <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labels" @aplicar="aplicarExibicao"
       @close="modalExibicaoAberto = false" />
 
-    <AppModal :isOpen="modalAlertaAberto" title="Validação de Segurança" icon="fa7-solid:shield-exclamation"
-      @close="modalAlertaAberto = false" tamanho="sm">
-      <div class="p-8 text-center space-y-4">
-        <div
-          class="w-16 h-16 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-rose-500/20">
-          <Icon name="fa7-solid:triangle-exclamation" class="w-8 h-8" />
-        </div>
-        <p class="text-gray-800 dark:text-gray-200 font-bold leading-relaxed">{{ modalAlertaMensagem }}</p>
-      </div>
-      <template #footer>
-        <AppBotao variacao="primario" @click="modalAlertaAberto = false"
-          class="w-full h-12 font-black uppercase tracking-widest text-[10px]">Entendido</AppBotao>
-      </template>
-    </AppModal>
-
   </div>
 </template>
 
@@ -243,8 +228,7 @@ const {
   mudarPagina, mudarItensPorPagina
 } = useLancamentoEstornoListagem()
 
-const modalAlertaAberto = ref(false)
-const modalAlertaMensagem = ref('')
+const { dispararAlerta } = useAppNotificacao()
 
 const camposFiltro = computed(() => [
   {
@@ -254,7 +238,8 @@ const camposFiltro = computed(() => [
     placeholder: 'Data Início',
     mask: '##/##/####',
     icon: 'fa7-solid:calendar-day',
-    colSpan: 'md:col-span-2'
+    colSpan: 'md:col-span-2',
+    required: true
   },
   {
     key: 'dataFimParam',
@@ -263,7 +248,8 @@ const camposFiltro = computed(() => [
     placeholder: 'Data Fim',
     mask: '##/##/####',
     icon: 'fa7-solid:calendar-day',
-    colSpan: 'md:col-span-2'
+    colSpan: 'md:col-span-2',
+    required: true
   },
   {
     key: 'projetoParam',
@@ -278,37 +264,32 @@ const camposFiltro = computed(() => [
 ])
 
 const tentarBuscar = async () => {
-  const res = await buscarLista()
-  if (res === 'datas_obrigatorias') {
-    modalAlertaMensagem.value = 'Data Início e Data Fim são obrigatórias para consulta.'
-    modalAlertaAberto.value = true
+  if (!filtro.dataInicioParam || !filtro.dataFimParam) {
+    dispararAlerta('Campos Obrigatórios', 'Data Início e Data Fim são obrigatórias para consulta.', 'warning')
+    return
   }
+  await buscarLista()
 }
 
 const vaiParaPin = () => {
   const res = avancarParaPin()
   if (res === 'motivo_obrigatorio') {
-    modalAlertaMensagem.value = 'É necessário informar o motivo do estorno para prosseguir.'
-    modalAlertaAberto.value = true
+    dispararAlerta('Atenção', 'É necessário informar o motivo do estorno para prosseguir.', 'warning')
   }
 }
 
 const tentarFinalizar = async () => {
   const res = await finalizarEstorno()
   if (res === 'pin_obrigatorio') {
-    modalAlertaMensagem.value = 'O PIN de segurança é obrigatório!'
-    modalAlertaAberto.value = true
+    dispararAlerta('Validação', 'O PIN de segurança é obrigatório!', 'error')
   } else if (res === 'pin_incorreto') {
-    modalAlertaMensagem.value = 'PIN de segurança inválido. Verifique seus dados.'
-    modalAlertaAberto.value = true
+    dispararAlerta('Erro', 'PIN de segurança inválido. Verifique seus dados.', 'error')
   } else if (res === 'sucesso') {
     // O composable já fecha o modal e recarrega a lista
   } else if (res === 'erro_interno') {
-    modalAlertaMensagem.value = 'Não foi possível processar o estorno no momento.'
-    modalAlertaAberto.value = true
+    dispararAlerta('Erro', 'Não foi possível processar o estorno no momento.', 'error')
   } else if (res) {
-    modalAlertaMensagem.value = res
-    modalAlertaAberto.value = true
+    dispararAlerta('Erro', res, 'error')
   }
 }
 
@@ -316,7 +297,7 @@ const gerarExcel = () => {
   alert('📊 Gerando relatório de estornos (Excel)...')
 }
 
-const novoReembolso = () => {
+const novoEstorno = () => {
   navigateTo('/operacao/movimentacaoBancaria/lancamentoEstorno/cadastro?id=0')
 }
 </script>

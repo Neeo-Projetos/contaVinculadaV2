@@ -10,7 +10,7 @@
       icone-titulo="fa7-solid:file-invoice-dollar"
       :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Operação' }, { label: 'Tesouraria' }, { label: 'Lançamento Manual' }]"
       :pending="carregando"
-      @buscar="buscarLista"
+      @buscar="tentarBuscar"
       @openAdvancedFilter="abrirModalFiltroAvancado"
       @buscarSugestao="buscarProjetosAutocomplete"
       @selecionarSugestao="({ sugestao }) => selecionarProjetoAutocomplete(sugestao)"
@@ -173,27 +173,48 @@ const {
   buscarProjetosAutocomplete, selecionarProjetoAutocomplete, fecharSugestoesDelay
 } = useLancamentoManualListagem()
 
+const { dispararAlerta } = useAppNotificacao()
+
 const camposFiltro = computed(() => [
+  {
+    key: 'dataInicioParam',
+    label: 'Início',
+    type: 'text' as const,
+    placeholder: 'Data Início',
+    mask: '##/##/####',
+    icon: 'fa7-solid:calendar-day',
+    colSpan: 'md:col-span-2',
+    required: true
+  },
+  {
+    key: 'dataFimParam',
+    label: 'Fim',
+    type: 'text' as const,
+    placeholder: 'Data Fim',
+    mask: '##/##/####',
+    icon: 'fa7-solid:calendar-day',
+    colSpan: 'md:col-span-2',
+    required: true
+  },
   { 
     key: 'projetoId', 
     label: 'Projeto', 
     type: 'autocomplete' as const, 
-    placeholder: 'Buscar projeto pelo apelido...',
+    placeholder: 'Buscar projeto...',
     sugestoes: sugestoesProjetos.value,
     buscando: buscandoProjetos.value,
     mostrarMenu: mostrarMenuProjetos.value,
-    colSpan: 'md:col-span-6'
-  },
-  { 
-    key: 'dataMovimentacaoParam', 
-    label: 'Data', 
-    type: 'text' as const, 
-    placeholder: 'Ex: 01/01/2024',
-    mask: '##/##/####',
-    icon: 'fa7-solid:calendar-day',
-    colSpan: 'md:col-span-3'
+    colSpan: 'md:col-span-5'
   }
 ])
+
+const tentarBuscar = () => {
+  if (!filtro.value.dataInicioParam || !filtro.value.dataFimParam) {
+    dispararAlerta('Campos Obrigatórios', 'As datas de início e fim são obrigatórias para a busca.', 'warning')
+    return
+  }
+  buscarLista()
+}
 
 const gerarExcel = () => {
     alert('📊 Gerando relatório de lançamentos manuais (Excel)...')

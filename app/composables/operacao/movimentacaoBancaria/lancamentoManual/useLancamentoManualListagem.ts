@@ -24,7 +24,8 @@ export function useLancamentoManualListagem() {
   const filtro = ref({
     projetoId: '',
     tipoMovimentacaoParam: '',
-    dataMovimentacaoParam: '',
+    dataInicioParam: '',
+    dataFimParam: '',
     ativoParam: '1'
   })
 
@@ -126,7 +127,8 @@ export function useLancamentoManualListagem() {
         body: {
           projeto: filtro.value.projetoId,
           tipoMovimentacao: filtro.value.tipoMovimentacaoParam,
-          dataMovimentacao: filtro.value.dataMovimentacaoParam,
+          dataInicio: filtro.value.dataInicioParam,
+          dataFim: filtro.value.dataFimParam,
           status: filtro.value.ativoParam
         }
       })
@@ -145,7 +147,8 @@ export function useLancamentoManualListagem() {
     filtro.value = {
         projetoId: '',
         tipoMovimentacaoParam: '',
-        dataMovimentacaoParam: '',
+        dataInicioParam: '',
+        dataFimParam: '',
         ativoParam: '1'
     }
     projetoSearch.value = ''
