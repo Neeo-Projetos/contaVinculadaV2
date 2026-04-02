@@ -10,10 +10,14 @@
       <AppBotao v-if="editando" variacao="perigo" :icone="iconeExcluir" :carregando="carregandoExclusao" @click="$emit('excluir')">
         {{ labelExcluir }}
       </AppBotao>
+
+      <slot name="extra-acoes-esquerda" />
     </div>
     
     <!-- Ações à direita -->
     <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+      <slot name="extra-acoes-direita" />
+
       <AppBotao variacao="acao" icone="fa7-solid:file" @click="$emit('limpar')">
         {{ labelLimpar }}
       </AppBotao>

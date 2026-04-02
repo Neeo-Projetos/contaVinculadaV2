@@ -33,7 +33,17 @@
           @excluir="confirmarExclusao"
           @limpar="novo"
           @gravar="gravar"
-        />
+        >
+          <template #extra-acoes-direita>
+            <AppBotao 
+              variacao="padrao" 
+              icone="fa7-solid:download" 
+              @click="navigateTo('/tabelaBasica/bancos/importar')"
+            >
+              Importação
+            </AppBotao>
+          </template>
+        </AppRodapeFormulario>
       </form>
     </AppCartaoFormulario>
 

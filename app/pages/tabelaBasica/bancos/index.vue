@@ -10,9 +10,7 @@
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
         <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="() => {}">Controle de Exibição
         </AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:download" @click="navigateTo('/tabelaBasica/bancos/importar')">
-          Importação
-        </AppBotao>
+
         <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/tabelaBasica/bancos/cadastro?id=0')">
           Novo Banco
         </AppBotao>
