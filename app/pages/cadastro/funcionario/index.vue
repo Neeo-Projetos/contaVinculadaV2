@@ -23,7 +23,7 @@
         :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas" :paginaAtual="paginaAtual"
         :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina" @mudarItensPorPagina="mudarItensPorPagina"
         :history="true" nomeTela="Funcionário" endpointDelete="/api/cadastro/funcionario/excluir"
-        @view="item => navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
+        @view="item => navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}&modo=visualizar`)"
         @edit="item => navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
         @history="codigo => abrirHistorico(Number(codigo))" @delete-success="filtrar">
 
@@ -46,7 +46,7 @@
 
         <template #linhas-tabela="{ item }">
           <td class="px-6 py-4 max-w-[300px]">
-            <NuxtLink :to="`/cadastro/funcionario/cadastro?codigo=${item.codigo}`"
+            <NuxtLink :to="`/cadastro/funcionario/cadastro?codigo=${item.codigo}&modo=visualizar`"
               class="flex items-center gap-3 group">
               <div
                 class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all">
@@ -84,11 +84,11 @@
               ...(colunas.matricula ? [{ icone: 'fa7-solid:id-badge', texto: `Matrícula: ${item.matricula}` }] : []),
               ...(colunas.projeto ? [{ icone: 'fa7-solid:id-card', texto: `Projeto: ${item.projeto || 'Sem Projeto'}` }] : []),
               ...(colunas.cpf ? [{ icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` }] : [])
-            ]" @ver-detalhes="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
+            ]" @ver-detalhes="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}&modo=visualizar`)"
             @editar="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
             @excluir="() => listagemRef?.triggerDelete(item.codigo)"
             @ver-historico="abrirHistorico(item.codigo)"
-            @clique-titulo="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)" />
+            @clique-titulo="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}&modo=visualizar`)" />
         </template>
 
       </AppContainerListagem>

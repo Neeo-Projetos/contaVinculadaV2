@@ -15,6 +15,8 @@ export function useFuncionarioFormulario() {
   const modalExclusaoAberto = ref(false)
   const projetosAtivos = ref<any[]>([])
 
+  const modoVisualizar = computed(() => route.query.modo === 'visualizar')
+
   const cpfInvalido = ref(false)
   const emailInvalido = ref(false)
 
@@ -178,6 +180,7 @@ export function useFuncionarioFormulario() {
     carregandoGravacao,
     carregandoExclusao,
     modalExclusaoAberto,
+    modoVisualizar,
     cpfInvalido,   
     emailInvalido, 
     modalAlertaAberto, 

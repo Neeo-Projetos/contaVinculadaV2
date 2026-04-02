@@ -6,20 +6,21 @@
     </label>
 
     <div class="relative">
-      <div @click="aberto = !aberto"
+      <div @click="!somenteLeitura && (aberto = !aberto)"
         ref="triggerRef"
         tabindex="0"
-        @keydown.space.prevent="aberto = !aberto"
-        @keydown.enter.prevent="aberto = !aberto"
+        @keydown.space.prevent="!somenteLeitura && (aberto = !aberto)"
+        @keydown.enter.prevent="!somenteLeitura && (aberto = !aberto)"
         @keydown.esc="aberto = false"
-        class="w-full rounded-xl px-4 py-3 text-sm transition-all cursor-pointer flex items-center justify-between border focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-gray-50 dark:bg-gray-900/50 shadow-sm transition-all"
+        class="w-full rounded-xl px-4 py-3 text-sm transition-all flex items-center justify-between border bg-gray-50 dark:bg-gray-900/50 shadow-sm"
         :class="[
           aberto ? 'ring-2 ring-emerald-500/50 border-emerald-500 shadow-[0_0_15px_-5px_rgba(16,185,129,0.3)]' : '',
           erro ? 'border-red-500 bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700/70',
-          !modelValue ? 'text-gray-400 dark:text-gray-500' : 'text-gray-800 dark:text-gray-200'
+          !modelValue ? 'text-gray-400 dark:text-gray-500' : 'text-gray-800 dark:text-gray-200',
+          somenteLeitura ? 'bg-gray-100 dark:bg-gray-800/50 cursor-not-allowed opacity-70 pointer-events-none text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700/50 shadow-none' : 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/10'
         ]">
         <span class="truncate pr-4">{{ textoSelecionado || placeholder }}</span>
-        <Icon name="fa7-solid:chevron-down" class="w-3 h-3 text-gray-400 transition-transform duration-200 shrink-0"
+        <Icon v-if="!somenteLeitura" name="fa7-solid:chevron-down" class="w-3 h-3 text-gray-400 transition-transform duration-200 shrink-0"
           :class="{ 'rotate-180': aberto }" />
       </div>
  
@@ -27,10 +28,10 @@
         <Icon name="fa7-solid:circle-exclamation" class="mr-1" /> {{ erro }}
       </div>
 
-      <div v-if="aberto" class="fixed inset-0 z-40" @click="aberto = false"></div>
+      <div v-if="aberto && !somenteLeitura" class="fixed inset-0 z-40" @click="aberto = false"></div>
 
       <Transition name="dropdown">
-        <div v-if="aberto"
+        <div v-if="aberto && !somenteLeitura"
           class="absolute top-full mt-1.5 left-0 w-full z-50 bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-gray-700/80 rounded-xl shadow-2xl backdrop-blur-xl py-1 overflow-hidden">
 
           <div
@@ -66,7 +67,8 @@ const props = defineProps({
   erro: { type: String, default: '' },
   opcoes: { type: Array as PropType<any[]>, default: () => [] },
   itemValue: { type: String, default: 'codigo' },
-  itemLabel: { type: String, default: 'descricao' }
+  itemLabel: { type: String, default: 'descricao' },
+  somenteLeitura: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -79,11 +81,16 @@ const textoSelecionado = computed(() => {
 })
 
 const selecionar = (valor: any) => {
+  if (props.somenteLeitura) return
   emit('update:modelValue', valor)
   aberto.value = false
 }
 
 defineExpose({
-  focus: () => triggerRef.value?.focus()
+  focus: () => {
+    if (!props.somenteLeitura) {
+      triggerRef.value?.focus()
+    }
+  }
 })
 </script>

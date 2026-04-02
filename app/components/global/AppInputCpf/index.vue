@@ -1,6 +1,6 @@
 <template>
   <div class="w-full">
-    <label :for="id" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+    <label v-if="label" :for="id" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
       {{ label }} <span v-if="required" class="text-red-500">*</span>
     </label>
     <div class="relative">
@@ -10,8 +10,12 @@
       <input 
         ref="inputRef"
         :id="id" :value="modelValue" @input="aoDigitar" @blur="validar" v-maska data-maska="###.###.###-##"
-        type="text" :placeholder="placeholder"
-        class="w-full rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 transition-all placeholder-gray-400 border bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700/70 text-gray-800 dark:text-gray-200 focus:ring-emerald-500/50 focus:border-emerald-500" />
+        type="text" :placeholder="placeholder" :readonly="somenteLeitura"
+        class="w-full rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none transition-all placeholder-gray-400 border"
+        :class="[
+          somenteLeitura ? 'bg-gray-100 dark:bg-gray-800/50 cursor-not-allowed opacity-70 pointer-events-none text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700/50 shadow-none' : 
+          (erroInterno ? 'border-red-500 bg-red-50/50 dark:bg-red-900/10 text-gray-800 dark:text-gray-200' : 'bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700/70 focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 text-gray-800 dark:text-gray-200')
+        ]" />
     </div>
     <span v-if="erroInterno" class="text-red-500 text-[10px] font-bold mt-1.5 block uppercase tracking-wider animate-fade-in pl-1">
       <Icon name="fa7-solid:circle-exclamation" class="mr-1" /> {{ erroInterno }}
@@ -28,7 +32,8 @@ const props = defineProps({
   label: { type: String, default: 'CPF' },
   id: { type: String, default: () => `cpf-${Math.random().toString(36).substr(2, 9)}` },
   placeholder: { type: String, default: '___.___.___-__' },
-  required: { type: Boolean, default: false }
+  required: { type: Boolean, default: false },
+  somenteLeitura: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['update:modelValue', 'invalido'])
@@ -59,6 +64,7 @@ const validarCpfMatematico = (cpf: string) => {
 }
 
 const validar = () => {
+  if (props.somenteLeitura) return
   if (!props.modelValue) {
     erroInterno.value = ''
     emit('invalido', false)
@@ -77,6 +83,10 @@ const validar = () => {
 }
 
 defineExpose({
-  focus: () => inputRef.value?.focus()
+  focus: () => {
+    if (!props.somenteLeitura) {
+      inputRef.value?.focus()
+    }
+  }
 })
 </script>

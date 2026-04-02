@@ -10,26 +10,26 @@
     <AppCartaoFormulario>
       <AppSobreposicaoCarregamento :carregando="carregandoTela" mensagem="Carregando dados do funcionário..." />
 
-      <form v-if="!carregandoTela" @submit.prevent="handleSubmit" class="space-y-8 relative z-0">
+      <form v-if="!carregandoTela" @submit.prevent="!modoVisualizar && handleSubmit()" class="space-y-8 relative z-0">
         <AppFormularioSecao icone="fa7-solid:file-lines">
           Dados Principais
         </AppFormularioSecao>
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8">
           <div class="md:col-span-8">
-            <AppInputTexto ref="nomeCompletoRef" v-model="form.nomeCompleto" label="Nome Completo" placeholder="Digite o nome completo do funcionário..." required maxlength="60" icone="fa7-solid:user" />
+            <AppInputTexto ref="nomeCompletoRef" v-model="form.nomeCompleto" label="Nome Completo" placeholder="Digite o nome completo do funcionário..." required maxlength="60" icone="fa7-solid:user" :somenteLeitura="modoVisualizar" />
           </div>
           
           <div class="md:col-span-4">
-            <AppInputCpf ref="cpfRef" v-model="form.cpf" @invalido="cpfInvalido = $event" required />
+            <AppInputCpf ref="cpfRef" v-model="form.cpf" @invalido="cpfInvalido = $event" required :somenteLeitura="modoVisualizar" />
           </div>
 
           <div class="md:col-span-3">
-            <AppInputTexto ref="matriculaRef" v-model="form.matricula" label="Matrícula" placeholder="Ex: 12345" required icone="fa7-solid:id-badge" />
+            <AppInputTexto ref="matriculaRef" v-model="form.matricula" label="Matrícula" placeholder="Ex: 12345" required icone="fa7-solid:id-badge" :somenteLeitura="modoVisualizar" />
           </div>
 
           <div class="md:col-span-4">
-            <AppInputEmail ref="emailRef" v-model="form.email" @invalido="emailInvalido = $event" required maxlength="50" />
+            <AppInputEmail ref="emailRef" v-model="form.email" @invalido="emailInvalido = $event" required maxlength="50" :somenteLeitura="modoVisualizar" />
           </div>
 
           <div class="md:col-span-5">
@@ -42,6 +42,7 @@
               itemValue="codigo" 
               itemLabel="label" 
               required 
+              :somenteLeitura="modoVisualizar"
             />
           </div>
         </div>
@@ -49,6 +50,7 @@
         <AppRodapeFormulario 
           :editando="editando && (Number(form.ativo) === 1 || form.ativo === true)" 
           :carregandoGravar="carregandoGravacao"
+          :visualizar="modoVisualizar"
           labelExcluir="Inativar"
           iconeExcluir="fa7-solid:user-slash"
           @voltar="voltarParaLista"
@@ -104,6 +106,7 @@
 <script setup lang="ts">
 const {
   carregandoTela, carregandoGravacao, carregandoExclusao, modalExclusaoAberto, form, editando,
+  modoVisualizar,
   projetosAtivos, carregarProjetos, carregarDados, voltarParaLista, limparFormulario,
     abrirModalExclusao, fecharModal, gravarRegistro, excluirRegistro,
     cpfInvalido, emailInvalido, projetosFormatados

@@ -22,6 +22,7 @@ Este documento é a referência arquitetural definitiva para a criação de TUDO
 6. **Navegação Distinta**: 
    - **Listagens (`index.vue`)**: Sem barra de navegação no topo. Usam apenas `AppCabecalhoPagina`.
    - **Cadastros (`cadastro.vue`)**: Uso OBRIGATÓRIO de `AppBarraNavegacao` (Simples) ou `AppTrilhaNavegacao` (Complexos) no topo.
+   - **Modo de Visualização (Readonly)**: Ao clicar em "Ver Detalhes" (ícone de olho), a navegação deve incluir o parâmetro `?modo=visualizar`. Nesse estado, todos os inputs devem receber a prop `:somenteLeitura="true"` e o `AppRodapeFormulario` deve receber `:visualizar="true"`, ocultando botões de Gravar/Inativar/Novo.
 7. **Inativação Lógica**: Nunca crie fluxos de "Delete" físico. Sempre "Inativar" o registro (`ativo = 0` ou `false`).
 8. **Theme CSS & Layout**: Tudo requer suporte via classes `dark:`. Formulários usam sempre matriz em Grid responsiva (`grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8 items-start`). O uso de `items-start` é fundamental para estabilidade visual durante validações.
 9. **Estilos Embutidos vs Externos**: 

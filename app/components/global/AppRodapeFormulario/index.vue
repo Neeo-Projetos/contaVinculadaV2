@@ -7,7 +7,7 @@
         {{ labelVoltar }}
       </AppBotao>
 
-      <AppBotao v-if="editando" variacao="perigo" :icone="iconeExcluir" :carregando="carregandoExclusao" @click="$emit('excluir')">
+      <AppBotao v-if="editando && !visualizar" variacao="perigo" :icone="iconeExcluir" :carregando="carregandoExclusao" @click="$emit('excluir')">
         {{ labelExcluir }}
       </AppBotao>
 
@@ -15,7 +15,7 @@
     </div>
     
     <!-- Ações à direita -->
-    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+    <div v-if="!visualizar" class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
       <slot name="extra-acoes-direita" />
 
       <AppBotao variacao="acao" icone="fa7-solid:file" @click="$emit('limpar')">
@@ -38,7 +38,8 @@ defineProps({
   labelExcluir: { type: String, default: 'Excluir' },
   iconeExcluir: { type: String, default: 'fa7-solid:trash-can' },
   labelLimpar: { type: String, default: 'Novo' },
-  labelGravar: { type: String, default: 'Gravar' }
+  labelGravar: { type: String, default: 'Gravar' },
+  visualizar: { type: Boolean, default: false }
 })
 
 defineEmits(['voltar', 'excluir', 'limpar', 'gravar'])
