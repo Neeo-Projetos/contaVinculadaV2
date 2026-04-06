@@ -15,7 +15,7 @@
     <AppCartaoFormulario class="py-10 px-8 sm:px-12">
       <AppSobreposicaoCarregamento :carregando="carregandoTela" mensagem="Carregando dados do projeto..." />
 
-      <form v-if="!carregandoTela" @submit.prevent="passoAtual === 2 ? gravarRegistro() : avancarPasso()" class="space-y-10 relative z-0">
+      <form v-if="!carregandoTela" @submit.prevent="!modoVisualizar && (passoAtual === 2 ? gravarRegistro() : avancarPasso())" class="space-y-10 relative z-0">
         
         <!-- Passo 0: Dados Gerais -->
         <div v-if="passoAtual === 0" class="animate-fade-in">
@@ -25,16 +25,16 @@
 
           <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
             <div class="md:col-span-5" :class="{ 'animate-shake': erros.has('cnpj') }">
-              <AppInputCnpj v-model="form.cnpj" label="CNPJ da Empresa" required @blur="verificarCnpj" />
+              <AppInputCnpj v-model="form.cnpj" label="CNPJ da Empresa" required @blur="verificarCnpj" :somenteLeitura="modoVisualizar" />
             </div>
             <div class="md:col-span-3" :class="{ 'animate-shake': erros.has('apelido') }">
-              <AppInputTexto v-model="form.apelido" label="Apelido / Sigla" placeholder="Ex: PROJ-X" required maxlength="20" icone="fa7-solid:tag" />
+              <AppInputTexto v-model="form.apelido" label="Apelido / Sigla" placeholder="Ex: PROJ-X" required maxlength="20" icone="fa7-solid:tag" :somenteLeitura="modoVisualizar" />
             </div>
             <div class="md:col-span-4" :class="{ 'animate-shake': erros.has('descricao') }">
-              <AppInputTexto v-model="form.descricao" label="Descrição Resumida" placeholder="Resumo do projeto..." required maxlength="100" icone="fa7-solid:comment-dots" />
+              <AppInputTexto v-model="form.descricao" label="Descrição Resumida" placeholder="Resumo do projeto..." required maxlength="100" icone="fa7-solid:comment-dots" :somenteLeitura="modoVisualizar" />
             </div>
             <div class="md:col-span-12 mt-2" :class="{ 'animate-shake': erros.has('razaoSocial') }">
-              <AppInputTexto v-model="form.razaoSocial" label="Razão Social (Nome Empresarial)" placeholder="Nome empresarial oficial conforme contrato social..." required maxlength="100" icone="fa7-solid:building" />
+              <AppInputTexto v-model="form.razaoSocial" label="Razão Social (Nome Empresarial)" placeholder="Nome empresarial oficial conforme contrato social..." required maxlength="100" icone="fa7-solid:building" :somenteLeitura="modoVisualizar" />
             </div>
           </div>
         </div>
@@ -47,22 +47,22 @@
 
           <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
             <div class="md:col-span-3" :class="{ 'animate-shake': erros.has('cep') }">
-              <AppInputCep v-model="form.cep" label="CEP Principal" required />
+              <AppInputCep v-model="form.cep" label="CEP Principal" required :somenteLeitura="modoVisualizar" />
             </div>
             <div class="md:col-span-7" :class="{ 'animate-shake': erros.has('logradouro') }">
-              <AppInputTexto v-model="form.logradouro" label="Logradouro" placeholder="Avenida, Rua, Praça, etc..." required maxlength="100" />
+              <AppInputTexto v-model="form.logradouro" label="Logradouro" placeholder="Avenida, Rua, Praça, etc..." required maxlength="100" :somenteLeitura="modoVisualizar" />
             </div>
             <div class="md:col-span-2" :class="{ 'animate-shake': erros.has('numeroEndereco') }">
-              <AppInputTexto v-model="form.numeroEndereco" label="Nº" placeholder="123" required maxlength="10" />
+              <AppInputTexto v-model="form.numeroEndereco" label="Nº" placeholder="123" required maxlength="10" :somenteLeitura="modoVisualizar" />
             </div>
             <div class="md:col-span-5" :class="{ 'animate-shake': erros.has('bairro') }">
-              <AppInputTexto v-model="form.bairro" label="Bairro / Distrito" placeholder="Digite o bairro..." required maxlength="50" />
+              <AppInputTexto v-model="form.bairro" label="Bairro / Distrito" placeholder="Digite o bairro..." required maxlength="50" :somenteLeitura="modoVisualizar" />
             </div>
             <div class="md:col-span-5" :class="{ 'animate-shake': erros.has('cidade') }">
-              <AppInputTexto v-model="form.cidade" label="Município" placeholder="Digite a cidade..." required maxlength="50" />
+              <AppInputTexto v-model="form.cidade" label="Município" placeholder="Digite a cidade..." required maxlength="50" :somenteLeitura="modoVisualizar" />
             </div>
             <div class="md:col-span-2" :class="{ 'animate-shake': erros.has('uf') }">
-              <AppInputTexto v-model="form.uf" label="UF (Estado)" placeholder="RJ" required maxlength="2" />
+              <AppInputTexto v-model="form.uf" label="UF (Estado)" placeholder="RJ" required maxlength="2" :somenteLeitura="modoVisualizar" />
             </div>
           </div>
         </div>
@@ -75,10 +75,10 @@
 
           <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
             <div class="md:col-span-3">
-              <AppInputTexto v-model="form.numeroFuncionarios" label="Quantidade de Funcionários" type="number" icone="fa7-solid:users" placeholder="0" />
+              <AppInputTexto v-model="form.numeroFuncionarios" label="Quantidade de Funcionários" type="number" icone="fa7-solid:users" placeholder="0" :somenteLeitura="modoVisualizar" />
             </div>
             <div class="md:col-span-3">
-              <AppInputTexto v-model="form.valorFaturamento" label="Expectativa de Faturamento" placeholder="R$ 0,00" icone="fa7-solid:money-bill-wave" />
+              <AppInputTexto v-model="form.valorFaturamento" label="Expectativa de Faturamento" placeholder="R$ 0,00" icone="fa7-solid:money-bill-wave" :somenteLeitura="modoVisualizar" />
             </div>
             <div class="md:col-span-3" :class="{ 'animate-shake': erros.has('tipoDeCalculo') }">
               <AppSelect 
@@ -86,6 +86,7 @@
                 label="Metodologia de Cálculo" 
                 :opcoes="[{ codigo: '1', descricao: 'Vencimento Padrão' }, { codigo: '2', descricao: 'Cálculo Extraordinário' }]" 
                 required 
+                :somenteLeitura="modoVisualizar"
               />
             </div>
             <div class="md:col-span-3" :class="{ 'animate-shake': erros.has('saldoOficio') }">
@@ -94,6 +95,7 @@
                 label="Habilitar Saldo Ofício?" 
                 :opcoes="[{ codigo: '1', descricao: 'Sim, Ativado' }, { codigo: '0', descricao: 'Não, Desativado' }]" 
                 required 
+                :somenteLeitura="modoVisualizar"
               />
             </div>
           </div>
@@ -102,6 +104,7 @@
         <AppRodapeFormulario 
           :editando="editando && (Number(form.ativo) === 1 || form.ativo === true)" 
           :carregandoGravar="carregandoGravacao"
+          :visualizar="modoVisualizar"
           :labelVoltar="passoAtual === 0 ? 'Cancelar' : 'Anterior'"
           :labelGravar="passoAtual === 2 ? 'Finalizar Cadastro' : 'Próxima Etapa'"
           :labelLimpar="passoAtual === 0 ? 'Limpar Dados' : ''"
@@ -110,7 +113,13 @@
           @voltar="voltarPasso"
           @excluir="abrirModalExclusao"
           @limpar="limparFormulario"
-        />
+        >
+          <template #extra-acoes-direita v-if="modoVisualizar">
+            <AppBotao variacao="primario" icone="fa7-solid:pencil" @click="irParaEdicao">
+              Editar
+            </AppBotao>
+          </template>
+        </AppRodapeFormulario>
       </form>
     </AppCartaoFormulario>
 
@@ -236,7 +245,7 @@ const {
   carregarDados, voltarParaLista, limparFormulario, verificarCnpj,
   abrirModalExclusao, fecharModal, gravarRegistro, excluirRegistro,
   modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta,
-  erros, modalSucessoAberto
+  erros, modalSucessoAberto, modoVisualizar, irParaEdicao
 } = useProjetoFormulario()
 
 onMounted(() => { 

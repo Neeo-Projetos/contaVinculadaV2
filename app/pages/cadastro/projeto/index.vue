@@ -23,7 +23,7 @@
         :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas" :paginaAtual="paginaAtual"
         :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina" @mudarItensPorPagina="mudarItensPorPagina"
         :history="true" nomeTela="Projeto" endpointDelete="/api/cadastro/projeto/excluir"
-        @view="item => navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}`)"
+        @view="item => navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}&modo=visualizar`)"
         @edit="item => navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}`)"
         @history="codigo => abrirHistorico(Number(codigo))" @delete-success="filtrar">
 
@@ -46,7 +46,7 @@
 
         <template #linhas-tabela="{ item }">
           <td class="px-6 py-4 max-w-[300px]">
-            <NuxtLink :to="`/cadastro/projeto/cadastro?id=${item.codigo}`" class="flex items-center gap-3 group">
+            <NuxtLink :to="`/cadastro/projeto/cadastro?id=${item.codigo}&modo=visualizar`" class="flex items-center gap-3 group">
               <div
                 class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all">
                 {{ item.apelido.charAt(0).toUpperCase() }}
@@ -86,10 +86,10 @@
             :ativo="Number(item.ativo) === 1 || item.ativo === true" :mostrarStatus="colunas.status"
             :mostrarHistorico="true" :detalhes="[
               ...(colunas.cnpj ? [{ icone: 'fa7-solid:address-card', texto: `CNPJ: ${item.cnpj}` }] : [])
-            ]" @ver-detalhes="navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}`)"
+            ]" @ver-detalhes="navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}&modo=visualizar`)"
             @editar="navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}`)"
             @excluir="() => listagemRef?.triggerDelete(item.codigo)" @ver-historico="abrirHistorico(item.codigo)"
-            @clique-titulo="navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}`)" />
+            @clique-titulo="navigateTo(`/cadastro/projeto/cadastro?id=${item.codigo}&modo=visualizar`)" />
         </template>
 
       </AppContainerListagem>

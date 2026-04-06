@@ -17,6 +17,9 @@ export function useProjetoFormulario() {
   const modalSucessoAberto = ref(false)
   const erros = reactive(new Set<string>())
 
+  // Modo de visualização
+  const modoVisualizar = computed(() => route.query.modo === 'visualizar')
+
   const validarEtapa = () => {
     erros.clear()
     
@@ -163,6 +166,10 @@ export function useProjetoFormulario() {
     router.push('/cadastro/projeto')
   }
 
+  const irParaEdicao = () => {
+    router.push({ path: '/cadastro/projeto/cadastro', query: { id: form.codigo.toString() } })
+  }
+
   const limparFormulario = () => {
     router.push('/cadastro/projeto/cadastro?id=0')
     Object.assign(form, {
@@ -255,9 +262,11 @@ export function useProjetoFormulario() {
     modalAlertaMensagem,
     form,
     editando,
+    modoVisualizar,
     carregarDados,
     verificarCnpj,
     voltarParaLista,
+    irParaEdicao,
     limparFormulario,
     abrirModalExclusao,
     fecharModal,
