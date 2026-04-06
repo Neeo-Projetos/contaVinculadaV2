@@ -56,7 +56,13 @@
           @voltar="voltarParaLista"
           @excluir="abrirModalExclusao"
           @limpar="limparFormulario"
-        />
+        >
+          <template #extra-acoes-direita v-if="modoVisualizar">
+            <AppBotao variacao="primario" icone="fa7-solid:pencil" @click="irParaEdicao">
+              Editar
+            </AppBotao>
+          </template>
+        </AppRodapeFormulario>
       </form>
     </AppCartaoFormulario>
 
@@ -107,7 +113,7 @@
 const {
   carregandoTela, carregandoGravacao, carregandoExclusao, modalExclusaoAberto, form, editando,
   modoVisualizar,
-  projetosAtivos, carregarProjetos, carregarDados, voltarParaLista, limparFormulario,
+  projetosAtivos, carregarProjetos, carregarDados, voltarParaLista, irParaEdicao, limparFormulario,
     abrirModalExclusao, fecharModal, gravarRegistro, excluirRegistro,
     cpfInvalido, emailInvalido, projetosFormatados
 } = useFuncionarioFormulario()

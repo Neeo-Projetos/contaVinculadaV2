@@ -15,16 +15,18 @@
     </div>
     
     <!-- Ações à direita -->
-    <div v-if="!visualizar" class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
       <slot name="extra-acoes-direita" />
 
-      <AppBotao variacao="acao" icone="fa7-solid:file" @click="$emit('limpar')">
-        {{ labelLimpar }}
-      </AppBotao>
-      
-      <AppBotao nativeType="submit" variacao="primario" icone="fa7-solid:floppy-disk" :carregando="carregandoGravar" @click="$emit('gravar')">
-        {{ labelGravar }}
-      </AppBotao>
+      <template v-if="!visualizar">
+        <AppBotao variacao="acao" icone="fa7-solid:file" @click="$emit('limpar')">
+          {{ labelLimpar }}
+        </AppBotao>
+        
+        <AppBotao nativeType="submit" variacao="primario" icone="fa7-solid:floppy-disk" :carregando="carregandoGravar" @click="$emit('gravar')">
+          {{ labelGravar }}
+        </AppBotao>
+      </template>
     </div>
   </div>
 </template>

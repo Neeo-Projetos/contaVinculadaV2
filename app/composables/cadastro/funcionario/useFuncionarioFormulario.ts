@@ -95,6 +95,10 @@ export function useFuncionarioFormulario() {
     router.push('/cadastro/funcionario')
   }
 
+  const irParaEdicao = () => {
+    router.push({ path: '/cadastro/funcionario/cadastro', query: { codigo: form.codigo.toString() } })
+  }
+
   const limparFormulario = () => {
     router.push('/cadastro/funcionario/cadastro')
     form.codigo = 0
@@ -193,6 +197,7 @@ export function useFuncionarioFormulario() {
     carregarProjetos,
     carregarDados,
     voltarParaLista,
+    irParaEdicao,
     limparFormulario,
     abrirModalExclusao,
     fecharModal,
