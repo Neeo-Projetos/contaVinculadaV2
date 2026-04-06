@@ -12,6 +12,7 @@
       <AppPassosFormulario 
         :passos="['Dados Pessoais', 'Acesso', 'Projetos']" 
         :passoAtual="passoAtual - 1" 
+        @mudar-passo="passoAtual = $event + 1"
       />
     </div>
 

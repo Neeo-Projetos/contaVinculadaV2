@@ -8,7 +8,7 @@
     />
  
     <div class="mb-4">
-      <AppPassosFormulario :passos="passos" :passoAtual="passoAtual" />
+      <AppPassosFormulario :passos="passos" :passoAtual="passoAtual" @mudar-passo="passoAtual = $event" />
     </div>
  
     <AppCartaoFormulario>

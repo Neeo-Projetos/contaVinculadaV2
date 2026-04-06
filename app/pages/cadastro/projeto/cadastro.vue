@@ -9,7 +9,11 @@
     />
 
     <div class="mb-8">
-      <AppPassosFormulario :passos="['Dados Gerais', 'Endereço', 'Parâmetros']" :passoAtual="passoAtual" />
+      <AppPassosFormulario 
+        :passos="['Dados Gerais', 'Endereço', 'Parâmetros']" 
+        :passoAtual="passoAtual" 
+        @mudar-passo="passoAtual = $event"
+      />
     </div>
 
     <AppCartaoFormulario class="py-10 px-8 sm:px-12">

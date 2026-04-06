@@ -10,7 +10,7 @@
         ></div>
       </div>
 
-      <div v-for="(passo, index) in passos" :key="index" class="flex flex-col items-center flex-1 relative z-10 group">
+      <div v-for="(passo, index) in passos" :key="index" @click="mudar(index)" class="flex flex-col items-center flex-1 relative z-10 group cursor-pointer hover:opacity-80 transition-opacity select-none" :title="`Ir para: ${passo}`">
         
         <!-- Círculo do Passo (Fino e elegante) -->
         <div class="relative mb-3">
@@ -66,6 +66,8 @@
 </style>
 
 <script setup lang="ts">
+const emit = defineEmits(['update:passoAtual', 'mudarPasso'])
+
 defineProps({
   passos: {
     type: Array as () => string[],
@@ -76,6 +78,11 @@ defineProps({
     default: 0
   }
 })
+
+const mudar = (index: number) => {
+  emit('update:passoAtual', index)
+  emit('mudarPasso', index)
+}
 </script>
 
 <style scoped>
