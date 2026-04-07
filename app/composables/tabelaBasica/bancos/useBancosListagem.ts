@@ -5,7 +5,7 @@ export function useBancosListagem() {
   const buscaRealizada = ref(false)
   const visaoAtual = ref<'lista' | 'cards'>('lista')
 
-  const filtro = reactive({
+  const filtro = ref({
     nomeBanco: '',
     codigoBanco: '',
     ativo: '1'
@@ -18,26 +18,43 @@ export function useBancosListagem() {
   const buscandoBancosSugestao = ref(false)
   const sugestoesBancos = ref<any[]>([])
   const mostrarMenuBancos = ref(false)
+  let timerDebounce: ReturnType<typeof setTimeout>
 
-  const buscarSugestoesBancos = async () => {
-    if (filtro.nomeBanco.length < 2) {
+  const buscarSugestoesBancos = () => {
+    const texto = filtro.value.nomeBanco
+
+    if (texto.length < 2) {
       sugestoesBancos.value = []
       mostrarMenuBancos.value = false
       return
     }
 
-    buscandoBancosSugestao.value = true
-    try {
-      const resp = await $fetch<any>('/api/tabelaBasica/bancos/autocomplete', {
-        params: { q: filtro.nomeBanco }
-      })
-      sugestoesBancos.value = resp.data || []
-      mostrarMenuBancos.value = sugestoesBancos.value.length > 0
-    } catch (error) {
-      console.error('Erro ao buscar sugestões', error)
-    } finally {
-      buscandoBancosSugestao.value = false
-    }
+    clearTimeout(timerDebounce)
+
+    timerDebounce = setTimeout(async () => {
+      buscandoBancosSugestao.value = true
+      mostrarMenuBancos.value = true
+      try {
+        const resp = await $fetch<any>(`/api/tabelaBasica/bancos/autocomplete?q=${texto}`)
+        sugestoesBancos.value = resp.data || []
+      } catch (error) {
+        console.error('Erro ao buscar sugestões', error)
+      } finally {
+        buscandoBancosSugestao.value = false
+      }
+    }, 400)
+  }
+
+  const selecionarSugestaoBancos = (sugestao: any) => {
+    filtro.value.nomeBanco = sugestao.descricao
+    mostrarMenuBancos.value = false
+    buscarLista()
+  }
+
+  const fecharSugestoesDelay = () => {
+    setTimeout(() => {
+      mostrarMenuBancos.value = false
+    }, 200)
   }
 
   // Controle de colunas e Exibição
@@ -68,7 +85,7 @@ export function useBancosListagem() {
   const modalFiltroAvancadoAberto = ref(false)
   const abrirModalFiltroAvancado = () => modalFiltroAvancadoAberto.value = true
   const limparFiltrosAvancados = () => {
-    Object.assign(filtro, { nomeBanco: '', codigoBanco: '', ativo: '1' })
+    filtro.value = { nomeBanco: '', codigoBanco: '', ativo: '1' }
     buscarLista()
   }
   const aplicarFiltroAvancado = () => {
@@ -81,7 +98,7 @@ export function useBancosListagem() {
     buscaRealizada.value = true
     try {
       const response = await $fetch<any>('/api/tabelaBasica/bancos/listagem', {
-        method: 'POST', body: filtro
+        method: 'POST', body: filtro.value
       })
       listaCompleta.value = response.data || []
       paginacao.mudarPagina(1)
@@ -139,6 +156,7 @@ export function useBancosListagem() {
     
     // Autocomplete
     buscandoBancosSugestao, sugestoesBancos, mostrarMenuBancos, buscarSugestoesBancos,
+    selecionarSugestaoBancos, fecharSugestoesDelay,
 
     // Histórico
     modalHistoricoAberto,
@@ -148,6 +166,7 @@ export function useBancosListagem() {
 
     // Outros
     gerarExcel,
+    filtroGlobal: paginacao.filtroGlobal,
 
     // Paginação
     dados: paginacao.listaPaginada,

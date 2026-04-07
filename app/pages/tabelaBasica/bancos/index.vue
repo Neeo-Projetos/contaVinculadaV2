@@ -5,7 +5,9 @@
       descricao="Cadastro e gestão de instituições financeiras" icone-titulo="fa7-solid:building-columns"
       :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Tabela Básica' }, { label: 'Bancos' }]" :pending="carregando"
       @buscar="buscarLista" @openAdvancedFilter="abrirModalFiltroAvancado"
-      @buscarSugestao="buscarSugestoesBancos" @fecharSugestao="mostrarMenuBancos = false"
+      @buscarSugestao="buscarSugestoesBancos" 
+      @selecionarSugestao="({ sugestao }) => selecionarSugestaoBancos(sugestao)"
+      @fecharSugestao="fecharSugestoesDelay"
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
@@ -19,6 +21,7 @@
 
       <AppContainerListagem 
         ref="listagemRef" 
+        v-model:filtro-global="filtroGlobal"
         :carregando="carregando"
         :buscaRealizada="buscaRealizada" 
         :lista="dados || []" 
@@ -130,7 +133,8 @@
 const {
   carregando, buscaRealizada, visaoAtual, dados, filtro,
   buscandoBancosSugestao, sugestoesBancos, mostrarMenuBancos, buscarSugestoesBancos,
-  buscarLista, modalHistoricoAberto, historicoData, abrirHistorico, carregandoHistorico,
+  selecionarSugestaoBancos, fecharSugestoesDelay,
+  buscarLista, filtroGlobal, modalHistoricoAberto, historicoData, abrirHistorico, carregandoHistorico,
   modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
   modalExibicaoAberto, abrirModalExibicao, colunas, labels, aplicarExibicao, colunasTemp,
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
