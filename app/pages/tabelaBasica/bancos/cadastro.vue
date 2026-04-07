@@ -5,7 +5,17 @@
       icone="fa7-solid:university" 
       :links="[{ label: 'Bancos', to: '/tabelaBasica/bancos' }]"
       :paginaAtual="ehEdicao ? form.nomeBanco || 'Editando Banco' : 'Novo Banco'"
-    />
+    >
+      <template #acoes>
+        <AppBotao 
+          variacao="padrao" 
+          icone="fa7-solid:download" 
+          @click="navigateTo('/tabelaBasica/bancos/importar')"
+        >
+          Importação
+        </AppBotao>
+      </template>
+    </AppBarraNavegacao>
 
     <AppCartaoFormulario>
       <AppSobreposicaoCarregamento :carregando="carregandoDados" mensagem="Buscando dados do banco..." />
@@ -34,15 +44,6 @@
           @limpar="novo"
           @gravar="gravar"
         >
-          <template #extra-acoes-direita>
-            <AppBotao 
-              variacao="padrao" 
-              icone="fa7-solid:download" 
-              @click="navigateTo('/tabelaBasica/bancos/importar')"
-            >
-              Importação
-            </AppBotao>
-          </template>
         </AppRodapeFormulario>
       </form>
     </AppCartaoFormulario>
