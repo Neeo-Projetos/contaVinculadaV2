@@ -8,6 +8,7 @@
     >
       <template #acoes>
         <AppBotao 
+          v-if="!modoVisualizar"
           variacao="padrao" 
           icone="fa7-solid:download" 
           @click="navigateTo('/tabelaBasica/bancos/importar')"
@@ -27,23 +28,29 @@
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8">
           <div class="md:col-span-4">
-            <AppInputTexto v-model="form.codigoBanco" label="Código do Banco" placeholder="Ex: 001, 237, 341..." required maxlength="11" icone="fa7-solid:hashtag" />
+            <AppInputTexto v-model="form.codigoBanco" label="Código do Banco" placeholder="Ex: 001, 237, 341..." required maxlength="11" icone="fa7-solid:hashtag" :somenteLeitura="modoVisualizar" />
           </div>
           <div class="md:col-span-8">
-            <AppInputTexto v-model="form.nomeBanco" label="Nome da Instituição" placeholder="Digite o nome oficial do banco..." required icone="fa7-solid:signature" />
+            <AppInputTexto v-model="form.nomeBanco" label="Nome da Instituição" placeholder="Digite o nome oficial do banco..." required icone="fa7-solid:signature" :somenteLeitura="modoVisualizar" />
           </div>
         </div>
 
         <AppRodapeFormulario 
           :editando="ehEdicao" 
           :carregandoGravar="salvando"
+          :visualizar="modoVisualizar"
           labelExcluir="Excluir Banco"
           iconeExcluir="fa7-solid:trash-can"
           @voltar="voltar"
-          @excluir="confirmarExclusao"
+          @excluir="modalExclusao = true"
           @limpar="novo"
           @gravar="gravar"
         >
+          <template #extra-acoes-direita v-if="modoVisualizar">
+            <AppBotao variacao="primario" icone="fa7-solid:pencil" @click="irParaEdicao">
+              Editar
+            </AppBotao>
+          </template>
         </AppRodapeFormulario>
       </form>
     </AppCartaoFormulario>
@@ -102,106 +109,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-
-const route = useRoute()
-const router = useRouter()
-
-const registroId = route.query.id as string
-const ehEdicao = computed(() => registroId !== '0' && !!registroId)
-
-const salvando = ref(false)
-const carregandoDados = ref(false)
-const modalExclusao = ref(false)
-
-const modalAlertaAberto = ref(false)
-const modalAlertaTitulo = ref('')
-const modalAlertaMensagem = ref('')
-
-const form = ref({
-  codigo: registroId || '0',
-  codigoBanco: '',
-  nomeBanco: ''
-})
-
-const mostrarAlerta = (titulo: string, mensagem: string) => {
-  modalAlertaTitulo.value = titulo
-  modalAlertaMensagem.value = mensagem
-  modalAlertaAberto.value = true
-}
-
-const buscarDados = async () => {
-  if (ehEdicao.value) {
-    carregandoDados.value = true
-    try {
-      const { data } = await $fetch<{ data: any }>('/api/tabelaBasica/bancos/recupera', {
-        method: 'POST',
-        body: { id: registroId }
-      })
-      if (data) {
-        form.value.codigoBanco = data.codigoBanco
-        form.value.nomeBanco = data.nomeBanco
-      }
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error)
-    } finally {
-      carregandoDados.value = false
-    }
-  }
-}
-
-const gravar = async () => {
-  if (!form.value.codigoBanco) return mostrarAlerta("Código Obrigatório", "Por favor, informe o código oficial do banco.")
-  if (!form.value.nomeBanco) return mostrarAlerta("Nome Obrigatório", "Por favor, informe o nome da instituição bancária.")
-
-  salvando.value = true
-  try {
-    const res = await $fetch<{ status: string, mensagem: string }>('/api/tabelaBasica/bancos/gravar', {
-      method: 'POST',
-      body: form.value
-    })
-    if (res.status === 'success') {
-      voltar()
-    } else {
-      mostrarAlerta("Erro ao Gravar", res.mensagem)
-    }
-  } catch (error) {
-    console.error('Erro ao gravar dados:', error)
-    mostrarAlerta("Erro Interno", "Houve uma falha ao tentar salvar os dados.")
-  } finally {
-    salvando.value = false
-  }
-}
-
-const confirmarExclusao = () => modalExclusao.value = true
-
-const excluir = async () => {
-  try {
-    const res = await $fetch<{ status: string, mensagem: string }>('/api/tabelaBasica/bancos/excluir', {
-      method: 'POST',
-      body: { codigo: form.value.codigo }
-    })
-    if (res.status === 'success') {
-      voltar()
-    } else {
-      mostrarAlerta("Erro ao Excluir", res.mensagem)
-    }
-  } catch (error) {
-    console.error('Erro ao excluir:', error)
-    mostrarAlerta("Erro Interno", "Falha de comunicação para excluir o registro.")
-  } finally {
-    modalExclusao.value = false
-  }
-}
-
-const novo = () => {
-  router.push('/tabelaBasica/bancos/cadastro?id=0')
-  form.value = { codigo: '0', codigoBanco: '', nomeBanco: '' }
-}
-
-const voltar = () => router.push('/tabelaBasica/bancos')
-
-onMounted(() => {
-  buscarDados()
-})
+const {
+  form, salvando, carregandoDados, modalExclusao, ehEdicao, modoVisualizar, irParaEdicao,
+  gravar, excluir, novo, voltar,
+  modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta
+} = useBancosFormulario()
 </script>

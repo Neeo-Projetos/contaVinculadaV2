@@ -97,7 +97,7 @@
         </template>
       </div>
 
-      <div v-else class="overflow-x-auto">
+      <div v-else class="overflow-x-auto custom-scrollbar">
         <table class="w-full text-left border-collapse">
           <thead class="bg-gray-50 dark:bg-[#1a1c23] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-20">
             <tr class="divide-x divide-gray-200 dark:divide-gray-800">
@@ -339,3 +339,25 @@ defineExpose({
     triggerDelete
 });
 </script>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #10b981; /* emerald-500 */
+  border-radius: 10px;
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: #059669; /* emerald-600 */
+}
+.custom-scrollbar {
+  -ms-overflow-style: thin;
+  scrollbar-width: thin;
+  scrollbar-color: #10b981 transparent;
+}
+</style>
