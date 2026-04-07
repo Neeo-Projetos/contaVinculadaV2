@@ -68,7 +68,7 @@ export function useContrachequeImportacao() {
       if (res.status === 'success') {
         modalImportadosAberto.value = true
       } else {
-        exibirAlerta('Falha na Importação', res.message || 'Não foi possível processar o arquivo.')
+        exibirAlerta('Falha na Importação', res.mensagem || 'Não foi possível processar o arquivo.')
       }
     } catch (error) {
       exibirAlerta('Erro de Conexão', 'Houve um erro técnico ao tentar enviar o arquivo para o servidor.')
