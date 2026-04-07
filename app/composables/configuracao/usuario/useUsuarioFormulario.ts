@@ -19,6 +19,22 @@ export function useUsuarioFormulario() {
   const router = useRouter()
   
   const codigoRaw = route.query.codigo
+  const modoVisualizar = computed(() => route.query.modo === 'visualizar')
+  const irParaEdicao = () => router.push({ path: route.path, query: { ...route.query, modo: undefined } })
+
+  const form = reactive<UsuarioForm>({
+    codigo: codigoRaw ? parseInt(codigoRaw as string) : 0,
+    nomeUsuario: '',
+    cpf: '',
+    telefone: '',
+    email: '',
+    login: '',
+    senha: '',
+    restauraSenha: 0,
+    projetos: [] as number[],
+    ativo: 1
+  })
+
   const editando = computed(() => !!form.codigo)
 
   const carregandoTela = ref(false)
@@ -36,20 +52,6 @@ export function useUsuarioFormulario() {
   
   const modalSucessoAberto = ref(false)
   const erros = ref(new Set<string>())
-
-
-  const form = reactive<UsuarioForm>({
-    codigo: codigoRaw ? parseInt(codigoRaw as string) : 0,
-    nomeUsuario: '',
-    cpf: '',
-    telefone: '',
-    email: '',
-    login: '',
-    senha: '',
-    restauraSenha: 0,
-    projetos: [] as number[],
-    ativo: 1
-  })
 
   const senhaConfirma = ref('')
   const projetosAtivos = ref<any[]>([])
@@ -269,6 +271,8 @@ export function useUsuarioFormulario() {
     senhaConfirma,
     projetosAtivos,
     editando,
+    modoVisualizar,
+    irParaEdicao,
     
     modalAlertaAberto,
     modalAlertaTitulo,

@@ -102,7 +102,7 @@
           <thead class="bg-gray-50 dark:bg-[#1a1c23] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-20">
             <tr class="divide-x divide-gray-200 dark:divide-gray-800">
               <slot name="cabecalho-tabela"></slot>
-              <th
+              <th v-if="view || edit || history || endpointDelete"
                 class="px-6 py-4 text-xs font-bold text-center text-gray-500 uppercase tracking-wider dark:text-gray-400">
                 Ações
               </th>
@@ -112,7 +112,7 @@
             <tr v-for="(item, index) in lista" :key="item.codigo || index"
               class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors group divide-x divide-gray-100 dark:divide-gray-800/60">
               <slot name="linhas-tabela" :item="item"></slot>
-              <td class="px-6 py-4 text-center">
+              <td v-if="view || edit || history || endpointDelete" class="px-6 py-4 text-center">
                 <div class="flex items-center justify-center gap-2 pl-2">
                   <button v-if="view" @click.stop="$emit('view', item)"
                     class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-blue-500/20 bg-blue-500/5 text-blue-500 hover:bg-blue-500 hover:text-white active:scale-95 shadow-sm"
@@ -121,7 +121,7 @@
                       class="h-4 w-4 animate-spin" />
                     <Icon v-else :name="verIcone" class="h-4 w-4" />
                   </button>
-                  <button @click.stop="$emit('edit', item)"
+                  <button v-if="edit" @click.stop="$emit('edit', item)"
                     class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-emerald-500/20 bg-emerald-500/5 text-emerald-500 hover:bg-emerald-500 hover:text-white active:scale-95 shadow-sm"
                     title="Editar">
                     <Icon name="fa7-solid:pen" class="h-4 w-4" />
@@ -131,7 +131,7 @@
                     title="Ver Histórico">
                     <Icon name="fa6-solid:clock-rotate-left" class="h-4 w-4" />
                   </button>
-                  <button v-if="isAtivo(item)" @click.stop="triggerDelete(item.codigo)"
+                  <button v-if="endpointDelete && isAtivo(item)" @click.stop="triggerDelete(item.codigo)"
                     class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white active:scale-95 shadow-sm"
                     title="Excluir">
                     <Icon name="fa7-solid:trash" class="h-4 w-4" />
@@ -228,6 +228,7 @@ const props = defineProps({
   
   // Novas props para Ações
   view: { type: Boolean, default: true },
+  edit: { type: Boolean, default: true },
   history: { type: Boolean, default: false },
   verIcone: { type: String, default: 'fa7-solid:eye' },
   loadingId: { type: [Number, String] as PropType<number | string | null>, default: null },

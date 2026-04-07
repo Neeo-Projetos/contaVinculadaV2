@@ -54,19 +54,19 @@
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8 items-end">
                 <div class="md:col-span-8" :class="{ 'animate-shake': erros.has('nomeUsuario') }">
-                    <AppInputTexto v-model="form.nomeUsuario" label="NOME COMPLETO" placeholder="Digite o nome do usuário..." required maxlength="60" icone="fa7-solid:user" />
+                    <AppInputTexto v-model="form.nomeUsuario" label="NOME COMPLETO" placeholder="Digite o nome do usuário..." required maxlength="60" icone="fa7-solid:user" :somenteLeitura="modoVisualizar" />
                 </div>
                 
                 <div class="md:col-span-4" :class="{ 'animate-shake': erros.has('cpf') }">
-                    <AppInputCpf v-model="form.cpf" label="CPF" required />
+                    <AppInputCpf v-model="form.cpf" label="CPF" required :somenteLeitura="modoVisualizar" />
                 </div>
 
                 <div class="md:col-span-6" :class="{ 'animate-shake': erros.has('email') }">
-                    <AppInputEmail v-model="form.email" label="E-MAIL" required maxlength="50" />
+                    <AppInputEmail v-model="form.email" label="E-MAIL" required maxlength="50" :somenteLeitura="modoVisualizar" />
                 </div>
 
                 <div class="md:col-span-6">
-                    <AppInputTexto v-model="form.telefone" label="TELEFONE" placeholder="(00) 00000-0000" icone="fa7-solid:phone" v-maska="'(##) #####-####'" />
+                    <AppInputTexto v-model="form.telefone" label="TELEFONE" placeholder="(00) 00000-0000" icone="fa7-solid:phone" v-maska="'(##) #####-####'" :somenteLeitura="modoVisualizar" />
                 </div>
             </div>
         </div>
@@ -79,7 +79,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8 items-end">
                 <div class="md:col-span-6" :class="{ 'animate-shake': erros.has('login') }">
-                    <AppInputTexto v-model="form.login" label="LOGIN (USERNAME)" placeholder="Digite o login de acesso..." required maxlength="100" icone="fa7-solid:id-badge" />
+                    <AppInputTexto v-model="form.login" label="LOGIN (USERNAME)" placeholder="Digite o login de acesso..." required maxlength="100" icone="fa7-solid:id-badge" :somenteLeitura="modoVisualizar" />
                 </div>
 
                 <div class="md:col-span-6">
@@ -91,6 +91,7 @@
                         itemValue="codigo" 
                         itemLabel="descricao" 
                         required 
+                        :somenteLeitura="modoVisualizar"
                     />
                 </div>
 
@@ -109,7 +110,9 @@
                                 :required="!editando"
                                 autocomplete="new-password"
                                 placeholder="••••••••"
-                                class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl py-3 pl-11 pr-12 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400 font-sans"
+                                :readonly="modoVisualizar"
+                                class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl py-3 pl-11 pr-12 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400 font-sans disabled:opacity-50"
+                                :disabled="modoVisualizar"
                             />
                             <button type="button" @click="pwdVisible = !pwdVisible" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-emerald-500 transition-colors">
                                 <Icon :name="pwdVisible ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" class="w-5 h-5" />
@@ -133,7 +136,9 @@
                                 :required="!editando || !!form.senha"
                                 autocomplete="new-password"
                                 placeholder="••••••••"
-                                class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl py-3 pl-11 pr-12 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400 font-sans"
+                                :readonly="modoVisualizar"
+                                class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl py-3 pl-11 pr-12 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400 font-sans disabled:opacity-50"
+                                :disabled="modoVisualizar"
                             />
                             <button type="button" @click="pwdVisibleConf = !pwdVisibleConf" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-emerald-500 transition-colors">
                                 <Icon :name="pwdVisibleConf ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" class="w-5 h-5" />
@@ -169,6 +174,7 @@
                 </div>
 
                 <AppBotao 
+                    v-if="!modoVisualizar"
                     :variacao="todosProjetosMarcados ? 'perigo' : 'sucesso'"
                     :icone="todosProjetosMarcados ? 'fa7-solid:xmark' : 'fa7-solid:check-double'" 
                     @click="marcarDesmarcarTodosProjetos"
@@ -196,6 +202,8 @@
                     :paginaAtual="paginaProjetos"
                     :itensPorPagina="itensPorPaginaProjetos"
                     :paginasExibidas="paginasExibidasProjetos"
+                    :view="false"
+                    :edit="false"
                     class="mb-0"
                     @mudarPagina="mudarPaginaProjetos"
                     @mudarItensPorPagina="mudarItensPorPaginaProjetos"
@@ -207,9 +215,9 @@
                     </template>
 
                     <template #linhas-tabela="{ item }">
-                        <td class="p-5 text-center cursor-pointer" @click.stop="alternarProjeto(item.codigo)">
+                        <td class="p-5 text-center" :class="{ 'cursor-pointer': !modoVisualizar }" @click.stop="alternarProjeto(item.codigo)">
                             <div class="flex items-center justify-center">
-                                <AppCheckbox :modelValue="form.projetos.includes(item.codigo)" />
+                                <AppCheckbox :modelValue="form.projetos.includes(item.codigo)" :somenteLeitura="modoVisualizar" />
                             </div>
                         </td>
                         <td class="p-5">
@@ -239,6 +247,7 @@
         <AppRodapeFormulario 
           :editando="editando && Number(form.ativo) === 1" 
           :carregandoGravar="salvando"
+          :visualizar="modoVisualizar"
           :labelVoltar="passoAtual === 1 ? 'Retornar' : 'Anterior'"
           :labelGravar="passoAtual === totalPassos ? 'Finalizar Cadastro' : 'Continuar'"
           :iconeGravar="passoAtual === totalPassos ? 'fa7-solid:check-double' : 'fa7-solid:arrow-right'"
@@ -247,7 +256,13 @@
           @voltar="voltarPasso"
           @excluir="modalExclusaoAberto = true"
           @limpar="limparFormulario"
-        />
+        >
+          <template #extra-acoes-direita v-if="modoVisualizar">
+            <AppBotao variacao="primario" icone="fa7-solid:pencil" @click="irParaEdicao">
+              Editar
+            </AppBotao>
+          </template>
+        </AppRodapeFormulario>
       </form>
     </AppCartaoFormulario>
 
@@ -302,6 +317,7 @@
 import { ref } from 'vue'
 const {
   carregandoTela, salvando, carregandoExclusao, modalExclusaoAberto, form, editando,
+  modoVisualizar, irParaEdicao,
   senhaConfirma, projetosAtivos, modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem,
   fecharModalAlerta, gravarRegistro, excluirRegistro, limparFormulario, voltarParaLista,
   passoAtual, totalPassos, avancarPasso, voltarPasso, modalSucessoAberto, erros,
@@ -315,6 +331,7 @@ const pwdVisible = ref(false)
 const pwdVisibleConf = ref(false)
 
 const alternarProjeto = (codigo: number) => {
+    if (modoVisualizar.value) return
     const index = form.projetos.indexOf(codigo)
     if (index > -1) form.projetos.splice(index, 1)
     else form.projetos.push(codigo)

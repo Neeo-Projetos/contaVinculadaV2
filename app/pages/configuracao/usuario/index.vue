@@ -21,6 +21,7 @@
       </template>
 
       <AppContainerListagem 
+        ref="listagemRef"
         :carregando="carregando" 
         :buscaRealizada="buscaRealizada" 
         :lista="dados || []"
@@ -34,6 +35,13 @@
         :paginasExibidas="paginasExibidas" 
         @mudarPagina="mudarPagina"
         @mudarItensPorPagina="mudarItensPorPagina"
+        :history="true"
+        nomeTela="Usuário"
+        endpointDelete="/api/configuracao/usuario/excluir"
+        @view="item => navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}&modo=visualizar`)"
+        @edit="item => navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}`)"
+        @history="codigo => abrirHistorico(Number(codigo))"
+        @delete-success="buscarLista"
       >
 
         <template #cabecalho-tabela>
@@ -46,7 +54,7 @@
 
         <template #linhas-tabela="{ item }">
           <td class="p-4">
-            <NuxtLink :to="`/configuracao/usuario/cadastro?codigo=${item.codigo}`" class="flex items-center gap-3 group">
+            <NuxtLink :to="`/configuracao/usuario/cadastro?codigo=${item.codigo}&modo=visualizar`" class="flex items-center gap-3 group">
               <div class="w-11 h-11 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-base shrink-0 group-hover:bg-emerald-500/20 transition-all">
                 {{ (item.nome || 'U').charAt(0).toUpperCase() }}
               </div>
@@ -81,9 +89,11 @@
               ...(colunas.cpf ? [{ icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` }] : []),
               ...(colunas.login ? [{ icone: 'fa7-solid:id-badge', texto: `Login: ${item.login}` }] : [])
             ]"
-            @ver-detalhes="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}`)"
+            @ver-detalhes="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}&modo=visualizar`)"
+            @editar="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}`)"
+            @excluir="() => listagemRef?.triggerDelete(item.codigo)"
             @ver-historico="abrirHistorico(item.codigo)"
-            @clique-titulo="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}`)" />
+            @clique-titulo="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}&modo=visualizar`)" />
         </template>
 
       </AppContainerListagem>
@@ -122,6 +132,8 @@ const {
   modalHistoricoAberto, abrirHistorico, historicoSelecionado, carregandoHistorico,
   projetosFormatados, placeholderDinamico
 } = useUsuarioListagem()
+
+const listagemRef = ref<any>(null)
 
 const camposFiltro = computed(() => [
   { key: 'nome', label: 'Usuário', type: 'text' as const, placeholder: placeholderDinamico.value },
