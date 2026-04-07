@@ -22,6 +22,7 @@
               v-model="form.usuarioNome" 
               label="Usuário Selecionado" 
               icone="fa7-solid:user" 
+              :somenteLeitura="true"
               disabled
             />
             <AppInputAutocomplete 
@@ -34,6 +35,7 @@
               propDescricao="descricao" 
               placeholder="Busque pelo login..." 
               required 
+              :somenteLeitura="modoVisualizar"
             />
           </div>
           <div class="md:col-span-6" :class="{ 'animate-shake': erros.has('menuSelecionado') }">
@@ -44,6 +46,7 @@
               itemValue="codigo"
               itemLabel="descricao"
               required
+              :somenteLeitura="modoVisualizar"
               @change="buscarPermissoesDoMenu"
             />
           </div>
@@ -54,7 +57,7 @@
             Funcionalidades Disponíveis
           </AppFormularioSecao>
 
-          <div class="flex items-center gap-4 mb-4">
+          <div v-if="!modoVisualizar" class="flex items-center gap-4 mb-4">
             <AppBotao variacao="padrao" icone="fa7-solid:check-double" @click.prevent="marcarDesmarcarTodos">
               Marcar / Desmarcar Todos
             </AppBotao>
@@ -71,7 +74,7 @@
               <tbody class="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900">
                 <tr v-for="perm in form.permissoes" :key="perm.idFuncionalidade" class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                   <td class="p-4 flex justify-center">
-                    <input type="checkbox" v-model="perm.marcado" class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600 dark:bg-gray-700 dark:border-gray-600 cursor-pointer" />
+                    <input type="checkbox" v-model="perm.marcado" :disabled="modoVisualizar" class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600 dark:bg-gray-700 dark:border-gray-600" :class="modoVisualizar ? 'opacity-60 grayscale cursor-not-allowed' : 'cursor-pointer'" />
                   </td>
                   <td class="p-4 text-sm font-medium text-gray-700 dark:text-gray-300">
                     {{ perm.nomeCompleto || perm.descricaoFuncionalidade }}
@@ -88,13 +91,20 @@
         <AppRodapeFormulario 
           :editando="editando" 
           :carregandoGravar="carregandoGravacao"
+          :visualizar="modoVisualizar"
           labelGravar="Gravar Acessos"
           labelExcluir="Revogar Selecionadas"
           iconeExcluir="fa7-solid:trash-can"
           @voltar="voltarParaLista"
           @limpar="limparFormulario"
           @excluir="abrirModalExclusao"
-        />
+        >
+          <template #extra-acoes-direita v-if="modoVisualizar">
+            <AppBotao variacao="primario" icone="fa7-solid:pencil" @click="irParaEdicao">
+              Editar
+            </AppBotao>
+          </template>
+        </AppRodapeFormulario>
       </form>
     </AppCartaoFormulario>
 
@@ -143,10 +153,10 @@ const {
   carregandoTela, carregandoGravacao, carregandoExclusao,
   modalExclusaoAberto, abrirModalExclusao, fecharModal,
   modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta,
-  modalSucessoAberto, editando, possuiMarcacao,
+  modalSucessoAberto, editando, possuiMarcacao, modoVisualizar,
   form, erros, menusDisponiveis,
   carregarDadosIniciais, buscarPermissoesDoMenu, marcarDesmarcarTodos,
-  gravarRegistro, excluirRegistro, voltarParaLista, limparFormulario
+  gravarRegistro, excluirRegistro, voltarParaLista, limparFormulario, irParaEdicao
 } = usePermissaoUsuarioFormulario()
 
 onMounted(() => {

@@ -124,7 +124,7 @@
                   <button v-if="edit" @click.stop="$emit('edit', item)"
                     class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-emerald-500/20 bg-emerald-500/5 text-emerald-500 hover:bg-emerald-500 hover:text-white active:scale-95 shadow-sm"
                     title="Editar">
-                    <Icon name="fa7-solid:pen" class="h-4 w-4" />
+                    <Icon :name="iconeEditar" class="h-4 w-4" />
                   </button>
                   <button v-if="history" @click.stop="$emit('history', item.codigo || item.id)"
                     class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-slate-500/20 bg-slate-500/5 text-slate-500 hover:bg-slate-500 hover:text-white active:scale-95 shadow-sm"
@@ -231,6 +231,7 @@ const props = defineProps({
   edit: { type: Boolean, default: true },
   history: { type: Boolean, default: false },
   verIcone: { type: String, default: 'fa7-solid:eye' },
+  iconeEditar: { type: String, default: 'fa7-solid:pen' },
   loadingId: { type: [Number, String] as PropType<number | string | null>, default: null },
   endpointDelete: { type: String, default: '' },
   funcaoDelete: { type: String, default: 'excluir' },

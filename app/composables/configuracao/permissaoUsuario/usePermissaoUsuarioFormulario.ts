@@ -6,6 +6,8 @@ export function usePermissaoUsuarioFormulario() {
   const router = useRouter()
   
   const usuarioId = route.query.codigo as string || route.query.id as string || '0'
+  const modoVisualizar = computed(() => route.query.modo === 'visualizar')
+  const irParaEdicao = () => router.push({ path: route.path, query: { ...route.query, modo: undefined } })
 
   const carregandoTela = ref(false)
   const carregandoGravacao = ref(false)
@@ -175,9 +177,9 @@ export function usePermissaoUsuarioFormulario() {
   return {
     carregandoTela, carregandoGravacao, carregandoExclusao,
     modalExclusaoAberto, modalSucessoAberto, modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem,
-    form, erros, menusDisponiveis, editando, possuiMarcacao,
+    form, erros, menusDisponiveis, editando, possuiMarcacao, modoVisualizar,
     carregarDadosIniciais, buscarPermissoesDoMenu, marcarDesmarcarTodos,
     gravarRegistro, excluirRegistro, voltarParaLista, limparFormulario,
-    abrirModalExclusao, fecharModal, fecharModalAlerta
+    abrirModalExclusao, fecharModal, fecharModalAlerta, irParaEdicao
   }
 }

@@ -20,11 +20,25 @@
         </AppBotao>
       </template>
 
-      <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
-        :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
-        :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
-        :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
-        @mudarItensPorPagina="mudarItensPorPagina">
+      <AppContainerListagem 
+        ref="listagemRef"
+        :carregando="carregando" 
+        :buscaRealizada="buscaRealizada" 
+        :lista="dados || []"
+        :visaoAtual="visaoAtual" 
+        :registroInicial="registroInicial" 
+        :registroFinal="registroFinal"
+        :totalRegistros="totalRegistros" 
+        :itensPorPagina="itensPorPagina" 
+        :totalPaginas="totalPaginas"
+        :paginaAtual="paginaAtual" 
+        :paginasExibidas="paginasExibidas" 
+        @mudarPagina="mudarPagina"
+        @mudarItensPorPagina="mudarItensPorPagina"
+        @view="item => navigateTo(`/configuracao/permissaoUsuario/cadastro?codigo=${item.codigo}&modo=visualizar`)"
+        @edit="item => navigateTo(`/configuracao/permissaoUsuario/cadastro?codigo=${item.codigo}`)"
+        iconeEditar="fa7-solid:user-shield"
+      >
         
         <template #cabecalho-tabela>
           <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -35,19 +49,17 @@
             CPF</th>
           <th v-if="colunas.historico" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
             Histórico</th>
-          <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-            Ações</th>
         </template>
 
         <template #linhas-tabela="{ item }">
           <td class="px-6 py-4 max-w-[300px]">
-            <NuxtLink :to="`/configuracao/permissaoUsuario/cadastro?codigo=${item.codigo}`" class="flex items-center gap-3 group">
+            <NuxtLink :to="`/configuracao/permissaoUsuario/cadastro?codigo=${item.codigo}&modo=visualizar`" class="flex items-center gap-3 group">
               <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all">
-                <Icon name="fa7-solid:shield-halved" class="w-5 h-5" />
+                {{ (item.login || 'U').charAt(0).toUpperCase() }}
               </div>
               <div class="flex flex-col min-w-0">
                 <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ item.login }}</span>
-                <span class="text-xs text-gray-500 dark:text-gray-400 truncate">Configurar permissões</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400 truncate">Consultar permissões</span>
               </div>
             </NuxtLink>
           </td>
@@ -62,11 +74,6 @@
               <Icon name="fa6-solid:clock-rotate-left" class="w-5 h-5" />
             </button>
           </td>
-          <td class="px-6 py-4 text-center">
-            <NuxtLink :to="`/configuracao/permissaoUsuario/cadastro?codigo=${item.codigo}`" class="p-2.5 inline-flex items-center text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Ir para edição de permissão">
-              <Icon name="fa7-solid:user-shield" class="w-5 h-5" />
-            </NuxtLink>
-          </td>
         </template>
 
         <template #cards="{ item }">
@@ -75,9 +82,10 @@
             :detalhes="[
               ...(colunas.usuario ? [{ icone: 'fa7-solid:user', texto: `Usuário: ${item.nomeUsuario}` }] : [])
             ]" 
-            @ver-detalhes="navigateTo(`/configuracao/permissaoUsuario/cadastro?codigo=${item.codigo}`)"
+            @ver-detalhes="navigateTo(`/configuracao/permissaoUsuario/cadastro?codigo=${item.codigo}&modo=visualizar`)"
+            @editar="navigateTo(`/configuracao/permissaoUsuario/cadastro?codigo=${item.codigo}`)"
             @ver-historico="abrirHistorico(item.codigo)"
-            @clique-titulo="navigateTo(`/configuracao/permissaoUsuario/cadastro?codigo=${item.codigo}`)">
+            @clique-titulo="navigateTo(`/configuracao/permissaoUsuario/cadastro?codigo=${item.codigo}&modo=visualizar`)">
           </AppCardListagem>
         </template>
 
@@ -104,6 +112,8 @@ const {
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = usePermissaoUsuarioListagem()
+
+const listagemRef = ref<any>(null)
 
 const camposFiltro = computed(() => [
   { key: 'login', label: 'Login', type: 'text' as const, placeholder: 'Filtrar por login...' },
