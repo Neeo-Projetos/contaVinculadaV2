@@ -13,6 +13,9 @@
     <span class="text-gray-800 dark:text-gray-200 font-bold px-2 py-1 bg-gray-50 dark:bg-gray-800/50 rounded-md truncate">
       {{ paginaAtual }}
     </span>
+
+    <div class="flex-1"></div>
+    <slot name="acoes" />
   </div>
 </template>
 

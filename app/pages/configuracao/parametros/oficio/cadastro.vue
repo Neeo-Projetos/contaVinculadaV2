@@ -1,11 +1,16 @@
 <template>
   <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
-    
     <AppBarraNavegacao 
       icone="fa7-solid:file-signature" 
       :links="[{ label: 'Parâmetros de Ofício', to: '/configuracao/parametros/oficio' }]"
       :paginaAtual="ehEdicao ? 'Edição de Parâmetros' : 'Novo Parâmetro de Ofício'"
-    />
+    >
+      <template #acoes>
+          <AppBotao variacao="padrao" icone="fa7-solid:pen-nib" @click="navigateTo('/configuracao/parametros/oficio/padrao')">
+            Redação Padrão
+          </AppBotao>
+      </template>
+    </AppBarraNavegacao>
 
     <AppCartaoFormulario>
       <AppSobreposicaoCarregamento :carregando="carregandoTela || salvando" :mensagem="salvando ? 'Gravando dados...' : 'Carregando informações...'" />
@@ -25,9 +30,10 @@
                         itemValue="codigo" 
                         itemLabel="nomeExibicao" 
                         required 
+                        :somenteLeitura="modoVisualizar"
                         @change="buscarModeloPadrao"
                     />
-                    <div class="mt-4 p-4 bg-emerald-50 dark:bg-emerald-500/5 rounded-2xl border border-emerald-500/10 flex items-start gap-3">
+                    <div v-if="!modoVisualizar" class="mt-4 p-4 bg-emerald-50 dark:bg-emerald-500/5 rounded-2xl border border-emerald-500/10 flex items-start gap-3">
                         <Icon name="fa7-solid:wand-magic-sparkles" class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
                         <div class="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
                             <p class="font-bold uppercase tracking-wider mb-1">Carga Inteligente</p>
@@ -47,7 +53,9 @@
                     v-model="form.texto" 
                     rows="15" 
                     class="w-full textarea-scrollbar bg-gray-50/50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 rounded-2xl p-8 text-sm text-gray-800 dark:text-gray-200 leading-relaxed shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-serif"
+                    :class="{ 'opacity-80 grayscale-[0.5] cursor-default pointer-events-none': modoVisualizar }"
                     placeholder="Digite aqui o texto do ofício..."
+                    :readonly="modoVisualizar"
                     required>
                 </textarea>
             </div>
@@ -69,10 +77,17 @@
         <AppRodapeFormulario 
           :editando="ehEdicao" 
           :carregandoGravar="salvando"
+          :visualizar="modoVisualizar"
           @voltar="voltar"
           @excluir="modalExclusaoAberto = true"
           @limpar="limpar"
-        />
+        >
+          <template #extra-acoes-direita v-if="modoVisualizar">
+            <AppBotao variacao="primario" icone="fa7-solid:pencil" @click="irParaEdicao">
+              Editar
+            </AppBotao>
+          </template>
+        </AppRodapeFormulario>
       </form>
     </AppCartaoFormulario>
 
@@ -140,7 +155,7 @@
 
 <script setup lang="ts">
 const {
-  carregandoTela, salvando, modalExclusaoAberto, form, projetos, ehEdicao, variaveis,
+  carregandoTela, salvando, modalExclusaoAberto, form, projetos, ehEdicao, variaveis, modoVisualizar, irParaEdicao,
   carregarProjetos, carregarDados, buscarModeloPadrao, gravar, excluir, limpar, voltar,
   erros, modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta, modalSucessoAberto
 } = useParametrosOficioFormulario()

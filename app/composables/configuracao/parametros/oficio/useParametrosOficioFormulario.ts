@@ -11,7 +11,10 @@ export function useParametrosOficioFormulario() {
   const route = useRoute()
   const router = useRouter()
   const idRaw = computed(() => (route.query.id || route.query.codigo) as string)
+  const modoVisualizar = computed(() => route.query.modo === 'visualizar')
   const idSet = computed(() => !!idRaw.value && idRaw.value !== '0')
+
+  const irParaEdicao = () => router.push({ path: route.path, query: { ...route.query, modo: undefined } })
   
   const carregandoTela = ref(false)
   const salvando = ref(false)
@@ -176,6 +179,8 @@ export function useParametrosOficioFormulario() {
     gravar,
     excluir,
     limpar,
-    voltar
+    voltar,
+    modoVisualizar,
+    irParaEdicao
   }
 }

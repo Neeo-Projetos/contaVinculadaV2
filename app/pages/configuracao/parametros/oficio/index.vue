@@ -15,15 +15,13 @@
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao">Controle de Exibição</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:pen-nib" @click="navigateTo('/configuracao/parametros/oficio/padrao')">
-          Redação Padrão
-        </AppBotao>
         <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/configuracao/parametros/oficio/cadastro?id=0')">
             Novo Registro
         </AppBotao>
       </template>
 
       <AppContainerListagem 
+        ref="listagemRef"
         :carregando="carregando" 
         :buscaRealizada="buscaRealizada" 
         :lista="dados || []"
@@ -35,8 +33,12 @@
         :totalPaginas="totalPaginas"
         :paginaAtual="paginaAtual" 
         :paginasExibidas="paginasExibidas" 
+        endpointDelete="/api/configuracao/parametros/oficio/excluir"
+        campoDelete="codigo"
         @mudarPagina="mudarPagina"
         @mudarItensPorPagina="mudarItensPorPagina"
+        @view="item => navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}&modo=visualizar`)"
+        @edit="item => navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}`)"
       >
         <template #cabecalho-tabela>
           <th v-if="colunas.projeto" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Projeto</th>
@@ -46,7 +48,7 @@
 
         <template #linhas-tabela="{ item }">
           <td v-if="colunas.projeto" class="px-6 py-4 max-w-[350px]">
-            <NuxtLink :to="`/configuracao/parametros/oficio/cadastro?id=${item.codigo}`" class="flex items-center gap-3 group">
+            <NuxtLink :to="`/configuracao/parametros/oficio/cadastro?id=${item.codigo}&modo=visualizar`" class="flex items-center gap-3 group">
               <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all shadow-sm">
                 {{ item.apelido ? item.apelido.charAt(0).toUpperCase() : 'P' }}
               </div>
@@ -54,6 +56,7 @@
                 <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                   {{ item.projeto ? `${item.apelido} - ${item.projeto}` : item.apelido }}
                 </span>
+                <span class="text-[10px] text-gray-500 dark:text-gray-400 group-hover:text-emerald-500 transition-colors">Ver detalhes e redação</span>
               </div>
             </NuxtLink>
           </td>
@@ -80,9 +83,10 @@
             :detalhes="[
               { icone: 'fa7-solid:barcode', texto: `Cód: ${item.codigo}` }
             ]" 
-            @ver-detalhes="navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}`)" 
+            @ver-detalhes="navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}&modo=visualizar`)" 
+            @editar="navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}`)"
             @ver-historico="abrirHistorico(item.codigo)"
-            @clique-titulo="navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}`)" 
+            @clique-titulo="navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}&modo=visualizar`)" 
           >
           </AppCardListagem>
         </template>
@@ -93,16 +97,6 @@
       @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
         <div class="md:col-span-2">
           <AppInputTexto v-model="filtro.projetoNome" label="NOME DO PROJETO" placeholder="Buscar por projeto..." icone="fa7-solid:magnifying-glass" />
-        </div>
-        <div class="md:col-span-2">
-          <AppSelect 
-            v-model="filtro.comSaldo" 
-            label="POSSUI SALDO?" 
-            placeholder="Selecione..."
-            :opcoes="[{codigo: '', descricao: 'Todos'}, {codigo: '1', descricao: 'Sim'}, {codigo: '0', descricao: 'Não'}]" 
-            itemValue="codigo" 
-            itemLabel="descricao" 
-          />
         </div>
     </AppModalFiltroAvancado>
 
@@ -125,7 +119,19 @@ const {
   mudarPagina, mudarItensPorPagina
 } = useParametrosOficioListagem()
 
+const listagemRef = ref<any>(null)
+
 const camposFiltro = computed(() => [
-  { key: 'projetoNome', label: 'Projeto', type: 'text' as const, placeholder: 'Digite o nome do projeto...' }
+  { key: 'projetoNome', label: 'Projeto', type: 'text' as const, placeholder: 'Digite o nome do projeto...' },
+  { 
+    key: 'comSaldo', 
+    label: 'Com Saldo', 
+    type: 'select' as const, 
+    options: [
+      { label: 'Todos', value: '' },
+      { label: 'Sim', value: '1' },
+      { label: 'Não', value: '0' }
+    ]
+  }
 ])
 </script>
