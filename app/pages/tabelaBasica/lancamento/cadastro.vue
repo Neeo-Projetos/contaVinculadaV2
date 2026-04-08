@@ -23,7 +23,7 @@
               placeholder="Digite o nome ou descrição do tipo de lançamento..." 
               required 
               maxlength="255" 
-              icone="fa7-solid:font"
+              :somenteLeitura="somenteLeitura"
               @input="formatarDescricao"
             />
           </div>
@@ -32,12 +32,14 @@
         <AppRodapeFormulario 
           :editando="ehEdicao" 
           :carregandoGravar="salvando"
+          :visualizar="somenteLeitura"
           labelExcluir="Remover Lançamento"
           iconeExcluir="fa7-solid:trash-can"
           @voltar="voltar"
           @excluir="confirmarExclusao"
           @limpar="novo"
           @gravar="gravar"
+          @editar="habilitarEdicao"
         />
       </form>
     </AppCartaoFormulario>
@@ -96,104 +98,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-
-const route = useRoute()
-const router = useRouter()
-
-const registroId = route.query.id as string
-const ehEdicao = computed(() => registroId !== '0' && !!registroId)
-
-const salvando = ref(false)
-const carregandoDados = ref(false)
-const modalExclusao = ref(false)
-
-const modalAlertaAberto = ref(false)
-const modalAlertaTitulo = ref('')
-const modalAlertaMensagem = ref('')
-
-const form = ref({ codigo: registroId || '0', descricao: '' })
-
-const mostrarAlerta = (titulo: string, mensagem: string) => {
-  modalAlertaTitulo.value = titulo
-  modalAlertaMensagem.value = mensagem
-  modalAlertaAberto.value = true
-}
-
-const buscarDados = async () => {
-  if (ehEdicao.value) {
-    carregandoDados.value = true
-    try {
-      const { data } = await $fetch<{ data: any }>('/api/tabelaBasica/lancamento/recupera', {
-        method: 'POST', body: { id: registroId }
-      })
-      if (data) form.value.descricao = data.descricao
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error)
-    } finally {
-      carregandoDados.value = false
-    }
-  }
-}
-
-const formatarDescricao = () => {
-  let valorLimpo = form.value.descricao
-    .replace(/[^a-zA-ZÀ-ÿ\s']/g, '')
-    .replace(/\s{2,}/g, ' ')
-    .replace(/^\s+/, '')
-  
-  form.value.descricao = valorLimpo
-}
-
-const gravar = async () => {
-  if (!form.value.descricao) return mostrarAlerta("Campo Obrigatório", "Por favor, informe uma descrição para o lançamento.")
-
-  salvando.value = true
-  try {
-    const res = await $fetch<{ status: string, mensagem: string }>('/api/tabelaBasica/lancamento/gravar', {
-      method: 'POST', body: form.value
-    })
-    if (res.status === 'success') {
-      voltar()
-    } else {
-      mostrarAlerta("Erro ao Gravar", res.mensagem)
-    }
-  } catch (error) {
-    console.error('Erro ao gravar dados:', error)
-    mostrarAlerta("Erro Interno", "Falha inesperada ao tentar salvar.")
-  } finally {
-    salvando.value = false
-  }
-}
-
-const confirmarExclusao = () => modalExclusao.value = true
-
-const excluir = async () => {
-  try {
-    const res = await $fetch<{ status: string, mensagem: string }>('/api/tabelaBasica/lancamento/excluir', {
-      method: 'POST', body: { codigo: form.value.codigo }
-    })
-    if (res.status === 'success') {
-      voltar()
-    } else {
-      mostrarAlerta("Erro ao Excluir", res.mensagem)
-    }
-  } catch (error) {
-    console.error('Erro ao excluir:', error)
-    mostrarAlerta("Erro Interno", "Erro de rede ao excluir registro.")
-  } finally {
-    modalExclusao.value = false
-  }
-}
-
-const novo = () => {
-  router.push('/tabelaBasica/lancamento/cadastro?id=0')
-  form.value = { codigo: '0', descricao: '' }
-}
-
-const voltar = () => router.push('/tabelaBasica/lancamento')
-
-onMounted(() => {
-  buscarDados()
-})
+const {
+  form, ehEdicao, somenteLeitura, salvando, carregandoDados,
+  modalExclusao, modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem,
+  gravar, confirmarExclusao, excluir, novo, voltar, habilitarEdicao, formatarDescricao
+} = useLancamentoFormulario()
 </script>
