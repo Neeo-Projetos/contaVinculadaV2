@@ -52,15 +52,15 @@
              </div>
           </td>
           <td v-if="colunas.conta" class="px-6 py-4">
-            <span class="text-xs text-gray-500 dark:text-gray-400 font-medium italic">{{ item.contaVinculada }}</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400 font-medium italic">{{ item.nomeBanco || item.contaVinculada || 'Não vinculada' }}</span>
           </td>
           <td v-if="colunas.saldo" class="px-6 py-4 text-center">
             <span class="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1.5 rounded-lg tabular-nums border border-emerald-500/10">
               R$ {{ formatarMoeda(item.saldoProjeto) }}
             </span>
           </td>
-          <td v-if="colunas.ultMov" class="px-6 py-4 text-center font-bold text-gray-500 tabular-nums text-xs">
-            {{ item.dataUltimaMovimentacao }}
+          <td v-if="colunas.ultMov" class="px-6 py-4 text-center font-bold text-gray-400 tabular-nums text-[10px] uppercase">
+            {{ item.dataUltimaMovimentacao || 'Não há' }}
           </td>
           <td v-if="colunas.acoes" class="px-6 py-4 text-center">
             <button @click.stop="verExtrato(item.codigoProjeto)"
