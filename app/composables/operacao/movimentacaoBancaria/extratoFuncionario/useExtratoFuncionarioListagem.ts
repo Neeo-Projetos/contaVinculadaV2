@@ -1,7 +1,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useWindowSize } from '@vueuse/core'
 
 export function useExtratoFuncionarioListagem() {
+  const router = useRouter()
   const { width } = useWindowSize()
   
   const carregandoTela = ref(false)
@@ -39,9 +41,10 @@ export function useExtratoFuncionarioListagem() {
 
   const listaCompleta = ref<any[]>([])
   
-  // Lógica do Modal de Extrato
-  const modalExtratoAberto = ref(false)
-  const funcionarioSelecionado = ref<number | undefined>(undefined)
+  // Lógica de Navegação para Detalhes
+  const verExtrato = (id: number) => {
+    router.push({ path: '/operacao/movimentacaoBancaria/extratoFuncionario/detalhes', query: { codigo: id.toString() } })
+  }
 
   // Paginação Front-End
   const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
@@ -147,10 +150,6 @@ export function useExtratoFuncionarioListagem() {
   }
   const fecharSugestoesDelay = () => { setTimeout(() => { mostrandoSugestoes.value = false }, 200) }
 
-  const abrirModalExtrato = (id: number) => {
-    funcionarioSelecionado.value = id
-    modalExtratoAberto.value = true
-  }
 
   const formatarMoeda = (valor: number) => Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
@@ -187,9 +186,7 @@ export function useExtratoFuncionarioListagem() {
     fecharSugestoesDelay,
     
     // Extrato
-    modalExtratoAberto,
-    funcionarioSelecionado,
-    abrirModalExtrato,
+    verExtrato,
     
     formatarMoeda,
 

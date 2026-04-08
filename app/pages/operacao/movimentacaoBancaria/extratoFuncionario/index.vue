@@ -8,7 +8,7 @@
       titulo="Extrato por Funcionário"
       descricao="Visualize saldos e movimentações detalhadas por colaborador" 
       icone-titulo="fa7-solid:user-check"
-      :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Operação' }, { label: 'Tesouraria' }, { label: 'Extrato Funcionário' }]"
+      :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Operação', to: '#' }, { label: 'Tesouraria', to: '#' }, { label: 'Extrato Funcionário', to: '#' }]"
       :pending="carregando"
       @buscar="buscarLista"
       @openAdvancedFilter="abrirModalFiltroAvancado"
@@ -22,13 +22,14 @@
       </template>
 
       <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
+        :view="false" :edit="false"
         :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
         :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
         :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
         @mudarItensPorPagina="mudarItensPorPagina">
 
         <template #cabecalho-tabela>
-          <th v-if="colunas.funcionario" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Colaborador</th>
+          <th v-if="colunas.funcionario" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Funcionário</th>
           <th v-if="colunas.cpf" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center w-40">CPF</th>
           <th v-if="colunas.projeto" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center w-60">Projeto Atual</th>
           <th v-if="colunas.saldo" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center w-48">Saldo Acumulado</th>
@@ -37,15 +38,17 @@
 
         <template #linhas-tabela="{ item }">
           <td v-if="colunas.funcionario" class="px-6 py-4">
-             <div class="flex items-center gap-4 group">
-               <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center border border-emerald-500/10 text-emerald-600 font-black text-sm uppercase group-hover:bg-emerald-500 transition-all group-hover:text-white group-hover:shadow-lg group-hover:shadow-emerald-500/20">
-                 {{ item.nomeCompleto.charAt(0) }}
-               </div>
-               <div class="flex flex-col">
-                 <span class="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-tight">{{ item.nomeCompleto }}</span>
-                 <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{{ item.email || 'N/A' }}</span>
-               </div>
-             </div>
+            <div @click="verExtrato(item.codigoFuncionario)" class="flex items-center gap-3 group cursor-pointer">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all">
+                {{ item.nomeCompleto.charAt(0).toUpperCase() }}
+              </div>
+              <div class="flex flex-col min-w-0">
+                <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                   {{ item.nomeAbreviado || item.nomeCompleto }}
+                </span>
+                <span class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ item.email || 'N/A' }}</span>
+              </div>
+            </div>
           </td>
           <td v-if="colunas.cpf" class="px-6 py-4 text-center">
             <span class="text-xs font-bold text-gray-500 dark:text-gray-400 tabular-nums">{{ item.cpf }}</span>
@@ -62,10 +65,10 @@
             </span>
           </td>
           <td v-if="colunas.acoes" class="px-6 py-4 text-center">
-            <button @click.stop="abrirModalExtrato(item.codigoFuncionario)"
-              class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
-              title="Ver Extrato Detalhado">
-              <Icon name="fa7-solid:clock-rotate-left" class="w-5 h-5" />
+            <button @click.stop="verExtrato(item.codigoFuncionario)"
+              class="p-2.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-all"
+              title="Ver Detalhes do Extrato">
+              <Icon name="fa7-solid:eye" class="w-5 h-5" />
             </button>
           </td>
         </template>
@@ -76,21 +79,18 @@
             :detalhes="[
               { icone: 'fa7-solid:briefcase', texto: item.apelido },
               { icone: 'fa7-solid:sack-dollar', texto: `Saldo: R$ ${formatarMoeda(item.saldo)}` }
-            ]">
+            ]"
+            @clique-titulo="verExtrato(item.codigoFuncionario)"
+            @ver-detalhes="verExtrato(item.codigoFuncionario)"
+          >
             <template #footer-actions>
-               <AppBotao variacao="acao" icone="fa7-solid:user-tag" class="flex-1 font-black uppercase tracking-widest text-[10px] h-10" @click="abrirModalExtrato(item.codigoFuncionario)">Ver Extrato</AppBotao>
+               <AppBotao variacao="acao" icone="fa7-solid:user-tag" class="flex-1 font-black uppercase tracking-widest text-[10px] h-10" @click="verExtrato(item.codigoFuncionario)">Ver Detalhes</AppBotao>
             </template>
           </AppCardListagem>
         </template>
       </AppContainerListagem>
     </AppFiltro>
 
-    <AppExtratoDetalhadoModal 
-      :isOpen="modalExtratoAberto" 
-      :id="funcionarioSelecionado" 
-      tipo="funcionario"
-      @close="modalExtratoAberto = false" 
-    />
 
     <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" @close="modalFiltroAvancadoAberto = false"
       @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
@@ -120,7 +120,7 @@ const {
   carregando, buscaRealizada, visaoAtual, dados, filtro, buscarLista,
   abrirModalExibicao, modalExibicaoAberto, colunas, labels, aplicarExibicao, colunasTemp,
   projetosAtivos, projetosFormatados,
-  modalExtratoAberto, funcionarioSelecionado, abrirModalExtrato,
+  verExtrato,
   sugestoesNome, buscandoSugestoes, mostrandoSugestoes,
   buscarSugestoesNome, selecionarSugestao, fecharSugestoesDelay,
   placeholderDinamico,
