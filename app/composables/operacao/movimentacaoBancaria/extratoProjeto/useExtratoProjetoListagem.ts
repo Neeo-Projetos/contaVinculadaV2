@@ -1,7 +1,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useWindowSize } from '@vueuse/core'
 
 export function useExtratoProjetoListagem() {
+  const router = useRouter()
   const { width } = useWindowSize()
   
   const carregandoTela = ref(false)
@@ -39,9 +41,6 @@ export function useExtratoProjetoListagem() {
 
   const colunasTemp = reactive({ ...colunasVisiveis })
 
-  // Lógica do Modal de Extrato
-  const modalExtratoAberto = ref(false)
-  const projetoSelecionado = ref<number | undefined>(undefined)
 
   // Paginação Front-End
   const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
@@ -148,10 +147,12 @@ export function useExtratoProjetoListagem() {
   }
   const fecharSugestoesDelay = () => { setTimeout(() => { mostrandoSugestoes.value = false }, 200) }
 
-  // Lógica do Modal de Extrato
-  const abrirModalExtrato = (id: number) => {
-    projetoSelecionado.value = id
-    modalExtratoAberto.value = true
+  // Navegação para Detalhes
+  const verExtrato = (id: number) => {
+    router.push({ 
+      path: '/operacao/movimentacaoBancaria/extratoProjeto/detalhes', 
+      query: { codigo: id.toString() } 
+    })
   }
 
   const formatarMoeda = (valor: number) => Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -189,9 +190,7 @@ export function useExtratoProjetoListagem() {
     fecharSugestoesDelay,
     
     // Extrato
-    modalExtratoAberto,
-    projetoSelecionado,
-    abrirModalExtrato,
+    verExtrato,
     
     formatarMoeda,
 

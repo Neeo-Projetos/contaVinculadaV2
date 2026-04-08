@@ -26,6 +26,7 @@
         :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
         :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
         :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
+        :view="false" :edit="false"
         @mudarItensPorPagina="mudarItensPorPagina">
 
         <template #cabecalho-tabela>
@@ -38,9 +39,16 @@
 
         <template #linhas-tabela="{ item }">
           <td v-if="colunas.projeto" class="px-6 py-4">
-             <div class="flex flex-col">
-               <span class="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-tight">{{ item.projeto }}</span>
-               <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{{ item.apelido }}</span>
+             <div @click="verExtrato(item.codigoProjeto)" class="flex items-center gap-3 group cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all">
+                  {{ item.apelido.charAt(0).toUpperCase() }}
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors uppercase tracking-tight">
+                    {{ item.projeto }}
+                  </span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ item.apelido }}</span>
+                </div>
              </div>
           </td>
           <td v-if="colunas.conta" class="px-6 py-4">
@@ -55,10 +63,10 @@
             {{ item.dataUltimaMovimentacao }}
           </td>
           <td v-if="colunas.acoes" class="px-6 py-4 text-center">
-            <button @click.stop="abrirModalExtrato(item.codigoProjeto)"
+            <button @click.stop="verExtrato(item.codigoProjeto)"
               class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
               title="Ver Extrato Detalhado">
-              <Icon name="fa7-solid:chart-line" class="w-5 h-5" />
+              <Icon name="fa7-solid:eye" class="w-5 h-5" />
             </button>
           </td>
         </template>
@@ -71,7 +79,7 @@
               { icone: 'fa7-solid:calendar-check', texto: `Última Mov: ${item.dataUltimaMovimentacao}` }
             ]">
             <template #footer-actions>
-               <AppBotao variacao="acao" icone="fa7-solid:chart-line" class="flex-1 font-black uppercase tracking-widest text-[10px] h-10" @click="abrirModalExtrato(item.codigoProjeto)">Ver Extrato</AppBotao>
+               <AppBotao variacao="acao" icone="fa7-solid:eye" class="flex-1 font-black uppercase tracking-widest text-[10px] h-10" @click="verExtrato(item.codigoProjeto)">Ver Extrato</AppBotao>
             </template>
           </AppCardListagem>
         </template>
@@ -82,12 +90,6 @@
     <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labels" @aplicar="aplicarExibicao"
       @close="modalExibicaoAberto = false" />
 
-    <AppExtratoDetalhadoModal
-      :isOpen="modalExtratoAberto"
-      tipo="projeto"
-      :id="projetoSelecionado"
-      @close="modalExtratoAberto = false"
-    />
 
     <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" @close="modalFiltroAvancadoAberto = false"
       @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
@@ -119,7 +121,7 @@ const {
   carregando, buscaRealizada, visaoAtual, dados, filtro, buscarLista,
   abrirModalExibicao, modalExibicaoAberto, colunas, labels, aplicarExibicao, colunasTemp,
   projetosAtivos, contasAtivas, projetosFormatados,
-  modalExtratoAberto, projetoSelecionado, abrirModalExtrato,
+  verExtrato,
   sugestoesNome, buscandoSugestoes, mostrandoSugestoes,
   buscarSugestoesNome, selecionarSugestao, fecharSugestoesDelay, placeholderDinamico,
   modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
