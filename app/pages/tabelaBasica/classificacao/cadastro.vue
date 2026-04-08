@@ -17,19 +17,29 @@
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8">
           <div class="md:col-span-12">
-            <AppInputTexto v-model="form.descricao" label="Descrição da Classificação" placeholder="Ex: Fixa, Variável, Eventual..." required maxlength="255" icone="fa7-solid:tag" />
+            <AppInputTexto 
+              v-model="form.descricao" 
+              label="Descrição da Classificação" 
+              placeholder="Ex: Fixa, Variável, Eventual..." 
+              required 
+              maxlength="255" 
+              icone="fa7-solid:tag" 
+              :somenteLeitura="somenteLeitura"
+            />
           </div>
         </div>
 
         <AppRodapeFormulario 
           :editando="ehEdicao" 
           :carregandoGravar="salvando"
+          :visualizar="somenteLeitura"
           labelExcluir="Remover Registro"
           iconeExcluir="fa7-solid:trash-can"
           @voltar="voltar"
           @excluir="confirmarExclusao"
           @limpar="novo"
           @gravar="gravar"
+          @editar="habilitarEdicao"
         />
       </form>
     </AppCartaoFormulario>
@@ -88,103 +98,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-
-const route = useRoute()
-const router = useRouter()
-
-const registroId = route.query.id as string
-const ehEdicao = computed(() => registroId !== '0' && !!registroId)
-
-const salvando = ref(false)
-const carregandoDados = ref(false)
-const modalExclusao = ref(false)
-
-const modalAlertaAberto = ref(false)
-const modalAlertaTitulo = ref('')
-const modalAlertaMensagem = ref('')
-
-const form = ref({
-  codigo: registroId || '0',
-  descricao: ''
-})
-
-const mostrarAlerta = (titulo: string, mensagem: string) => {
-  modalAlertaTitulo.value = titulo
-  modalAlertaMensagem.value = mensagem
-  modalAlertaAberto.value = true
-}
-
-const buscarDados = async () => {
-  if (ehEdicao.value) {
-    carregandoDados.value = true
-    try {
-      const { data } = await $fetch<{ data: any }>('/api/tabelaBasica/classificacao/recupera', {
-        method: 'POST',
-        body: { id: registroId }
-      })
-      if (data) {
-        form.value.descricao = data.descricao
-      }
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error)
-    } finally {
-      carregandoDados.value = false
-    }
-  }
-}
-
-const gravar = async () => {
-  if (!form.value.descricao) return mostrarAlerta("Campo Obrigatório", "Por favor, informe uma descrição para a classificação.")
-
-  salvando.value = true
-  try {
-    const res = await $fetch<{ status: string, mensagem: string }>('/api/tabelaBasica/classificacao/gravar', {
-      method: 'POST',
-      body: form.value
-    })
-    if (res.status === 'success') {
-      voltar()
-    } else {
-      mostrarAlerta("Erro ao Gravar", res.mensagem)
-    }
-  } catch (error) {
-    console.error('Erro ao gravar dados:', error)
-    mostrarAlerta("Erro Interno", "Falha de comunicação para salvar o registro.")
-  } finally {
-    salvando.value = false
-  }
-}
-
-const confirmarExclusao = () => modalExclusao.value = true
-
-const excluir = async () => {
-  try {
-    const res = await $fetch<{ status: string, mensagem: string }>('/api/tabelaBasica/classificacao/excluir', {
-      method: 'POST',
-      body: { codigo: form.value.codigo }
-    })
-    if (res.status === 'success') {
-      voltar()
-    } else {
-      mostrarAlerta("Erro ao Excluir", res.mensagem)
-    }
-  } catch (error) {
-    console.error('Erro ao excluir:', error)
-    mostrarAlerta("Erro Interno", "Houve uma falha ao excluir o registro.")
-  } finally {
-    modalExclusao.value = false
-  }
-}
-
-const novo = () => {
-  router.push('/tabelaBasica/classificacao/cadastro?id=0')
-  form.value = { codigo: '0', descricao: '' }
-}
-
-const voltar = () => router.push('/tabelaBasica/classificacao')
-
-onMounted(() => {
-  buscarDados()
-})
+const {
+  form, ehEdicao, somenteLeitura, salvando, carregandoDados,
+  modalExclusao, modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem,
+  gravar, confirmarExclusao, excluir, novo, voltar, habilitarEdicao
+} = useClassificacaoFormulario()
 </script>

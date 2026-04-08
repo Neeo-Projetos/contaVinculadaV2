@@ -27,6 +27,12 @@
           {{ labelGravar }}
         </AppBotao>
       </template>
+
+      <template v-else>
+        <AppBotao variacao="primario" icone="fa7-solid:pen-to-square" @click="$emit('editar')">
+          Editar Registro
+        </AppBotao>
+      </template>
     </div>
   </div>
 </template>
@@ -44,5 +50,5 @@ defineProps({
   visualizar: { type: Boolean, default: false }
 })
 
-defineEmits(['voltar', 'excluir', 'limpar', 'gravar'])
+defineEmits(['voltar', 'excluir', 'limpar', 'gravar', 'editar'])
 </script>
