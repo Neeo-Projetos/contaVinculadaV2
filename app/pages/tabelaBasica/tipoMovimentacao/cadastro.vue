@@ -17,7 +17,14 @@
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8">
           <div class="md:col-span-8">
-            <AppInputTexto v-model="form.descricao" label="Descrição do Tipo" placeholder="Ex: Transferência, Depósito, Estorno..." required maxlength="255" icone="fa7-solid:font" />
+            <AppInputTexto 
+              v-model="form.descricao" 
+              label="Descrição do Tipo" 
+              placeholder="Ex: Transferência, Depósito, Estorno..." 
+              required 
+              maxlength="255" 
+              :somenteLeitura="somenteLeitura"
+            />
           </div>
           <div class="md:col-span-4">
             <AppSelect 
@@ -26,6 +33,7 @@
               placeholder="Selecione..." 
               :opcoes="[{ codigo: '1', descricao: 'Crédito (+)' }, { codigo: '0', descricao: 'Débito (-)' }]" 
               required 
+              :somenteLeitura="somenteLeitura"
             />
           </div>
         </div>
@@ -33,12 +41,14 @@
         <AppRodapeFormulario 
           :editando="ehEdicao" 
           :carregandoGravar="salvando"
+          :visualizar="somenteLeitura"
           labelExcluir="Remover Registro"
           iconeExcluir="fa7-solid:trash-can"
           @voltar="voltar"
           @excluir="confirmarExclusao"
           @limpar="novo"
           @gravar="gravar"
+          @editar="habilitarEdicao"
         />
       </form>
     </AppCartaoFormulario>
@@ -97,106 +107,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-
-const route = useRoute()
-const router = useRouter()
-
-const registroId = route.query.id as string
-const ehEdicao = computed(() => registroId !== '0' && !!registroId)
-
-const salvando = ref(false)
-const carregandoDados = ref(false)
-const modalExclusao = ref(false)
-
-const modalAlertaAberto = ref(false)
-const modalAlertaTitulo = ref('')
-const modalAlertaMensagem = ref('')
-
-const form = ref({
-  codigo: registroId || '0',
-  descricao: '',
-  tipo: ''
-})
-
-const mostrarAlerta = (titulo: string, mensagem: string) => {
-  modalAlertaTitulo.value = titulo
-  modalAlertaMensagem.value = mensagem
-  modalAlertaAberto.value = true
-}
-
-const buscarDados = async () => {
-  if (ehEdicao.value) {
-    carregandoDados.value = true
-    try {
-      const { data } = await $fetch<{ data: any }>('/api/tabelaBasica/tipoMovimentacao/recupera', {
-        method: 'POST',
-        body: { id: registroId }
-      })
-      if (data) {
-        form.value.descricao = data.descricao
-        form.value.tipo = data.tipo?.toString() || ''
-      }
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error)
-    } finally {
-      carregandoDados.value = false
-    }
-  }
-}
-
-const gravar = async () => {
-  if (!form.value.descricao) return mostrarAlerta("Campo Obrigatório", "Por favor, informe a descrição da movimentação.")
-  if (form.value.tipo === '') return mostrarAlerta("Campo Obrigatório", "Por favor, informe o efeito financeiro (Crédito/Débito).")
-
-  salvando.value = true
-  try {
-    const res = await $fetch<{ status: string, mensagem: string }>('/api/tabelaBasica/tipoMovimentacao/gravar', {
-      method: 'POST',
-      body: form.value
-    })
-    if (res.status === 'success') {
-      voltar()
-    } else {
-      mostrarAlerta("Erro ao Gravar", res.mensagem)
-    }
-  } catch (error) {
-    console.error('Erro ao gravar dados:', error)
-    mostrarAlerta("Erro Interno", "Falha inesperada ao salvar.")
-  } finally {
-    salvando.value = false
-  }
-}
-
-const confirmarExclusao = () => modalExclusao.value = true
-
-const excluir = async () => {
-  try {
-    const res = await $fetch<{ status: string, mensagem: string }>('/api/tabelaBasica/tipoMovimentacao/excluir', {
-      method: 'POST',
-      body: { codigo: form.value.codigo }
-    })
-    if (res.status === 'success') {
-      voltar()
-    } else {
-      mostrarAlerta("Erro ao Excluir", res.mensagem)
-    }
-  } catch (error) {
-    console.error('Erro ao excluir:', error)
-    mostrarAlerta("Erro Interno", "Houve uma falha ao tentar excluir.")
-  } finally {
-    modalExclusao.value = false
-  }
-}
-
-const novo = () => {
-  router.push('/tabelaBasica/tipoMovimentacao/cadastro?id=0')
-  form.value = { codigo: '0', descricao: '', tipo: '' }
-}
-
-const voltar = () => router.push('/tabelaBasica/tipoMovimentacao')
-
-onMounted(() => {
-  buscarDados()
-})
+const {
+  form, ehEdicao, somenteLeitura, salvando, carregandoDados,
+  modalExclusao, modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem,
+  gravar, confirmarExclusao, excluir, novo, voltar, habilitarEdicao
+} = useTipoMovimentacaoFormulario()
 </script>
