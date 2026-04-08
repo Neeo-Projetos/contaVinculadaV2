@@ -11,6 +11,7 @@ export function useExtratoFuncionarioDetalhes() {
   const carregando = ref(false)
   const carregandoFuncionario = ref(false)
   const gerandoExcel = ref(false)
+  const projetosAtivos = ref<any[]>([])
   
   const funcionario = reactive({
     nomeCompleto: '',
@@ -31,7 +32,10 @@ export function useExtratoFuncionarioDetalhes() {
     lancamento: ''
   })
 
-  const formatarMoeda = (valor: number) => Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const formatarMoeda = (valor: any) => {
+    const v = Number(valor || 0)
+    return isNaN(v) ? '0,00' : v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  }
 
   const mudarTipo = (tipo: number) => {
     filtro.value.tipo = tipo
@@ -65,14 +69,22 @@ export function useExtratoFuncionarioDetalhes() {
     if (!codigoFuncionario.value) return
     carregandoFuncionario.value = true
     try {
+      // Carregamos projetos primeiro para ter o De/Para de nomes
+      const projetosRes = await $fetch<any>('/api/cadastro/projeto/ativos')
+      projetosAtivos.value = projetosRes?.data || []
+
       const response = await $fetch<any>(`/api/cadastro/funcionario/recupera?codigo=${codigoFuncionario.value}`)
       if (response && response.status === 'success') {
         const d = response.data
         funcionario.nomeCompleto = d.nomeCompleto
         funcionario.cpf = d.cpf
         funcionario.matricula = d.matricula
-        funcionario.projetoNome = d.projetoApelido || d.projetoDescricao || '-'
-        funcionario.saldo = d.saldo // Se a API retornar saldo, usamos. Caso contrário, calculamos ou buscamos de outro lugar.
+        
+        // Busca o nome do projeto na lista de ativos
+        const proj = projetosAtivos.value.find(p => Number(p.codigo || p.id) === Number(d.projeto))
+        funcionario.projetoNome = proj ? `${proj.apelido} - ${proj.descricao}` : (d.projetoApelido || d.projetoDescricao || '-')
+        
+        funcionario.saldo = Number(d.saldo || 0)
       }
     } catch (error) {
       console.error('Erro ao carregar dados do funcionário:', error)
@@ -98,9 +110,8 @@ export function useExtratoFuncionarioDetalhes() {
       detalhes.value = response.data || []
       
       // Se tivermos dados, o último saldoAcumulado da lista (considerando a ordem) pode ser o saldo atual
-      // Mas para o cabeçalho, geralmente pegamos do primeiro item se estiver em ordem decrescente (mais recente)
       if (detalhes.value.length > 0 && filtro.value.ordenar === '1') {
-          funcionario.saldo = detalhes.value[0].saldoAcumulado
+          funcionario.saldo = Number(detalhes.value[0].saldoAcumulado || 0)
       }
     } catch (error) {
       console.error('Erro ao buscar detalhes do extrato:', error)

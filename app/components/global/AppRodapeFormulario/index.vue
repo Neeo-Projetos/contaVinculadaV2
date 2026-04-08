@@ -29,7 +29,7 @@
       </template>
 
       <template v-else>
-        <AppBotao variacao="primario" icone="fa7-solid:pen-to-square" @click="$emit('editar')">
+        <AppBotao v-if="!ocultarEditar" variacao="primario" icone="fa7-solid:pen-to-square" @click="$emit('editar')">
           Editar Registro
         </AppBotao>
       </template>
@@ -47,7 +47,8 @@ defineProps({
   iconeExcluir: { type: String, default: 'fa7-solid:trash-can' },
   labelLimpar: { type: String, default: 'Novo' },
   labelGravar: { type: String, default: 'Gravar' },
-  visualizar: { type: Boolean, default: false }
+  visualizar: { type: Boolean, default: false },
+  ocultarEditar: { type: Boolean, default: false }
 })
 
 defineEmits(['voltar', 'excluir', 'limpar', 'gravar', 'editar'])

@@ -41,7 +41,7 @@
           </div>
         </div>
 
-        <AppFormularioSecao icone="fa7-solid:filter-list">
+        <AppFormularioSecao icone="fa7-solid:sliders">
           Filtros de Movimentação
         </AppFormularioSecao>
 
@@ -162,6 +162,7 @@
         <!-- Rodapé de Ações (Estilo Cadastro) -->
         <AppRodapeFormulario 
           :visualizar="true"
+          :ocultarEditar="true"
           @voltar="voltarParaLista"
         />
 
