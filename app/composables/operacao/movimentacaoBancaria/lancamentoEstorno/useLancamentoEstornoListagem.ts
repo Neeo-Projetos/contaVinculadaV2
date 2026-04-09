@@ -17,7 +17,7 @@ export function useLancamentoEstornoListagem() {
   })
 
   // Filtros padrão segundo Padrão Ouro
-  const filtro = reactive({
+  const filtro = ref({
     nomeParam: '', // Termo de busca principal (Autocomplete opcional)
     projetoParam: '',
     funcionarioParam: '',
@@ -53,7 +53,7 @@ export function useLancamentoEstornoListagem() {
   }
 
   const selecionarProjetoAutocomplete = (proj: any) => {
-    filtro.projetoParam = String(proj.projetoId)
+    filtro.value.projetoParam = String(proj.projetoId)
     projetoSearch.value = proj.apelido
     mostrarMenuProjetos.value = false
   }
@@ -73,7 +73,7 @@ export function useLancamentoEstornoListagem() {
     data: true,
     classificacao: true,
     funcionarios: true,
-    estornar: true
+    acoes: true
   })
 
   const labelsColunas = {
@@ -85,7 +85,7 @@ export function useLancamentoEstornoListagem() {
     data: 'Data',
     classificacao: 'Classificação',
     funcionarios: 'Funcionários',
-    estornar: 'Estornar'
+    acoes: 'Ações'
   }
 
   const colunasTemp = reactive({ ...colunasVisiveis })
@@ -110,7 +110,7 @@ export function useLancamentoEstornoListagem() {
   }
 
   const buscarLista = async () => {
-    if (!filtro.dataInicioParam || !filtro.dataFimParam) {
+    if (!filtro.value.dataInicioParam || !filtro.value.dataFimParam) {
       // Usando modal ou alerta padronizado no futuro, por enquanto o alert básico do componente
       return 'datas_obrigatorias'
     }
@@ -121,12 +121,12 @@ export function useLancamentoEstornoListagem() {
       const response = await $fetch<{ status: string, data: any[] }>('/api/operacao/movimentacaoBancaria/lancamentoEstorno/listagem', {
         method: 'POST', 
         body: {
-          projeto: filtro.projetoParam,
-          funcionarioId: filtro.funcionarioParam,
-          tipoLancamento: filtro.tipoLancamentoParam,
-          dataInicio: filtro.dataInicioParam,
-          dataFim: filtro.dataFimParam,
-          estornado: filtro.estornadoParam
+          projeto: filtro.value.projetoParam,
+          funcionarioId: filtro.value.funcionarioParam,
+          tipoLancamento: filtro.value.tipoLancamentoParam,
+          dataInicio: filtro.value.dataInicioParam,
+          dataFim: filtro.value.dataFimParam,
+          estornado: filtro.value.estornadoParam
         }
       })
       listaCompleta.value = response.data || []
@@ -141,11 +141,11 @@ export function useLancamentoEstornoListagem() {
   const abrirModalFiltroAvancado = () => { modalFiltroAvancadoAberto.value = true }
   const aplicarFiltroAvancado = () => { modalFiltroAvancadoAberto.value = false; buscarLista() }
   const limparFiltrosAvancados = () => {
-    filtro.projetoParam = ''
+    filtro.value.projetoParam = ''
     projetoSearch.value = ''
-    filtro.funcionarioParam = ''
-    filtro.tipoLancamentoParam = ''
-    filtro.estornadoParam = '0'
+    filtro.value.funcionarioParam = ''
+    filtro.value.tipoLancamentoParam = ''
+    filtro.value.estornadoParam = '0'
     modalFiltroAvancadoAberto.value = false
     buscarLista()
   }

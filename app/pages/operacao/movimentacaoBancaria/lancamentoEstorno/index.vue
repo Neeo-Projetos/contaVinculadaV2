@@ -21,6 +21,7 @@
         :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
         :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
         :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
+        :view="false" :edit="false"
         @mudarItensPorPagina="mudarItensPorPagina">
 
         <template #cabecalho-tabela>
@@ -38,8 +39,8 @@
             class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider text-center">Data</th>
           <th v-if="colunas.classificacao" scope="col"
             class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider text-left">Classificação</th>
-          <th v-if="colunas.funcionarios" scope="col"
-            class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider text-center">Ações</th>
+          <th v-if="colunas.acoes" scope="col"
+            class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider text-center w-32">Ações</th>
         </template>
 
         <template #linhas-tabela="{ item }">
@@ -71,19 +72,21 @@
             class="px-6 py-4 text-xs text-gray-600 dark:text-gray-400 font-bold uppercase tracking-widest">
             {{ item.classificacao }}
           </td>
-          <td v-if="colunas.funcionarios" class="px-6 py-4 text-center">
-            <div class="flex items-center justify-center gap-1.5">
+          <td v-if="colunas.acoes" class="px-6 py-4 text-center">
+            <div class="flex items-center justify-center gap-2">
               <button @click="abrirModalFuncionarios(item.codigo, item.tipoLancamento)" title="Ver Funcionários"
-                class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all">
-                <Icon name="fa7-solid:users" class="w-5 h-5" />
+                class="w-9 h-9 flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 rounded-xl transition-all shadow-sm">
+                <Icon name="fa7-solid:users" class="w-4 h-4" />
               </button>
+              
               <button v-if="item.estorno === 0" @click="prepararEstorno(item)" title="Realizar Estorno"
-                class="p-2 text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all">
-                <Icon name="fa7-solid:reply" class="w-5 h-5" />
+                class="w-9 h-9 flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 rounded-xl transition-all shadow-sm">
+                <Icon name="fa7-solid:reply" class="w-4 h-4" />
               </button>
-              <span v-else class="p-2 text-emerald-500" title="Já Estornado">
-                <Icon name="fa7-solid:circle-check" class="w-5 h-5" />
-              </span>
+              
+              <div v-else class="w-9 h-9 flex items-center justify-center text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl shadow-sm" title="Já Estornado">
+                <Icon name="fa7-solid:circle-check" class="w-4 h-4" />
+              </div>
             </div>
           </td>
         </template>
@@ -264,7 +267,7 @@ const camposFiltro = computed(() => [
 ])
 
 const tentarBuscar = async () => {
-  if (!filtro.dataInicioParam || !filtro.dataFimParam) {
+  if (!filtro.value.dataInicioParam || !filtro.value.dataFimParam) {
     dispararAlerta('Campos Obrigatórios', 'Data Início e Data Fim são obrigatórias para consulta.', 'warning')
     return
   }
