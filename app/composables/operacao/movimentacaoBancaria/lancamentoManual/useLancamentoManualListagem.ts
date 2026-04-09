@@ -68,7 +68,8 @@ export function useLancamentoManualListagem() {
     classificacao: true,
     data: true,
     funcionarios: true,
-    detalhes: true
+    detalhes: true,
+    acoes: true
   })
 
   const labelsColunas = {
@@ -79,7 +80,8 @@ export function useLancamentoManualListagem() {
     classificacao: 'Classificação',
     data: 'Data Movimentação',
     funcionarios: 'Vínculo Func.',
-    detalhes: 'Detalhes'
+    detalhes: 'Detalhes',
+    acoes: 'Ações'
   }
 
   const colunasTemp = reactive({ ...colunasVisiveis })

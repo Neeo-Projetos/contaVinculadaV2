@@ -33,7 +33,7 @@
             </div>
 
             <!-- Actions Slot (New Button, Options, etc) -->
-            <div v-if="$slots.acoes" class="flex items-center gap-4">
+            <div v-if="$slots.acoes" class="flex items-center justify-end flex-wrap gap-x-4 gap-y-3">
                 <slot name="acoes" />
             </div>
         </div>

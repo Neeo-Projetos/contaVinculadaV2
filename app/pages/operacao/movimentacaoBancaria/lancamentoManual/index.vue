@@ -18,7 +18,7 @@
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="visaoAtual = visaoAtual === 'lista' ? 'cards' : 'lista'">Controle de Exibição</AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao" class="whitespace-nowrap">Controle de Exibição</AppBotao>
         <AppBotao variacao="acao" icone="fa7-solid:plus" @click="novoRegistro">
           Novo Lançamento
         </AppBotao>
@@ -28,6 +28,7 @@
         :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
         :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
         :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
+        :view="false" :edit="false"
         @mudarItensPorPagina="mudarItensPorPagina">
 
         <template #cabecalho-tabela>
@@ -43,12 +44,9 @@
           <th v-if="colunas.data" scope="col"
             class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
             Data</th>
-          <th v-if="colunas.funcionarios" scope="col"
-            class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-            Funcionários</th>
-          <th v-if="colunas.detalhes" scope="col"
-            class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-            Detalhes</th>
+          <th v-if="colunas.acoes" scope="col"
+            class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center w-40">
+            Ações</th>
         </template>
 
         <template #linhas-tabela="{ item }">
@@ -72,20 +70,31 @@
           <td v-if="colunas.data" class="px-6 py-4 text-center font-bold text-gray-500 tabular-nums">
             <span class="text-xs tracking-tighter">{{ item.dataMovimentacao }}</span>
           </td>
-          <td v-if="colunas.funcionarios" class="px-6 py-4 text-center">
-            <button @click="abrirModalFuncionarios(item.codigo)"
-              class="w-10 h-10 mx-auto flex items-center justify-center transition-all active:scale-95 rounded-xl shadow-sm"
-              :class="item.funcionario === 1 ? 'text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20' : 'text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 opacity-40'"
-              title="Funcionários">
-              <Icon name="fa7-solid:users" class="w-4 h-4" />
-            </button>
-          </td>
-          <td v-if="colunas.detalhes" class="px-6 py-4 text-center">
-            <button @click="abrirModalDetalhes(item.codigo)"
-              class="w-10 h-10 mx-auto flex items-center justify-center text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all active:scale-95 shadow-sm"
-              title="Ver Detalhes">
-              <Icon name="fa7-solid:indent" class="w-4 h-4" />
-            </button>
+          <td v-if="colunas.acoes" class="px-6 py-4 text-center">
+             <div class="flex items-center justify-center gap-2">
+                <button @click="abrirModalDetalhes(item.codigo)"
+                  class="w-10 h-10 flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 rounded-xl transition-all active:scale-95 shadow-sm"
+                  title="Ver Detalhes">
+                  <Icon name="fa7-solid:eye" class="w-4 h-4" />
+                </button>
+                <NuxtLink :to="`/operacao/movimentacaoBancaria/lancamentoManual/cadastro?id=${item.codigo}`"
+                  class="w-10 h-10 flex items-center justify-center text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 rounded-xl transition-all active:scale-95 shadow-sm"
+                  title="Editar">
+                  <Icon name="fa7-solid:pen" class="w-4 h-4" />
+                </NuxtLink>
+                <button @click="abrirModalFuncionarios(item.codigo)"
+                  :disabled="item.funcionario !== 1"
+                  class="w-10 h-10 flex items-center justify-center transition-all active:scale-95 rounded-xl shadow-sm"
+                  :class="item.funcionario === 1 ? 'text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20' : 'text-gray-300 opacity-40 cursor-not-allowed'"
+                  title="Funcionários">
+                  <Icon name="fa7-solid:users" class="w-4 h-4" />
+                </button>
+                <button @click="abrirModalDetalhes(item.codigo)"
+                  class="w-10 h-10 flex items-center justify-center text-slate-600 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/80 rounded-xl transition-all active:scale-95 shadow-sm border border-slate-200/50 dark:border-slate-700/50"
+                  title="Mais Detalhes">
+                  <Icon name="fa7-solid:indent" class="w-4 h-4" />
+                </button>
+             </div>
           </td>
         </template>
 
