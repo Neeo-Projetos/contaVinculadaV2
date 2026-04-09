@@ -38,12 +38,14 @@
         :paginasExibidas="paginasExibidas" 
         @mudarPagina="mudarPagina"
         @mudarItensPorPagina="mudarItensPorPagina"
+        :view="false"
+        :edit="false"
       >
         <template #cabecalho-tabela>
           <th v-if="colunas.projeto" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Projeto</th>
           <th v-if="colunas.contaVinculada" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Conta Vinculada</th>
-          <th v-if="colunas.tipoMov" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Tipo Mov.</th>
-          <th v-if="colunas.vlrMov" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Vlr Mov.</th>
+          <th v-if="colunas.tipoMov" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center min-w-[140px]">Tipo Mov.</th>
+          <th v-if="colunas.vlrMov" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center min-w-[140px]">Vlr Mov.</th>
           <th v-if="colunas.dataOficio" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Data Ofício</th>
           <th v-if="colunas.status" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
           <th v-if="colunas.acoes" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Ações</th>
@@ -63,7 +65,7 @@
                 {{ item.tipoMovimentacao }}
               </span>
           </td>
-          <td v-if="colunas.vlrMov" class="p-4 text-center font-black text-emerald-600 dark:text-emerald-400 text-sm tabular-nums">
+          <td v-if="colunas.vlrMov" class="p-4 text-center font-black text-emerald-600 dark:text-emerald-400 text-base tabular-nums">
             R$ {{ item.valorMovimentacao }}
           </td>
           <td v-if="colunas.dataOficio" class="p-4 text-center text-xs font-bold text-gray-500">
@@ -76,28 +78,20 @@
           </td>
           <td v-if="colunas.acoes" class="p-4 text-center">
             <div class="flex items-center justify-center gap-2">
+              <button @click="abrirModalDetalhes(item.codigo)" 
+                class="w-10 h-10 flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 rounded-xl transition-all active:scale-95 shadow-sm" title="Ver Detalhes">
+                <Icon name="fa7-solid:eye" class="w-4 h-4" />
+              </button>
               <button @click="abrirModalFuncionarios(item.codigo)" 
                 :disabled="item.funcionario !== 1"
                 :class="item.funcionario === 1 ? 'text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20' : 'text-gray-300 opacity-40 cursor-not-allowed'" 
                 class="w-10 h-10 flex items-center justify-center rounded-xl transition-all active:scale-95 shadow-sm" title="Funcionários">
                 <Icon name="fa7-solid:users" class="w-4 h-4" />
               </button>
-              <button @click="abrirModalDetalhes(item.codigo)" 
-                class="w-10 h-10 flex items-center justify-center text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 rounded-xl transition-all active:scale-95 shadow-sm" title="Ver Detalhes">
-                <Icon name="fa7-solid:circle-info" class="w-4 h-4" />
-              </button>
-              <button @click="gerarPdfOficio(item.codigo)" 
-                class="w-10 h-10 flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 rounded-xl transition-all active:scale-95 shadow-sm" title="PDF Ofício">
-                <Icon name="fa7-solid:file-pdf" class="w-4 h-4" />
-              </button>
               <button @click="verHistorico" 
                 class="w-10 h-10 flex items-center justify-center text-amber-600 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 rounded-xl transition-all active:scale-95 shadow-sm" title="Histórico">
-                <Icon name="fa6-solid:history" class="w-4 h-4" />
+                <Icon name="fa6-solid:clock-rotate-left" class="h-4 w-4" />
               </button>
-              <NuxtLink :to="`/operacao/oficio/lancamentoReembolso/cadastro?id=${item.codigo}`"
-                class="w-10 h-10 flex items-center justify-center text-gray-600 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl transition-all active:scale-95 shadow-sm" title="Editar">
-                <Icon name="fa7-solid:pen-to-square" class="w-4 h-4" />
-              </NuxtLink>
             </div>
           </td>
         </template>
