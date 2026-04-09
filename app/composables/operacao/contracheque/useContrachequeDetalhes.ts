@@ -7,12 +7,32 @@ export function useContrachequeDetalhes() {
   const buscaRealizada = ref(false)
   const visaoAtual = ref<'lista' | 'cards'>('lista')
 
-  const filtro = reactive({
+  const filtro = ref({
     mesAno: '',
     projeto: '',
     funcionarioId: '',
     status: '' 
   })
+
+  // Controle de Colunas (Padrão Ouro)
+  const modalExibicaoAberto = ref(false)
+  const colunasVisiveis = reactive({
+    funcionario: true,
+    projeto: true,
+    status: true,
+    competencia: true,
+    acoes: true
+  })
+
+  const labelsColunas = {
+    funcionario: 'Funcionário',
+    projeto: 'Projeto',
+    status: 'Status',
+    competencia: 'Competência',
+    acoes: 'Ações'
+  }
+
+  const colunasTemp = reactive({ ...colunasVisiveis })
 
   const listaCompleta = ref<any[]>([])
   const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
@@ -53,7 +73,7 @@ export function useContrachequeDetalhes() {
     mostrarMenuFuncionarios.value = true
     try {
         const res = await $fetch<any>('/api/cadastro/funcionario/autocomplete', {
-            query: { q: termo, projeto: filtro.projeto }
+            query: { q: termo, projeto: filtro.value.projeto }
         })
         sugestoesFuncionarios.value = res.data || []
     } catch (e) {
@@ -64,13 +84,13 @@ export function useContrachequeDetalhes() {
   }
 
   const selecionarFuncionario = (sugestao: any) => {
-    filtro.funcionarioId = sugestao.id
+    filtro.value.funcionarioId = sugestao.id
     nomeFuncionarioSearch.value = sugestao.descricao
     mostrarMenuFuncionarios.value = false
   }
 
   const buscarRegistros = async () => {
-    if (!filtro.mesAno) {
+    if (!filtro.value.mesAno) {
       dispararAlerta('Filtro Obrigatório', 'Por favor, informe o Mês/Ano para realizar a consulta.', 'warning')
       return
     }
@@ -81,7 +101,7 @@ export function useContrachequeDetalhes() {
     try {
       const response = await $fetch<any>('/api/operacao/contracheque/detalhes/listagem', {
         method: 'POST',
-        body: filtro
+        body: filtro.value
       })
       listaCompleta.value = response.data || []
       paginacao.mudarPagina(1)
@@ -124,8 +144,22 @@ export function useContrachequeDetalhes() {
     // Filtro Avançado
     modalFiltroAvancadoAberto,
     limparFiltrosAvancados() {
-        Object.assign(filtro, { mesAno: '', projeto: '', funcionarioId: '', status: '' })
+        filtro.value = { mesAno: '', projeto: '', funcionarioId: '', status: '' }
         nomeFuncionarioSearch.value = ''
+    },
+
+    // Exibição (Padrão Ouro)
+    modalExibicaoAberto,
+    colunas: colunasVisiveis,
+    labels: labelsColunas,
+    colunasTemp,
+    abrirModalExibicao() {
+        Object.assign(colunasTemp, colunasVisiveis)
+        modalExibicaoAberto.value = true
+    },
+    aplicarExibicao() {
+        Object.assign(colunasVisiveis, colunasTemp)
+        modalExibicaoAberto.value = false
     },
 
     // Autocomplete Funcionário

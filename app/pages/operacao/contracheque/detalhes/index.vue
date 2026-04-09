@@ -15,33 +15,34 @@
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="visaoAtual = visaoAtual === 'lista' ? 'cards' : 'lista'">Controle de Exibição</AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao" class="whitespace-nowrap">Controle de Exibição</AppBotao>
       </template>
 
       <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
         :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
         :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
         :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
+        :view="false" :edit="false"
         @mudarItensPorPagina="mudarItensPorPagina">
         <template #cabecalho-tabela>
-          <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left font-black">
+          <th v-if="colunas.funcionario" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left font-black">
             Funcionário</th>
-          <th scope="col"
+          <th v-if="colunas.projeto" scope="col"
             class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left font-black">
             Projeto</th>
-          <th scope="col"
+          <th v-if="colunas.status" scope="col"
             class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center font-black">
             Status</th>
-          <th scope="col"
+          <th v-if="colunas.competencia" scope="col"
             class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center font-black">
             Competência</th>
-          <th scope="col"
-            class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right font-black">Ação
+          <th v-if="colunas.acoes" scope="col"
+            class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right font-black">Ações
           </th>
         </template>
 
         <template #linhas-tabela="{ item }">
-          <td class="px-6 py-4">
+          <td v-if="colunas.funcionario" class="px-6 py-4">
             <div class="flex items-center gap-4 min-w-[300px]">
               <div
                 class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-black text-sm border border-emerald-500/10 shrink-0 uppercase tracking-tighter">
@@ -53,11 +54,11 @@
               </div>
             </div>
           </td>
-          <td class="px-6 py-4 text-left">
+          <td v-if="colunas.projeto" class="px-6 py-4 text-left">
             <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-tight">{{
               item.projeto }}</span>
           </td>
-          <td class="px-6 py-4 text-center">
+          <td v-if="colunas.status" class="px-6 py-4 text-center">
             <span v-if="item.statusAprovacao === 0"
               class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/10">
               <span class="w-1.5 h-1.5 rounded-full bg-rose-500 mr-2 animate-pulse"></span>
@@ -69,12 +70,12 @@
               Aprovado
             </span>
           </td>
-          <td class="px-6 py-4 text-center">
+          <td v-if="colunas.competencia" class="px-6 py-4 text-center">
             <span class="text-xs font-bold text-gray-700 dark:text-gray-300 font-mono tracking-tighter tabular-nums">{{ item.dataRetencao }}</span>
           </td>
-          <td class="px-6 py-4 text-right">
+          <td v-if="colunas.acoes" class="px-6 py-4 text-right">
             <button @click="abrirModalDetalhes(item.codigo)"
-              class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
+              class="w-10 h-10 ml-auto flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 rounded-xl transition-all shadow-sm"
               title="Ver Verbas">
               <Icon name="fa7-solid:sack-dollar" class="w-5 h-5" />
             </button>
@@ -111,6 +112,9 @@
         <AppBotao variacao="padrao" @click="modalDetalhesAberto = false" class="px-8">Fechar</AppBotao>
       </template>
     </AppModal>
+    
+    <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labels" @aplicar="aplicarExibicao"
+      @close="modalExibicaoAberto = false" />
 
   </div>
 </template>
@@ -122,6 +126,9 @@ const {
 
   // Filtro Avançado
   modalFiltroAvancadoAberto, limparFiltrosAvancados,
+
+  // Exibição (Padrão Ouro)
+  modalExibicaoAberto, abrirModalExibicao, aplicarExibicao, colunas, labels, colunasTemp,
 
   // Autocomplete Funcionário
   nomeFuncionarioSearch, sugestoesFuncionarios, buscandoFuncionarios, mostrarMenuFuncionarios,
