@@ -115,18 +115,10 @@ export function useTipoMovimentacaoListagem() {
     carregandoHistorico.value = true
     try {
       const response = await $fetch<any>('/api/tabelaBasica/tipoMovimentacao/historico', {
-        method: 'POST', body: { codigo: id }
+        method: 'POST', body: { tipoMovimentacao: id }
       })
       
-      historicoData.value = (response.data || []).map((item: any) => ({
-        ...item,
-        usuario: item.usuarioAlteracao,
-        dataHora: item.dataAlteracao,
-        alteracoes: (item.alteracoes || []).map((alt: any) => {
-          if (typeof alt === 'string') return { mensagem: alt }
-          return alt
-        })
-      }))
+      historicoData.value = response.data || []
     } catch (error) {
       console.error('Erro ao buscar histórico', error)
     } finally {
