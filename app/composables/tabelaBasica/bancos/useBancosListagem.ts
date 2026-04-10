@@ -121,15 +121,7 @@ export function useBancosListagem() {
         method: 'POST', body: { banco: id }
       })
       
-      historicoData.value = (response.data || []).map((item: any) => ({
-        ...item,
-        usuario: item.usuarioAlteracao,
-        dataHora: item.dataAlteracao,
-        alteracoes: (item.alteracoes || []).map((alt: any) => {
-          if (typeof alt === 'string') return { mensagem: alt }
-          return alt
-        })
-      }))
+      historicoData.value = response.data || []
     } catch (error) {
       console.error('Erro ao buscar histórico', error)
     } finally {

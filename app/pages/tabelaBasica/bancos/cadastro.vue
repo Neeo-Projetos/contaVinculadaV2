@@ -39,19 +39,16 @@
           :editando="ehEdicao" 
           :carregandoGravar="salvando"
           :visualizar="modoVisualizar"
-          labelExcluir="Excluir Banco"
+          labelEditar="&nbsp;Editar"
+          iconeEditar="fa7-solid:pencil"
           iconeExcluir="fa7-solid:trash-can"
+          :ocultarExcluir="registroInativo"
           @voltar="voltar"
           @excluir="modalExclusao = true"
           @limpar="novo"
           @gravar="gravar"
-        >
-          <template #extra-acoes-direita v-if="modoVisualizar">
-            <AppBotao variacao="primario" icone="fa7-solid:pencil" @click="irParaEdicao">
-              Editar
-            </AppBotao>
-          </template>
-        </AppRodapeFormulario>
+          @editar="irParaEdicao"
+        />
       </form>
     </AppCartaoFormulario>
 
@@ -111,6 +108,7 @@
 <script setup lang="ts">
 const {
   form, salvando, carregandoDados, modalExclusao, ehEdicao, modoVisualizar, irParaEdicao,
+  registroInativo,
   gravar, excluir, novo, voltar,
   modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta
 } = useBancosFormulario()

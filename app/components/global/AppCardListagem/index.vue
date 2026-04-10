@@ -44,16 +44,16 @@
         <Icon name="fa7-solid:pen" class="h-5 w-5" />
       </button>
 
-      <button v-show="mostrarHistorico" @click="$emit('ver-historico')" 
-        class="w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300 border border-slate-500/20 bg-slate-500/5 text-slate-500 hover:bg-slate-500 hover:text-white"
-        title="Ver Histórico">
-        <Icon name="fa6-solid:clock-rotate-left" class="h-5 w-5" />
-      </button>
-
       <button @click="$emit('excluir')" 
         class="w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300 border border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white"
         title="Excluir">
         <Icon name="fa7-solid:trash" class="h-5 w-5" />
+      </button>
+
+      <button v-show="mostrarHistorico" @click="$emit('ver-historico')" 
+        class="w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300 border border-slate-500/20 bg-slate-500/5 text-slate-500 hover:bg-slate-500 hover:text-white"
+        title="Ver Histórico">
+        <Icon name="fa6-solid:clock-rotate-left" class="h-5 w-5" />
       </button>
     </div>
 

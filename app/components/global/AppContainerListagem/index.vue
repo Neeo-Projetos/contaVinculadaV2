@@ -126,15 +126,15 @@
                     title="Editar">
                     <Icon :name="iconeEditar" class="h-4 w-4" />
                   </button>
-                  <button v-if="history" @click.stop="$emit('history', item.codigo || item.id)"
-                    class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-slate-500/20 bg-slate-500/5 text-slate-500 hover:bg-slate-500 hover:text-white active:scale-95 shadow-sm"
-                    title="Ver Histórico">
-                    <Icon name="fa6-solid:clock-rotate-left" class="h-4 w-4" />
-                  </button>
                   <button v-if="endpointDelete && isAtivo(item)" @click.stop="triggerDelete(item.codigo)"
                     class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white active:scale-95 shadow-sm"
                     title="Excluir">
                     <Icon name="fa7-solid:trash" class="h-4 w-4" />
+                  </button>
+                  <button v-if="history" @click.stop="$emit('history', item.codigo || item.id)"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-slate-500/20 bg-slate-500/5 text-slate-500 hover:bg-slate-500 hover:text-white active:scale-95 shadow-sm"
+                    title="Ver Histórico">
+                    <Icon name="fa6-solid:clock-rotate-left" class="h-4 w-4" />
                   </button>
                 </div>
               </td>

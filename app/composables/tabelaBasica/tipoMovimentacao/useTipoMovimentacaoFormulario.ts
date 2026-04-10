@@ -20,7 +20,8 @@ export function useTipoMovimentacaoFormulario() {
   const form = ref({
     codigo: registroId || '0',
     descricao: '',
-    tipo: ''
+    tipo: '',
+    ativo: 1
   })
 
   const mostrarAlerta = (titulo: string, mensagem: string) => {
@@ -41,6 +42,7 @@ export function useTipoMovimentacaoFormulario() {
           form.value.descricao = data.descricao
           form.value.codigo = data.codigo
           form.value.tipo = data.tipo?.toString() || ''
+          form.value.ativo = data.ativo
         }
       } catch (error) {
         console.error('Erro ao carregar dados:', error)
@@ -101,7 +103,7 @@ export function useTipoMovimentacaoFormulario() {
 
   const novo = () => {
     router.push('/tabelaBasica/tipoMovimentacao/cadastro?id=0')
-    form.value = { codigo: '0', descricao: '', tipo: '' }
+    form.value = { codigo: '0', descricao: '', tipo: '', ativo: 1 }
     somenteLeitura.value = false
   }
 
@@ -109,6 +111,8 @@ export function useTipoMovimentacaoFormulario() {
     somenteLeitura.value = false
     router.replace({ query: { ...route.query, modo: undefined } })
   }
+
+  const registroInativo = computed(() => !form.value.ativo)
 
   const voltar = () => router.push('/tabelaBasica/tipoMovimentacao')
 
@@ -135,6 +139,7 @@ export function useTipoMovimentacaoFormulario() {
     novo,
     voltar,
     habilitarEdicao,
+    registroInativo,
     mostrarAlerta
   }
 }

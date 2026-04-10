@@ -19,7 +19,8 @@ export function useBancosFormulario() {
   const form = ref({
     codigo: registroId.value || '0',
     codigoBanco: '',
-    nomeBanco: ''
+    nomeBanco: '',
+    ativo: 1
   })
 
   const mostrarAlerta = (titulo: string, mensagem: string) => {
@@ -39,6 +40,7 @@ export function useBancosFormulario() {
         if (data) {
           form.value.codigoBanco = data.codigoBanco
           form.value.nomeBanco = data.nomeBanco
+          form.value.ativo = data.ativo
         }
       } catch (error) {
         console.error('Erro ao carregar dados:', error)
@@ -92,7 +94,7 @@ export function useBancosFormulario() {
 
   const novo = () => {
     router.push('/tabelaBasica/bancos/cadastro?id=0')
-    form.value = { codigo: '0', codigoBanco: '', nomeBanco: '' }
+    form.value = { codigo: '0', codigoBanco: '', nomeBanco: '', ativo: 1 }
   }
 
   const voltar = () => router.push('/tabelaBasica/bancos')
@@ -100,6 +102,8 @@ export function useBancosFormulario() {
   const irParaEdicao = () => {
     router.push({ path: route.path, query: { ...route.query, modo: undefined } })
   }
+
+  const registroInativo = computed(() => !form.value.ativo)
 
   onMounted(() => {
     buscarDados()
@@ -113,6 +117,7 @@ export function useBancosFormulario() {
     ehEdicao,
     modoVisualizar,
     irParaEdicao,
+    registroInativo,
     gravar,
     excluir,
     novo,

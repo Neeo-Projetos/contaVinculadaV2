@@ -22,7 +22,8 @@ export function useVerbaFormulario() {
     codigoReferencia: '',
     descricao: '',
     tipo: '',
-    observacao: ''
+    observacao: '',
+    ativo: 1
   })
 
   const mostrarAlerta = (titulo: string, mensagem: string) => {
@@ -45,6 +46,7 @@ export function useVerbaFormulario() {
           form.value.codigo = data.codigo
           form.value.tipo = data.tipo?.toString() || ''
           form.value.observacao = data.observacao
+          form.value.ativo = data.ativo
         }
       } catch (error) {
         console.error('Erro ao carregar dados:', error)
@@ -107,14 +109,16 @@ export function useVerbaFormulario() {
 
   const novo = () => {
     router.push('/tabelaBasica/verbas/cadastro?id=0')
-    form.value = { codigo: '0', codigoReferencia: '', descricao: '', tipo: '', observacao: '' }
+    form.value = { codigo: '0', codigoReferencia: '', descricao: '', tipo: '', observacao: '', ativo: 1 }
     somenteLeitura.value = false
   }
 
-  const habilitarEdicao = () => {
+  const irParaEdicao = () => {
     somenteLeitura.value = false
     router.replace({ query: { ...route.query, modo: undefined } })
   }
+
+  const registroInativo = computed(() => !form.value.ativo)
 
   const voltar = () => router.push('/tabelaBasica/verbas')
 
@@ -140,7 +144,8 @@ export function useVerbaFormulario() {
     excluir,
     novo,
     voltar,
-    habilitarEdicao,
+    habilitarEdicao: irParaEdicao,
+    registroInativo,
     mostrarAlerta
   }
 }

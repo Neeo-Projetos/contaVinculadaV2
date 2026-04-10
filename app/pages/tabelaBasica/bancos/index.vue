@@ -33,6 +33,7 @@
         :paginasExibidas="paginasExibidas" 
         :registroInicial="registroInicial" 
         :registroFinal="registroFinal"
+        :history="true"
         nomeTela="Banco" 
         endpointDelete="/api/tabelaBasica/bancos/excluir"
         campoDelete="codigo"
@@ -40,7 +41,7 @@
         @mudarItensPorPagina="mudarItensPorPagina"
         @view="item => navigateTo(`/tabelaBasica/bancos/cadastro?id=${item.codigo}&modo=visualizar`)"
         @edit="item => navigateTo(`/tabelaBasica/bancos/cadastro?id=${item.codigo}`)"
-        @history="item => abrirHistorico(item.codigo)" 
+        @history="item => abrirHistorico(item)" 
         @delete-success="buscarLista"
       >
 

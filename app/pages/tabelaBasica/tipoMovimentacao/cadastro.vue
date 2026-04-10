@@ -49,6 +49,7 @@
           @limpar="novo"
           @gravar="gravar"
           @editar="habilitarEdicao"
+          :ocultarExcluir="registroInativo"
         />
       </form>
     </AppCartaoFormulario>
@@ -110,6 +111,6 @@
 const {
   form, ehEdicao, somenteLeitura, salvando, carregandoDados,
   modalExclusao, modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem,
-  gravar, confirmarExclusao, excluir, novo, voltar, habilitarEdicao
+  gravar, confirmarExclusao, excluir, novo, voltar, habilitarEdicao, registroInativo
 } = useTipoMovimentacaoFormulario()
 </script>

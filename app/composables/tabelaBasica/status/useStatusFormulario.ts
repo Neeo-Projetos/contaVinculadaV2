@@ -19,7 +19,8 @@ export function useStatusFormulario() {
 
   const form = ref({
     codigo: registroId || '0',
-    descricao: ''
+    descricao: '',
+    ativo: 1
   })
 
   const mostrarAlerta = (titulo: string, mensagem: string) => {
@@ -39,6 +40,7 @@ export function useStatusFormulario() {
         if (data) {
           form.value.descricao = data.descricao
           form.value.codigo = data.codigo
+          form.value.ativo = data.ativo
         }
       } catch (error) {
         console.error('Erro ao carregar dados:', error)
@@ -98,7 +100,7 @@ export function useStatusFormulario() {
 
   const novo = () => {
     router.push('/tabelaBasica/status/cadastro?id=0')
-    form.value = { codigo: '0', descricao: '' }
+    form.value = { codigo: '0', descricao: '', ativo: 1 }
     somenteLeitura.value = false
   }
 
@@ -106,6 +108,8 @@ export function useStatusFormulario() {
     somenteLeitura.value = false
     router.replace({ query: { ...route.query, modo: undefined } })
   }
+
+  const registroInativo = computed(() => !form.value.ativo)
 
   const voltar = () => router.push('/tabelaBasica/status')
 
@@ -132,6 +136,7 @@ export function useStatusFormulario() {
     novo,
     voltar,
     habilitarEdicao,
+    registroInativo,
     mostrarAlerta
   }
 }

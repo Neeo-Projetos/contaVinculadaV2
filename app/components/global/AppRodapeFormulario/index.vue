@@ -7,7 +7,7 @@
         {{ labelVoltar }}
       </AppBotao>
 
-      <AppBotao v-if="editando && !visualizar" variacao="perigo" :icone="iconeExcluir" :carregando="carregandoExclusao" @click="$emit('excluir')">
+      <AppBotao v-if="editando && !visualizar && !ocultarExcluir" variacao="perigo" :icone="iconeExcluir" :carregando="carregandoExclusao" @click="$emit('excluir')">
         {{ labelExcluir }}
       </AppBotao>
 
@@ -29,8 +29,8 @@
       </template>
 
       <template v-else>
-        <AppBotao v-if="!ocultarEditar" variacao="primario" icone="fa7-solid:pen-to-square" @click="$emit('editar')">
-          Editar Registro
+        <AppBotao v-if="!ocultarEditar" variacao="primario" :icone="iconeEditar" @click="$emit('editar')">
+          {{ labelEditar }}
         </AppBotao>
       </template>
     </div>
@@ -42,13 +42,16 @@ defineProps({
   editando: { type: Boolean, default: false },
   carregandoGravar: { type: Boolean, default: false },
   carregandoExclusao: { type: Boolean, default: false },
-  labelVoltar: { type: String, default: 'Voltar' },
+  labelVoltar: { type: String, default: 'Retornar' },
   labelExcluir: { type: String, default: 'Excluir' },
   iconeExcluir: { type: String, default: 'fa7-solid:trash-can' },
   labelLimpar: { type: String, default: 'Novo' },
   labelGravar: { type: String, default: 'Gravar' },
+  labelEditar: { type: String, default: 'Editar Registro' },
+  iconeEditar: { type: String, default: 'fa7-solid:pen-to-square' },
   visualizar: { type: Boolean, default: false },
-  ocultarEditar: { type: Boolean, default: false }
+  ocultarEditar: { type: Boolean, default: false },
+  ocultarExcluir: { type: Boolean, default: false }
 })
 
 defineEmits(['voltar', 'excluir', 'limpar', 'gravar', 'editar'])
