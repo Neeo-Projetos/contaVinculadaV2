@@ -33,7 +33,6 @@
           :editando="ehEdicao" 
           :carregandoGravar="salvando"
           :visualizar="somenteLeitura"
-          labelExcluir="Remover Status"
           iconeExcluir="fa7-solid:trash-can"
           @voltar="voltar"
           @excluir="confirmarExclusao"
@@ -45,10 +44,10 @@
       </form>
     </AppCartaoFormulario>
 
-    <!-- Modal de Exclusão (Padrão) -->
+    <!-- Modal de Inativação (Padrão) -->
     <AppModal 
       :isOpen="modalExclusao" 
-      title="Atenção: Confirmar Exclusão" 
+      title="Atenção: Confirmar Inativação" 
       icon="fa7-solid:triangle-exclamation"
       @close="modalExclusao = false"
     >
@@ -61,11 +60,11 @@
         </div>
         
         <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-3">
-          Deseja Excluir?
+          Deseja Inativar?
         </h4>
         
         <p class="text-gray-500 dark:text-gray-400 text-base leading-relaxed max-w-[320px]">
-          Esta ação é irreversível. O status <strong class="text-gray-800 dark:text-gray-200">{{ form.descricao }}</strong> será removido permanentemente.
+          Esta operação desativará o status <strong class="text-gray-800 dark:text-gray-200">{{ form.descricao }}</strong> no sistema.
         </p>
       </div>
       <template #footer>
@@ -74,7 +73,7 @@
         </AppBotao>
         
         <AppBotao variacao="perigo" icone="fa7-solid:trash-can" @click="excluir">
-          Sim, Excluir Agora
+          Sim, Inativar Agora
         </AppBotao>
       </template>
     </AppModal>

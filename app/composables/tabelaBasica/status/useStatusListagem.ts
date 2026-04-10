@@ -65,7 +65,7 @@ export function useStatusListagem() {
   const colunasTemp = reactive({ ...colunasVisiveis })
   const labelsColunas = {
     descricao: 'Descrição do Status',
-    status: 'Status no Sistema',
+    status: 'Status',
     historico: 'Histórico'
   }
   const modalExibicaoAberto = ref(false)
@@ -115,18 +115,10 @@ export function useStatusListagem() {
     carregandoHistorico.value = true
     try {
       const response = await $fetch<any>('/api/tabelaBasica/status/historico', {
-        method: 'POST', body: { codigo: id }
+        method: 'POST', body: { status: id }
       })
       
-      historicoData.value = (response.data || []).map((item: any) => ({
-        ...item,
-        usuario: item.usuarioAlteracao,
-        dataHora: item.dataAlteracao,
-        alteracoes: (item.alteracoes || []).map((alt: any) => {
-          if (typeof alt === 'string') return { mensagem: alt }
-          return alt
-        })
-      }))
+      historicoData.value = response.data || []
     } catch (error) {
       console.error('Erro ao buscar histórico', error)
     } finally {

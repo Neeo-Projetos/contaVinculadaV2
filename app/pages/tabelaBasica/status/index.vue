@@ -43,11 +43,12 @@
         nomeTela="Status" 
         endpointDelete="/api/tabelaBasica/status/excluir"
         campoDelete="codigo"
+        :history="true"
         @mudarPagina="mudarPagina"
         @mudarItensPorPagina="mudarItensPorPagina"
         @view="item => navigateTo(`/tabelaBasica/status/cadastro?id=${item.codigo}&modo=visualizar`)"
         @edit="item => navigateTo(`/tabelaBasica/status/cadastro?id=${item.codigo}`)"
-        @history="item => abrirHistorico(item.codigo)" 
+        @history="id => abrirHistorico(id)" 
         @delete-success="buscarLista"
       >
 
@@ -56,7 +57,7 @@
             Descrição do Status</th>
           <th v-if="colunas.status" scope="col"
             class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-            Status no Sistema</th>
+            Status</th>
         </template>
 
         <template #linhas-tabela="{ item }">
