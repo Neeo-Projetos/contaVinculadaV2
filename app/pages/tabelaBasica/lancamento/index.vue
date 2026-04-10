@@ -36,11 +36,12 @@
         nomeTela="Lançamento" 
         endpointDelete="/api/tabelaBasica/lancamento/excluir"
         campoDelete="codigo"
+        :history="true"
         @mudarPagina="mudarPagina"
         @mudarItensPorPagina="mudarItensPorPagina"
         @view="item => navigateTo(`/tabelaBasica/lancamento/cadastro?id=${item.codigo}&modo=visualizar`)"
         @edit="item => navigateTo(`/tabelaBasica/lancamento/cadastro?id=${item.codigo}`)"
-        @history="item => abrirHistorico(item.codigo)" 
+        @history="id => abrirHistorico(id)" 
         @delete-success="buscarLista"
       >
 
