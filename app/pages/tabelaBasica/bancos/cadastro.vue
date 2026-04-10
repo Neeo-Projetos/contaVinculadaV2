@@ -52,10 +52,10 @@
       </form>
     </AppCartaoFormulario>
 
-    <!-- Modal de Exclusão (Padrão) -->
+    <!-- Modal de Inativação (Padrão) -->
     <AppModal 
       :isOpen="modalExclusao" 
-      title="Atenção: Exclusão de Registro" 
+      title="Atenção: Inativação de Registro" 
       icon="fa7-solid:triangle-exclamation"
       @close="modalExclusao = false"
     >
@@ -68,11 +68,11 @@
         </div>
         
         <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-3">
-          Remover Banco?
+          Inativar Banco?
         </h4>
         
         <p class="text-gray-500 dark:text-gray-400 text-base leading-relaxed max-w-[320px]">
-          Esta ação é permanente. Ter certeza que deseja excluir <strong class="text-gray-800 dark:text-gray-200">{{ form.nomeBanco }}</strong> do sistema?
+          Esta ação desativará o registro. Tem certeza que deseja inativar <strong class="text-gray-800 dark:text-gray-200">{{ form.nomeBanco }}</strong> no sistema?
         </p>
       </div>
       <template #footer>
@@ -81,7 +81,7 @@
         </AppBotao>
         
         <AppBotao variacao="perigo" icone="fa7-solid:trash-can" @click="excluir">
-          Sim, Excluir Agora
+          Sim, Inativar Agora
         </AppBotao>
       </template>
     </AppModal>

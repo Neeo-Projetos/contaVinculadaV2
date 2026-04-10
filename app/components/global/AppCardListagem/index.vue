@@ -46,7 +46,7 @@
 
       <button @click="$emit('excluir')" 
         class="w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300 border border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white"
-        title="Excluir">
+        title="Inativar">
         <Icon name="fa7-solid:trash" class="h-5 w-5" />
       </button>
 

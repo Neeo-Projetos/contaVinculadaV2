@@ -33,6 +33,7 @@
         :paginasExibidas="paginasExibidas" 
         :registroInicial="registroInicial" 
         :registroFinal="registroFinal"
+        :history="true"
         nomeTela="Classificação" 
         endpointDelete="/api/tabelaBasica/classificacao/excluir"
         campoDelete="codigo"
@@ -40,7 +41,7 @@
         @mudarItensPorPagina="mudarItensPorPagina"
         @view="item => navigateTo(`/tabelaBasica/classificacao/cadastro?id=${item.codigo}&modo=visualizar`)"
         @edit="item => navigateTo(`/tabelaBasica/classificacao/cadastro?id=${item.codigo}`)"
-        @history="item => abrirHistorico(item.codigo)" 
+        @history="id => abrirHistorico(id)" 
         @delete-success="buscarLista"
       >
 

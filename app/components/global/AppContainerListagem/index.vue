@@ -128,7 +128,7 @@
                   </button>
                   <button v-if="endpointDelete && isAtivo(item)" @click.stop="triggerDelete(item.codigo)"
                     class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white active:scale-95 shadow-sm"
-                    title="Excluir">
+                    title="Inativar">
                     <Icon name="fa7-solid:trash" class="h-4 w-4" />
                   </button>
                   <button v-if="history" @click.stop="$emit('history', item.codigo || item.id)"
@@ -173,19 +173,19 @@
       </div>
     </div>
 
-    <!-- Modais de Exclusão e Feedback -->
-    <AppModal :isOpen="modalConfirm.visivel" title="Confirmar Exclusão" icon="fa7-solid:triangle-exclamation" @close="modalConfirm.visivel = false">
+    <!-- Modais de Inativação e Feedback -->
+    <AppModal :isOpen="modalConfirm.visivel" title="Confirmar Inativação" icon="fa7-solid:triangle-exclamation" @close="modalConfirm.visivel = false">
       <div class="flex flex-col items-center justify-center p-4 text-center">
           <div class="w-16 h-16 bg-rose-50 dark:bg-rose-500/10 rounded-full flex items-center justify-center mb-4 border border-rose-100 dark:border-rose-900/30">
               <Icon name="fa7-solid:trash" class="w-8 h-8 text-rose-500" />
           </div>
           <p class="text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
-              {{ mensagemExcluir || 'Tem certeza que deseja excluir este registro?' }}
+              {{ mensagemExcluir || 'Tem certeza que deseja inativar este registro?' }}
           </p>
       </div>
       <template #footer>
           <button @click="modalConfirm.visivel = false" class="px-6 py-2.5 text-[11px] font-black uppercase tracking-widest text-gray-500 hover:text-gray-700 transition-colors">Cancelar</button>
-          <AppBotao variacao="erro" class="!px-8" @click="handleConfirmDelete">Sim, Excluir</AppBotao>
+          <AppBotao variacao="erro" class="!px-8" @click="handleConfirmDelete">Sim, Inativar</AppBotao>
       </template>
     </AppModal>
 
@@ -300,11 +300,11 @@ const handleConfirmDelete = async () => {
                     visivel: true,
                     tipo: 'sucesso',
                     titulo: 'Sucesso',
-                    mensagem: `${props.nomeTela || 'Registro'} excluído com sucesso.`
+                    mensagem: `${props.nomeTela || 'Registro'} inativado com sucesso.`
                 };
                 deveAtualizarAposFeedback.value = true;
             } else {
-                throw new Error(response.message || 'Erro ao excluir');
+                throw new Error(response.message || 'Erro ao inativar');
             }
         } catch (error: any) {
             deveAtualizarAposFeedback.value = false;
@@ -312,7 +312,7 @@ const handleConfirmDelete = async () => {
                 visivel: true,
                 tipo: 'erro',
                 titulo: 'Erro',
-                mensagem: error.message || 'Não foi possível excluir o registro.'
+                mensagem: error.message || 'Não foi possível inativar o registro.'
             };
         }
     } else {
