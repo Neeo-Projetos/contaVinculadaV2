@@ -76,12 +76,12 @@
             {{ item.cpf }}
           </td>
           <td v-if="colunas.status" class="px-6 py-4 text-center">
-            <AppAtivo :ativo="item.ativo" />
+            <AppAtivo :ativo="item.ativo !== 0" />
           </td>
         </template>
 
         <template #cards="{ item }">
-          <AppCardListagem :titulo="item.nome" :subtituloNome="'Login'" :subtituloValor="item.login" :ativo="item.ativo"
+          <AppCardListagem :titulo="item.nome" :subtituloNome="'Login'" :subtituloValor="item.login" :ativo="item.ativo !== 0"
             :mostrarStatus="colunas.status" :mostrarHistorico="true" 
             :detalhes="[
               ...(colunas.cpf ? [{ icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` }] : []),

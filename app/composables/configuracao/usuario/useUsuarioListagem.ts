@@ -12,7 +12,7 @@ export function useUsuarioListagem() {
     return 'Digite o nome do usuário...'
   })
 
-  const filtro = reactive({
+  const filtro = ref({
     login: '',
     nome: '',
     cpf: '',
@@ -47,9 +47,9 @@ export function useUsuarioListagem() {
     try {
       const data = await $fetch<any>('/api/configuracao/usuario/listagem', {
         method: 'POST',
-        body: filtro
+        body: filtro.value
       })
-      listaCompleta.value = data?.results || []
+      listaCompleta.value = data?.data || []
       paginacao.mudarPagina(1)
     } catch (err: any) {
       console.error(err)
@@ -81,12 +81,13 @@ export function useUsuarioListagem() {
   const modalFiltroAvancadoAberto = ref(false)
   const abrirModalFiltroAvancado = () => modalFiltroAvancadoAberto.value = true
   const limparFiltrosAvancados = () => {
-    Object.assign(filtro, {
+    filtro.value = {
       login: '',
       nome: '',
       cpf: '',
+      projeto: '',
       ativo: '1'
-    })
+    }
     buscarLista()
   }
   const aplicarFiltroAvancado = () => {
