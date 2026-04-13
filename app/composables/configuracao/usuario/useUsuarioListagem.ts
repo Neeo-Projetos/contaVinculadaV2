@@ -103,7 +103,17 @@ export function useUsuarioListagem() {
     modalHistoricoAberto.value = true
     carregandoHistorico.value = true
     try {
-        // Implementação futura da API de histórico
+        const response = await $fetch<any>('/api/configuracao/usuario/historico', {
+            method: 'POST', body: { codigo }
+        })
+        
+        if (response.status === 'failed') {
+            historicoSelecionado.value = []
+            return
+        }
+        historicoSelecionado.value = response.data || []
+    } catch (error) {
+        console.error('Erro ao buscar histórico', error)
         historicoSelecionado.value = []
     } finally {
         carregandoHistorico.value = false
