@@ -4,16 +4,16 @@ import { comum } from '../../../utils/comum'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const statusId = Number(body.status || body.codigo || body.id)
+  const codigo = Number(body.codigo)
 
-  if (!statusId) {
-    return { status: 'failed', message: 'Status não informado' }
+  if (!codigo) {
+    return { status: 'failed', mensagem: 'Status não informado' }
   }
 
   try {
     const db = await useDb()
     const request = db.request()
-    request.input('status', statusId)
+    request.input('status', codigo)
 
     // Consulta o histórico ordenado pela data mais recente
     const result = await request.query(`

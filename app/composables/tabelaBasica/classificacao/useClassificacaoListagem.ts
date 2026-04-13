@@ -115,7 +115,7 @@ export function useClassificacaoListagem() {
     carregandoHistorico.value = true
     try {
       const response = await $fetch<any>('/api/tabelaBasica/classificacao/historico', {
-        method: 'POST', body: { classificacao: id }
+        method: 'POST', body: { codigo: id }
       })
       
       historicoData.value = response.data || []

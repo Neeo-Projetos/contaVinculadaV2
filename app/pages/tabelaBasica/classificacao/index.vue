@@ -1,20 +1,26 @@
 <template>
   <div class="min-h-full flex flex-col gap-4 p-4 md:p-6 animate-fade-in text-gray-900 dark:text-gray-100">
 
-    <AppFiltro v-model="filtro" v-model:viewMode="visaoAtual" :campos="camposFiltro" titulo="Classificações"
-      descricao="Gerenciamento de tipos de classificação de lançamentos" icone-titulo="fa7-solid:tags"
-      :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Tabela Básica' }, { label: 'Classificações' }]" :pending="carregando"
-      @buscar="buscarLista" @openAdvancedFilter="abrirModalFiltroAvancado"
+    <AppFiltro 
+      v-model="filtro" 
+      v-model:viewMode="visaoAtual" 
+      :campos="camposFiltro" 
+      titulo="Classificações"
+      descricao="Gerenciamento de tipos de classificação de lançamentos" 
+      icone-titulo="fa7-solid:tags"
+      :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Tabela Básica' }, { label: 'Classificações' }]" 
+      :pending="carregando"
+      @buscar="buscarLista" 
+      @openAdvancedFilter="abrirModalFiltroAvancado"
       @buscarSugestao="buscarSugestoesClassificacao" 
       @selecionarSugestao="({ sugestao }) => selecionarSugestaoClassificacao(sugestao)"
       @fecharSugestao="fecharSugestoesDelay"
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao">Controle de Exibição
-        </AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao">Controle de Exibição</AppBotao>
 
-        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/tabelaBasica/classificacao/cadastro?id=0')">
+        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/tabelaBasica/classificacao/cadastro?codigo=0')">
           Nova Classificação
         </AppBotao>
       </template>
@@ -39,8 +45,8 @@
         campoDelete="codigo"
         @mudarPagina="mudarPagina"
         @mudarItensPorPagina="mudarItensPorPagina"
-        @view="item => navigateTo(`/tabelaBasica/classificacao/cadastro?id=${item.codigo}&modo=visualizar`)"
-        @edit="item => navigateTo(`/tabelaBasica/classificacao/cadastro?id=${item.codigo}`)"
+        @view="item => navigateTo(`/tabelaBasica/classificacao/cadastro?codigo=${item.codigo}&modo=visualizar`)"
+        @edit="item => navigateTo(`/tabelaBasica/classificacao/cadastro?codigo=${item.codigo}`)"
         @history="id => abrirHistorico(id)" 
         @delete-success="buscarLista"
       >
@@ -55,7 +61,7 @@
 
         <template #linhas-tabela="{ item }">
           <td v-if="colunas.descricao" class="px-6 py-4">
-            <NuxtLink :to="`/tabelaBasica/classificacao/cadastro?id=${item.codigo || item.id}&modo=visualizar`" class="flex items-center gap-3 group">
+            <NuxtLink :to="`/tabelaBasica/classificacao/cadastro?codigo=${item.codigo}&modo=visualizar`" class="flex items-center gap-3 group">
               <div
                 class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all">
                 {{ item.descricao ? item.descricao.charAt(0).toUpperCase() : 'C' }}
@@ -82,11 +88,11 @@
             :ativo="Number(item.ativo) === 1" 
             :mostrarStatus="colunas.status" 
             :mostrarHistorico="colunas.historico"
-            @ver-detalhes="navigateTo(`/tabelaBasica/classificacao/cadastro?id=${item.codigo}&modo=visualizar`)"
-            @editar="navigateTo(`/tabelaBasica/classificacao/cadastro?id=${item.codigo}`)"
+            @ver-detalhes="navigateTo(`/tabelaBasica/classificacao/cadastro?codigo=${item.codigo}&modo=visualizar`)"
+            @editar="navigateTo(`/tabelaBasica/classificacao/cadastro?codigo=${item.codigo}`)"
             @excluir="() => listagemRef?.triggerDelete(item.codigo)"
             @ver-historico="abrirHistorico(item.codigo)"
-            @clique-titulo="navigateTo(`/tabelaBasica/classificacao/cadastro?id=${item.codigo}&modo=visualizar`)" 
+            @clique-titulo="navigateTo(`/tabelaBasica/classificacao/cadastro?codigo=${item.codigo}&modo=visualizar`)" 
           />
         </template>
 

@@ -115,7 +115,7 @@ export function useTipoMovimentacaoListagem() {
     carregandoHistorico.value = true
     try {
       const response = await $fetch<any>('/api/tabelaBasica/tipoMovimentacao/historico', {
-        method: 'POST', body: { tipoMovimentacao: id }
+        method: 'POST', body: { codigo: id }
       })
       
       historicoData.value = response.data || []

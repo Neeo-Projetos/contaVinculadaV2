@@ -115,7 +115,7 @@ export function useStatusListagem() {
     carregandoHistorico.value = true
     try {
       const response = await $fetch<any>('/api/tabelaBasica/status/historico', {
-        method: 'POST', body: { status: id }
+        method: 'POST', body: { codigo: id }
       })
       
       historicoData.value = response.data || []

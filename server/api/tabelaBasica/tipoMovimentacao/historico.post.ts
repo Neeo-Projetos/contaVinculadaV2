@@ -4,14 +4,14 @@ import { comum } from '../../../utils/comum'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const tipoMovimentacaoId = Number(body.tipoMovimentacao || body.codigo || body.id)
+  const codigo = Number(body.codigo)
 
-  if (!tipoMovimentacaoId) return { status: 'failed', message: 'Tipo de movimentação não informado' }
+  if (!codigo) return { status: 'failed', mensagem: 'Tipo de movimentação não informado' }
 
   try {
     const db = await useDb()
     const request = db.request()
-    request.input('tipoId', tipoMovimentacaoId)
+    request.input('tipoId', codigo)
 
     const result = await request.query(`
       SELECT 

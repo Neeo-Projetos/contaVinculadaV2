@@ -3,11 +3,11 @@ import { useDb } from '../../../utils/db'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const id = Number(body.id)
+  const codigo = Number(body.codigo)
 
-  if (!id) return { status: 'failed', mensagem: 'ID inválido' }
+  if (!codigo) return { status: 'failed', mensagem: 'Código inválido' }
 
-  const query = `SELECT codigo, descricao, tipo, ativo FROM tabelaBasica.tipoMovimentacao WHERE codigo = ${id}`
+  const query = `SELECT codigo, descricao, tipo, ativo FROM tabelaBasica.tipoMovimentacao WHERE codigo = ${codigo}`
 
   try {
     const pool = await useDb()

@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const codigo = Number(body.codigo)
 
-  if (!codigo) return { status: 'failed', message: 'Código não informado' }
+  if (!codigo) return { status: 'failed', mensagem: 'Código não informado' }
 
   const usuario = 1 
 
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
     const resultQuery = await pool.request().query(selectQuery)
 
     if (resultQuery.recordset.length === 0) {
-       return { status: 'failed', message: 'Registro não encontrado para exclusão.' }
+       return { status: 'failed', mensagem: 'Registro não encontrado para exclusão.' }
     }
 
     const rec = resultQuery.recordset[0]
@@ -25,9 +25,9 @@ export default defineEventHandler(async (event) => {
     const queryExec = `EXEC tabelaBasica.classificacao_Atualiza ${codigo}, ${descSql}, ${usuario}, 0`
     await pool.request().query(queryExec)
 
-    return { status: 'success', message: 'Registro excluído com sucesso.' }
-  } catch (erro) {
+    return { status: 'success', mensagem: 'Registro excluído com sucesso.' }
+  } catch (erro: any) {
     console.error('Erro ao excluir classificação:', erro)
-    return { status: 'failed', message: 'Erro ao excluir no banco de dados.' }
+    return { status: 'failed', mensagem: 'Erro ao excluir no banco de dados: ' + (erro.message || erro) }
   }
 })

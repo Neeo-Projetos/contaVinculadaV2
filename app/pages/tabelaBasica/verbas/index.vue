@@ -18,10 +18,9 @@
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao">Controle de Exibição
-        </AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao">Controle de Exibição</AppBotao>
 
-        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/tabelaBasica/verbas/cadastro?id=0')">
+        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/tabelaBasica/verbas/cadastro?codigo=0')">
           Nova Verba
         </AppBotao>
       </template>
@@ -38,7 +37,7 @@
         :totalPaginas="totalPaginas"
         :paginaAtual="paginaAtual" 
         :paginasExibidas="paginasExibidas" 
-        :registroInitial="registroInicial" 
+        :registroInicial="registroInicial" 
         :registroFinal="registroFinal"
         nomeTela="Verba" 
         endpointDelete="/api/tabelaBasica/verbas/excluir"
@@ -46,8 +45,8 @@
         :history="true"
         @mudarPagina="mudarPagina"
         @mudarItensPorPagina="mudarItensPorPagina"
-        @view="item => navigateTo(`/tabelaBasica/verbas/cadastro?id=${item.codigo}&modo=visualizar`)"
-        @edit="item => navigateTo(`/tabelaBasica/verbas/cadastro?id=${item.codigo}`)"
+        @view="item => navigateTo(`/tabelaBasica/verbas/cadastro?codigo=${item.codigo}&modo=visualizar`)"
+        @edit="item => navigateTo(`/tabelaBasica/verbas/cadastro?codigo=${item.codigo}`)"
         @history="id => abrirHistorico(id)" 
         @delete-success="buscarLista"
       >
@@ -62,7 +61,7 @@
 
         <template #linhas-tabela="{ item }">
           <td v-if="colunas.descricao" class="px-6 py-4">
-            <NuxtLink :to="`/tabelaBasica/verbas/cadastro?id=${item.codigo}&modo=visualizar`" class="flex items-center gap-3 group">
+            <NuxtLink :to="`/tabelaBasica/verbas/cadastro?codigo=${item.codigo}&modo=visualizar`" class="flex items-center gap-3 group">
               <div
                 class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all">
                 {{ item.descricao ? item.descricao.charAt(0).toUpperCase() : 'V' }}
@@ -89,11 +88,11 @@
             :ativo="Number(item.ativo) === 1" 
             :mostrarStatus="colunas.status" 
             :mostrarHistorico="colunas.historico"
-            @ver-detalhes="navigateTo(`/tabelaBasica/verbas/cadastro?id=${item.codigo}&modo=visualizar`)"
-            @editar="navigateTo(`/tabelaBasica/verbas/cadastro?id=${item.codigo}`)"
+            @ver-detalhes="navigateTo(`/tabelaBasica/verbas/cadastro?codigo=${item.codigo}&modo=visualizar`)"
+            @editar="navigateTo(`/tabelaBasica/verbas/cadastro?codigo=${item.codigo}`)"
             @excluir="() => listagemRef?.triggerDelete(item.codigo)"
             @ver-historico="abrirHistorico(item.codigo)"
-            @clique-titulo="navigateTo(`/tabelaBasica/verbas/cadastro?id=${item.codigo}&modo=visualizar`)" 
+            @clique-titulo="navigateTo(`/tabelaBasica/verbas/cadastro?codigo=${item.codigo}&modo=visualizar`)" 
           />
         </template>
 

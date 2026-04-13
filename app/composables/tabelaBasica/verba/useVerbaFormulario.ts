@@ -4,10 +4,10 @@ export function useVerbaFormulario() {
   const route = useRoute()
   const router = useRouter()
 
-  const registroId = route.query.codigo as string || route.query.id as string || '0'
+  const registroCodigo = (route.query.codigo as string) || '0'
   const somenteLeitura = ref(false)
 
-  const ehEdicao = computed(() => registroId !== '0' && !!registroId)
+  const ehEdicao = computed(() => registroCodigo !== '0' && !!registroCodigo)
   
   const salvando = ref(false)
   const carregandoDados = ref(false)
@@ -18,7 +18,7 @@ export function useVerbaFormulario() {
   const modalAlertaMensagem = ref('')
 
   const form = ref({
-    codigo: registroId || '0',
+    codigo: registroCodigo || '0',
     codigoReferencia: '',
     descricao: '',
     tipo: '',
@@ -38,7 +38,7 @@ export function useVerbaFormulario() {
       try {
         const { data } = await $fetch<{ data: any }>('/api/tabelaBasica/verbas/recupera', {
           method: 'POST',
-          body: { id: registroId }
+          body: { codigo: registroCodigo }
         })
         if (data) {
           form.value.codigoReferencia = data.codigoReferencia
@@ -109,7 +109,7 @@ export function useVerbaFormulario() {
   }
 
   const novo = () => {
-    router.push('/tabelaBasica/verbas/cadastro?id=0')
+    router.push('/tabelaBasica/verbas/cadastro?codigo=0')
     form.value = { codigo: '0', codigoReferencia: '', descricao: '', tipo: '', observacao: '', ativo: 1 }
     somenteLeitura.value = false
   }

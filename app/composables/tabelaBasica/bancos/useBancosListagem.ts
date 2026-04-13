@@ -118,7 +118,7 @@ export function useBancosListagem() {
     carregandoHistorico.value = true
     try {
       const response = await $fetch<any>('/api/tabelaBasica/bancos/historico', {
-        method: 'POST', body: { banco: id }
+        method: 'POST', body: { codigo: id }
       })
       
       historicoData.value = response.data || []

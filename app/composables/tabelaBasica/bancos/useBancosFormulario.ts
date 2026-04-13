@@ -4,9 +4,9 @@ export function useBancosFormulario() {
   const route = useRoute()
   const router = useRouter()
 
-  const registroId = computed(() => (route.query.id || route.query.codigo) as string)
+  const registroCodigo = (route.query.codigo as string) || '0'
   const modoVisualizar = computed(() => route.query.modo === 'visualizar')
-  const ehEdicao = computed(() => registroId.value !== '0' && !!registroId.value)
+  const ehEdicao = computed(() => registroCodigo !== '0' && !!registroCodigo)
 
   const salvando = ref(false)
   const carregandoDados = ref(false)
@@ -17,7 +17,7 @@ export function useBancosFormulario() {
   const modalAlertaMensagem = ref('')
 
   const form = ref({
-    codigo: registroId.value || '0',
+    codigo: registroCodigo || '0',
     codigoBanco: '',
     nomeBanco: '',
     ativo: 1
@@ -35,7 +35,7 @@ export function useBancosFormulario() {
       try {
         const { data } = await $fetch<{ data: any }>('/api/tabelaBasica/bancos/recupera', {
           method: 'POST',
-          body: { id: registroId.value }
+          body: { codigo: registroCodigo }
         })
         if (data) {
           form.value.codigoBanco = data.codigoBanco
@@ -93,7 +93,7 @@ export function useBancosFormulario() {
   }
 
   const novo = () => {
-    router.push('/tabelaBasica/bancos/cadastro?id=0')
+    router.push('/tabelaBasica/bancos/cadastro?codigo=0')
     form.value = { codigo: '0', codigoBanco: '', nomeBanco: '', ativo: 1 }
   }
 

@@ -1,20 +1,26 @@
 <template>
   <div class="min-h-full flex flex-col gap-4 p-4 md:p-6 animate-fade-in text-gray-900 dark:text-gray-100">
 
-    <AppFiltro v-model="filtro" v-model:viewMode="visaoAtual" :campos="camposFiltro" titulo="Bancos"
-      descricao="Cadastro e gestão de instituições financeiras" icone-titulo="fa7-solid:building-columns"
-      :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Tabela Básica' }, { label: 'Bancos' }]" :pending="carregando"
-      @buscar="buscarLista" @openAdvancedFilter="abrirModalFiltroAvancado"
+    <AppFiltro 
+      v-model="filtro" 
+      v-model:viewMode="visaoAtual" 
+      :campos="camposFiltro" 
+      titulo="Bancos"
+      descricao="Cadastro e gestão de instituições financeiras" 
+      icone-titulo="fa7-solid:building-columns"
+      :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Tabela Básica' }, { label: 'Bancos' }]" 
+      :pending="carregando"
+      @buscar="buscarLista" 
+      @openAdvancedFilter="abrirModalFiltroAvancado"
       @buscarSugestao="buscarSugestoesBancos" 
       @selecionarSugestao="({ sugestao }) => selecionarSugestaoBancos(sugestao)"
       @fecharSugestao="fecharSugestoesDelay"
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:file-excel" @click="gerarExcel">Relatório</AppBotao>
-        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="() => {}">Controle de Exibição
-        </AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao">Controle de Exibição</AppBotao>
 
-        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/tabelaBasica/bancos/cadastro?id=0')">
+        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/tabelaBasica/bancos/cadastro?codigo=0')">
           Novo Banco
         </AppBotao>
       </template>
@@ -39,8 +45,8 @@
         campoDelete="codigo"
         @mudarPagina="mudarPagina"
         @mudarItensPorPagina="mudarItensPorPagina"
-        @view="item => navigateTo(`/tabelaBasica/bancos/cadastro?id=${item.codigo}&modo=visualizar`)"
-        @edit="item => navigateTo(`/tabelaBasica/bancos/cadastro?id=${item.codigo}`)"
+        @view="item => navigateTo(`/tabelaBasica/bancos/cadastro?codigo=${item.codigo}&modo=visualizar`)"
+        @edit="item => navigateTo(`/tabelaBasica/bancos/cadastro?codigo=${item.codigo}`)"
         @history="item => abrirHistorico(item)" 
         @delete-success="buscarLista"
       >
@@ -60,7 +66,7 @@
             <span class="text-xs font-bold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-lg">{{ item.codigoBanco }}</span>
           </td>
           <td v-if="colunas.descricao" class="px-6 py-4">
-            <NuxtLink :to="`/tabelaBasica/bancos/cadastro?id=${item.codigo}&modo=visualizar`" class="flex items-center gap-3 group">
+            <NuxtLink :to="`/tabelaBasica/bancos/cadastro?codigo=${item.codigo}&modo=visualizar`" class="flex items-center gap-3 group">
               <div
                 class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all">
                 {{ item.nomeBanco ? item.nomeBanco.charAt(0).toUpperCase() : 'B' }}
@@ -87,11 +93,11 @@
             :ativo="Number(item.ativo) === 1" 
             :mostrarStatus="colunas.status" 
             :mostrarHistorico="colunas.historico"
-            @ver-detalhes="navigateTo(`/tabelaBasica/bancos/cadastro?id=${item.codigo}&modo=visualizar`)"
-            @editar="navigateTo(`/tabelaBasica/bancos/cadastro?id=${item.codigo}`)"
+            @ver-detalhes="navigateTo(`/tabelaBasica/bancos/cadastro?codigo=${item.codigo}&modo=visualizar`)"
+            @editar="navigateTo(`/tabelaBasica/bancos/cadastro?codigo=${item.codigo}`)"
             @excluir="() => listagemRef?.triggerDelete(item.codigo)"
             @ver-historico="abrirHistorico(item.codigo)"
-            @clique-titulo="navigateTo(`/tabelaBasica/bancos/cadastro?id=${item.codigo}&modo=visualizar`)" 
+            @clique-titulo="navigateTo(`/tabelaBasica/bancos/cadastro?codigo=${item.codigo}&modo=visualizar`)" 
           />
         </template>
 

@@ -4,10 +4,10 @@ export function useClassificacaoFormulario() {
   const route = useRoute()
   const router = useRouter()
 
-  const registroId = route.query.codigo as string || route.query.id as string || '0'
+  const registroCodigo = (route.query.codigo as string) || '0'
   const somenteLeitura = ref(false)
 
-  const ehEdicao = computed(() => registroId !== '0' && !!registroId)
+  const ehEdicao = computed(() => registroCodigo !== '0' && !!registroCodigo)
   
   const salvando = ref(false)
   const carregandoDados = ref(false)
@@ -18,7 +18,7 @@ export function useClassificacaoFormulario() {
   const modalAlertaMensagem = ref('')
 
   const form = ref({
-    codigo: registroId || '0',
+    codigo: registroCodigo || '0',
     descricao: '',
     ativo: 1
   })
@@ -35,7 +35,7 @@ export function useClassificacaoFormulario() {
       try {
         const { data } = await $fetch<{ data: any }>('/api/tabelaBasica/classificacao/recupera', {
           method: 'POST',
-          body: { id: registroId }
+          body: { codigo: registroCodigo }
         })
         if (data) {
           form.value.descricao = data.descricao
@@ -99,7 +99,7 @@ export function useClassificacaoFormulario() {
   }
 
   const novo = () => {
-    router.push('/tabelaBasica/classificacao/cadastro?id=0')
+    router.push('/tabelaBasica/classificacao/cadastro?codigo=0')
     form.value = { codigo: '0', descricao: '', ativo: 1 }
     somenteLeitura.value = false
   }

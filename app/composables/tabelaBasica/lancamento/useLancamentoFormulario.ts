@@ -4,10 +4,10 @@ export function useLancamentoFormulario() {
   const route = useRoute()
   const router = useRouter()
 
-  const registroId = route.query.id as string || '0'
+  const registroCodigo = (route.query.codigo as string) || '0'
   const somenteLeitura = ref(false)
 
-  const ehEdicao = computed(() => registroId !== '0' && !!registroId)
+  const ehEdicao = computed(() => registroCodigo !== '0' && !!registroCodigo)
   
   const salvando = ref(false)
   const carregandoDados = ref(false)
@@ -18,7 +18,7 @@ export function useLancamentoFormulario() {
   const modalAlertaMensagem = ref('')
 
   const form = ref({
-    codigo: registroId || '0',
+    codigo: registroCodigo || '0',
     descricao: '',
     ativo: 1
   })
@@ -35,7 +35,7 @@ export function useLancamentoFormulario() {
       try {
         const { data } = await $fetch<{ data: any }>('/api/tabelaBasica/lancamento/recupera', {
           method: 'POST',
-          body: { id: registroId }
+          body: { codigo: registroCodigo }
         })
         if (data) {
           form.value.descricao = data.descricao
@@ -108,7 +108,7 @@ export function useLancamentoFormulario() {
   }
 
   const novo = () => {
-    router.push('/tabelaBasica/lancamento/cadastro?id=0')
+    router.push('/tabelaBasica/lancamento/cadastro?codigo=0')
     form.value = { codigo: '0', descricao: '', ativo: 1 }
     somenteLeitura.value = false
   }

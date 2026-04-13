@@ -5,10 +5,10 @@ import sql from 'mssql'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const verbaId = Number(body.codigoVerba || body.codigo || body.id)
-
+  const verbaId = Number(body.codigo)
+  
   if (!verbaId) {
-    return { status: 'failed', mensagem: 'Verba não informada' }
+    return { status: 'failed', mensagem: 'Código da verba não informado' }
   }
 
   try {

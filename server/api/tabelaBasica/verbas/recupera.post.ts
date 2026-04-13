@@ -3,15 +3,15 @@ import { useDb } from '../../../utils/db'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const id = Number(body.id)
-
-  if (!id) {
-    return { status: 'failed', mensagem: 'ID inválido' }
+  const codigo = Number(body.codigo)
+  
+  if (!codigo) {
+    return { status: 'failed', mensagem: 'Código inválido' }
   }
 
   const query = `
     SELECT codigo, codigoReferencia, descricao, tipo, observacao, ativo FROM cadastro.verbas 
-    WHERE codigo = ${id}
+    WHERE codigo = ${codigo}
   `
 
   try {

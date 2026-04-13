@@ -115,7 +115,7 @@ export function useLancamentoListagem() {
     carregandoHistorico.value = true
     try {
       const response = await $fetch<any>('/api/tabelaBasica/lancamento/historico', {
-        method: 'POST', body: { lancamento: id }
+        method: 'POST', body: { codigo: id }
       })
       
       historicoData.value = response.data || []
