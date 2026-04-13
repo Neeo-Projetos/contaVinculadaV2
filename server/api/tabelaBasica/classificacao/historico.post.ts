@@ -4,16 +4,16 @@ import { comum } from '../../../utils/comum'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const codigo = Number(body.codigo)
+  const codigoClassificacao = Number(body.codigo)
 
-  if (!codigo) {
+  if (!codigoClassificacao) {
     return { status: 'failed', mensagem: 'Classificação não informada' }
   }
 
   try {
     const db = await useDb()
     const request = db.request()
-    request.input('classificacao', codigo)
+    request.input('codigoClassificacao', codigoClassificacao)
 
     const result = await request.query(`
       SELECT 
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
         U.login AS usuarioAlteracao
       FROM tabelaBasica.classificacaoHistorico H
       LEFT JOIN configuracao.usuario U ON U.codigo = H.usuarioAlteracao
-      WHERE H.classificacao = @classificacao
+      WHERE H.classificacao = @codigoClassificacao
       ORDER BY H.dataAlteracao DESC
     `)
 

@@ -5,9 +5,9 @@ import sql from 'mssql'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const verbaId = Number(body.codigo)
+  const codigoVerba = Number(body.codigo)
   
-  if (!verbaId) {
+  if (!codigoVerba) {
     return { status: 'failed', mensagem: 'Código da verba não informado' }
   }
 
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
     const request = db.request()
     
     // Forçando o tipo sql.Int para garantir o binding correto no SQL Server
-    request.input('verbaId', sql.Int, verbaId)
+    request.input('codigoVerba', sql.Int, codigoVerba)
 
     const result = await request.query(`
       SELECT 
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
         U.login AS usuarioAlteracao
       FROM cadastro.verbasHistorico H
       LEFT JOIN configuracao.usuario U ON U.codigo = H.usuarioAlteracao
-      WHERE H.codigoVerba = @verbaId
+      WHERE H.codigoVerba = @codigoVerba
       ORDER BY H.dataAlteracao DESC
     `)
 

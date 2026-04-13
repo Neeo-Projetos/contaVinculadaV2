@@ -4,14 +4,14 @@ import { comum } from '../../../utils/comum'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const codigo = Number(body.codigo)
+  const codigoTipoMovimentacao = Number(body.codigo)
 
-  if (!codigo) return { status: 'failed', mensagem: 'Tipo de movimentação não informado' }
+  if (!codigoTipoMovimentacao) return { status: 'failed', mensagem: 'Tipo de movimentação não informado' }
 
   try {
     const db = await useDb()
     const request = db.request()
-    request.input('tipoId', codigo)
+    request.input('codigoTipoMovimentacao', codigoTipoMovimentacao)
 
     const result = await request.query(`
       SELECT 
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
         U.login AS usuarioAlteracao
       FROM tabelaBasica.tipoMovimentacaoHistorico H
       LEFT JOIN configuracao.usuario U ON U.codigo = H.usuarioAlteracao
-      WHERE H.tipoMovimentacao = @tipoId
+      WHERE H.tipoMovimentacao = @codigoTipoMovimentacao
       ORDER BY H.dataAlteracao DESC
     `)
 

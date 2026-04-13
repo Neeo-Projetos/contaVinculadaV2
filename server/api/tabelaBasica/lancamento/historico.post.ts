@@ -4,16 +4,16 @@ import { comum } from '../../../utils/comum'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const codigo = Number(body.codigo)
+  const codigoLancamento = Number(body.codigo)
 
-  if (!codigo) {
+  if (!codigoLancamento) {
     return { status: 'failed', mensagem: 'Lançamento não informado' }
   }
 
   try {
     const db = await useDb()
     const request = db.request()
-    request.input('lancamento', codigo)
+    request.input('codigoLancamento', codigoLancamento)
 
     // Consulta o histórico ordenado pela data mais recente
     const result = await request.query(`
@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
         U.login AS usuarioAlteracao
       FROM tabelaBasica.lancamentoHistorico H
       LEFT JOIN configuracao.usuario U ON U.codigo = H.usuarioAlteracao
-      WHERE H.lancamento = @lancamento
+      WHERE H.lancamento = @codigoLancamento
       ORDER BY H.dataAlteracao DESC
     `)
 
