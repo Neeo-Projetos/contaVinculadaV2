@@ -256,13 +256,8 @@
           @voltar="voltarPasso"
           @excluir="modalExclusaoAberto = true"
           @limpar="limparFormulario"
-        >
-          <template #extra-acoes-direita v-if="modoVisualizar">
-            <AppBotao variacao="primario" icone="fa7-solid:pencil" @click="irParaEdicao">
-              Editar
-            </AppBotao>
-          </template>
-        </AppRodapeFormulario>
+          @editar="irParaEdicao"
+        />
       </form>
     </AppCartaoFormulario>
 
