@@ -44,7 +44,8 @@ export function useVerbaFormulario() {
           form.value.codigoReferencia = data.codigoReferencia
           form.value.descricao = data.descricao
           form.value.codigo = data.codigo
-          form.value.tipo = data.tipo?.toString() || ''
+          form.value.tipo = (data.tipo === true || data.tipo === 1 || data.tipo === '1') ? '1' : 
+                            (data.tipo === false || data.tipo === 0 || data.tipo === '0') ? '0' : ''
           form.value.observacao = data.observacao
           form.value.ativo = data.ativo
         }

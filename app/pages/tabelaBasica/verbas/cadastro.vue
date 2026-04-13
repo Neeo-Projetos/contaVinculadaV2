@@ -68,7 +68,6 @@
           :editando="ehEdicao" 
           :carregandoGravar="salvando"
           :visualizar="somenteLeitura"
-          labelExcluir="Remover Verba"
           iconeExcluir="fa7-solid:trash-can"
           @voltar="voltar"
           @excluir="confirmarExclusao"
@@ -80,10 +79,10 @@
       </form>
     </AppCartaoFormulario>
 
-    <!-- Modal de Exclusão (Padrão) -->
+    <!-- Modal de Inativação (Padrão) -->
     <AppModal 
       :isOpen="modalExclusao" 
-      title="Atenção: Exclusão de Registro" 
+      title="Atenção: Confirmar Inativação" 
       icon="fa7-solid:triangle-exclamation"
       @close="modalExclusao = false"
     >
@@ -96,11 +95,11 @@
         </div>
         
         <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-3">
-          Remover Verba?
+          Deseja Inativar?
         </h4>
         
         <p class="text-gray-500 dark:text-gray-400 text-base leading-relaxed max-w-[320px]">
-          Confirma a exclusão de <strong class="text-gray-800 dark:text-gray-200">{{ form.descricao }}</strong>? Esta ação não pode ser desfeita.
+          Esta operação desativará a verba <strong class="text-gray-800 dark:text-gray-200">{{ form.descricao }}</strong> no sistema.
         </p>
       </div>
       <template #footer>
@@ -109,7 +108,7 @@
         </AppBotao>
         
         <AppBotao variacao="perigo" icone="fa7-solid:trash-can" @click="excluir">
-          Sim, Excluir Agora
+          Sim, Inativar Agora
         </AppBotao>
       </template>
     </AppModal>

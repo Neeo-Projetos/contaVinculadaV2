@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const id = Number(body.id)
 
   if (!id) {
-    return { status: 'failed', message: 'ID inválido' }
+    return { status: 'failed', mensagem: 'ID inválido' }
   }
 
   const query = `
@@ -22,9 +22,9 @@ export default defineEventHandler(async (event) => {
       return { status: 'success', data: result.recordset[0] }
     }
     
-    return { status: 'failed', message: 'Registro não encontrado' }
-  } catch (erro) {
+    return { status: 'failed', mensagem: 'Registro não encontrado' }
+  } catch (erro: any) {
     console.error('Erro ao recuperar verba:', erro)
-    return { status: 'failed', message: 'Erro ao buscar no banco de dados.' }
+    return { status: 'failed', mensagem: 'Erro ao buscar no banco: ' + (erro.message || erro) }
   }
 })

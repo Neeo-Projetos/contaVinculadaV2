@@ -43,11 +43,12 @@
         nomeTela="Verba" 
         endpointDelete="/api/tabelaBasica/verbas/excluir"
         campoDelete="codigo"
+        :history="true"
         @mudarPagina="mudarPagina"
         @mudarItensPorPagina="mudarItensPorPagina"
         @view="item => navigateTo(`/tabelaBasica/verbas/cadastro?id=${item.codigo}&modo=visualizar`)"
         @edit="item => navigateTo(`/tabelaBasica/verbas/cadastro?id=${item.codigo}`)"
-        @history="item => abrirHistorico(item.codigo)" 
+        @history="id => abrirHistorico(id)" 
         @delete-success="buscarLista"
       >
 

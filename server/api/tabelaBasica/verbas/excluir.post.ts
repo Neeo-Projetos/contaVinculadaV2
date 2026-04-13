@@ -1,12 +1,13 @@
 import { defineEventHandler, readBody } from 'h3'
 import { useDb } from '../../../utils/db'
+import sql from 'mssql'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const codigo = Number(body.codigo)
 
   if (!codigo) {
-    return { status: 'failed', message: 'Código não informado' }
+    return { status: 'failed', mensagem: 'Código não informado' }
   }
 
   const usuario = 1 
@@ -14,25 +15,33 @@ export default defineEventHandler(async (event) => {
   try {
     const pool = await useDb()
     
-    const selectQuery = `SELECT codigoReferencia, descricao, tipo, observacao FROM cadastro.verbas WHERE codigo = ${codigo}`
-    const resultQuery = await pool.request().query(selectQuery)
+    const requestSelect = pool.request()
+    requestSelect.input('codigo', sql.Int, codigo)
+    const selectQuery = `SELECT codigoReferencia, descricao, tipo, observacao FROM cadastro.verbas WHERE codigo = @codigo`
+    const resultQuery = await requestSelect.query(selectQuery)
 
     if (resultQuery.recordset.length === 0) {
-       return { status: 'failed', message: 'Registro não encontrado para exclusão.' }
+       return { status: 'failed', mensagem: 'Registro não encontrado para exclusão.' }
     }
 
     const rec = resultQuery.recordset[0]
     
-    const descSql = rec.descricao ? `'${rec.descricao.replace(/'/g, "''")}'` : 'NULL'
-    const obsSql = rec.observacao ? `'${rec.observacao.replace(/'/g, "''")}'` : 'NULL'
+    const requestExec = pool.request()
+    requestExec.input('codigo', sql.Int, codigo)
+    requestExec.input('codigoReferencia', sql.Int, rec.codigoReferencia)
+    requestExec.input('descricao', sql.VarChar, rec.descricao)
+    requestExec.input('tipo', sql.Bit, rec.tipo)
+    requestExec.input('observacao', sql.VarChar, rec.observacao)
+    requestExec.input('usuario', sql.Int, usuario)
+    requestExec.input('ativo', sql.Bit, 0)
 
-    const queryExec = `EXEC cadastro.verba_Atualiza ${codigo}, ${rec.codigoReferencia}, ${descSql}, ${rec.tipo}, ${obsSql}, ${usuario}, 0`
+    const queryExec = `EXEC cadastro.verba_Atualiza @codigo, @codigoReferencia, @descricao, @tipo, @observacao, @usuario, @ativo`
     
-    await pool.request().query(queryExec)
+    await requestExec.query(queryExec)
 
-    return { status: 'success', message: 'Registro excluído com sucesso.' }
-  } catch (erro) {
+    return { status: 'success', mensagem: 'Registro excluído com sucesso.' }
+  } catch (erro: any) {
     console.error('Erro ao excluir verba:', erro)
-    return { status: 'failed', message: 'Erro ao excluir no banco de dados.' }
+    return { status: 'failed', mensagem: 'Erro ao excluir no banco: ' + (erro.message || erro) }
   }
 })

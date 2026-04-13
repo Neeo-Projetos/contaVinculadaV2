@@ -97,10 +97,14 @@ export function useVerbaListagem() {
       const response = await $fetch<any>('/api/tabelaBasica/verbas/listagem', {
         method: 'POST', body: filtro.value
       })
+      if (response.status === 'failed') {
+        throw new Error(response.mensagem || 'Erro ao buscar listagem')
+      }
       listaCompleta.value = response.data || []
       paginacao.mudarPagina(1)
     } catch (error) {
       console.error('Erro ao buscar verbas', error)
+      mostrarAlerta("Erro", error instanceof Error ? error.message : "Erro ao carregar dados")
     } finally {
       carregando.value = false
     }
@@ -118,15 +122,12 @@ export function useVerbaListagem() {
         method: 'POST', body: { codigo: id }
       })
       
-      historicoData.value = (response.data || []).map((item: any) => ({
-        ...item,
-        usuario: item.usuarioAlteracao,
-        dataHora: item.dataAlteracao,
-        alteracoes: (item.alteracoes || []).map((alt: any) => {
-          if (typeof alt === 'string') return { mensagem: alt }
-          return alt
-        })
-      }))
+      if (response.status === 'failed') {
+        mostrarAlerta("Erro no Histórico", response.mensagem || response.message || "Erro desconhecido")
+        historicoData.value = []
+        return
+      }
+      historicoData.value = response.data || []
     } catch (error) {
       console.error('Erro ao buscar histórico', error)
     } finally {

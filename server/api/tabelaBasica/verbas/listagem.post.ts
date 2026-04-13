@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   
   let query = `
-    SELECT codigo, codigoReferencia, descricao, tipo, observacao, ativo FROM cadastro.verbas 
+    SELECT codigo, codigoReferencia AS codigo_verba, descricao, tipo, observacao, ativo FROM cadastro.verbas 
     WHERE (0 = 0)
   `
 
