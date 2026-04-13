@@ -13,9 +13,9 @@ export default defineEventHandler(async (event) => {
   try {
     const pool = await useDb()
     await pool.request().query(queryExec)
-    return { status: 'success', message: 'Operação realizada com sucesso.' }
-  } catch (erro) {
+    return { status: 'success', mensagem: 'Operação realizada com sucesso.' }
+  } catch (erro: any) {
     console.error('Erro ao gravar tipo de movimentação:', erro)
-    return { status: 'failed', message: 'Erro ao gravar no banco de dados.' }
+    return { status: 'failed', mensagem: 'Erro ao gravar no banco: ' + (erro.message || erro) }
   }
 })
