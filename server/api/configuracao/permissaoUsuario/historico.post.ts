@@ -1,41 +1,71 @@
 import { defineEventHandler, readBody } from 'h3'
 import { useDb } from '../../../utils/db'
+import { comum } from '../../../utils/comum'
+import sql from 'mssql'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const codigo = body.codigo
+  const codigoUsuario = Number(body.codigo)
 
-  if (!codigo) {
-    return { status: 'failed', message: 'Usuário não informado' }
+  if (!codigoUsuario) {
+    return { status: 'failed', mensagem: 'Código do usuário não informado' }
   }
 
   try {
-    const pool = await useDb() 
+    const db = await useDb()
+    const request = db.request()
 
-    // const query = `SELECT DISTINCT CONVERT(VARCHAR(19), H.dataAlteracao, 120) AS dataAlteracao, U.login AS usuarioAlteracao, H.usuario 
-    //                FROM configuracao.usuarioFuncionalidadeHistorico H 
-    //                LEFT JOIN configuracao.usuario U ON U.codigo = H.usuarioAlteracao
-    //                WHERE H.usuario = ${Number(usuarioId)} ORDER BY 1 DESC`
-    // const result = await pool.request().query(query)
+    request.input('codigoUsuario', sql.Int, codigoUsuario)
 
-    const mockHistorico = [
-      {
-        codigo: 9991,
-        dataAlteracao: '25/02/2026 10:30',
-        usuarioAlteracao: 'admin',
-        alteracoes: [
-          '- A permissão para: Gravar Dados foi Concedida.',
-          '- A permissão para: Excluir Registros foi Removida.'
-        ]
+    // Buscamos o histórico detalhado com os nomes das funcionalidades e usuários
+    const result = await request.query(`
+      SELECT H.dataAlteracao, U.login AS usuarioAlteracaoNome, F.nomeCompleto AS funcionalidadeNome, H.ativo AS statusNovo
+      FROM configuracao.usuarioFuncionalidadeHistorico H
+      LEFT JOIN configuracao.usuario U ON U.codigo = H.usuarioAlteracao
+      LEFT JOIN configuracao.funcionalidade F ON F.codigo = H.funcionalidade
+      WHERE H.usuario = @codigoUsuario
+      ORDER BY H.dataAlteracao DESC
+    `)
+
+    const rows = result.recordset
+    const historicoFormatado = []
+
+    // Lógica de agrupamento por lote (Batch)
+    // Agrupamos alterações feitas no mesmo segundo pelo mesmo usuário
+    const grupos: Record<string, any> = {}
+
+    for (const row of rows) {
+      const dataHoraKey = comum.formatarDataHoraBr(row.dataAlteracao)
+      const chaveAgrupamento = `${dataHoraKey}-${row.usuarioAlteracaoNome}`
+
+      if (!grupos[chaveAgrupamento]) {
+        grupos[chaveAgrupamento] = {
+          dataHora: dataHoraKey,
+          usuario: row.usuarioAlteracaoNome || 'Sistema',
+          alteracoes: [] as any[]
+        }
+        historicoFormatado.push(grupos[chaveAgrupamento])
       }
-    ]
+
+      const acao = (row.statusNovo === true || row.statusNovo === 1) ? 'Concedida' : 'Revogada'
+
+      // Seguindo o tipo 'status' do histórico de usuários para renderização correta
+      grupos[chaveAgrupamento].alteracoes.push({
+        tipo: 'status',
+        mensagem: `- A permissão para [${row.funcionalidadeNome}] foi ${acao}.`
+      })
+    }
 
     return {
       status: 'success',
-      data: mockHistorico
+      data: historicoFormatado
     }
-  } catch (erro) {
-    console.error('Erro ao puxar o histórico:', erro)
-    return { status: 'failed', message: 'Erro ao buscar o histórico.' }
+
+  } catch (error: any) {
+    console.error('Erro ao recuperar o histórico de permissões:', error)
+    return {
+      status: 'failed',
+      mensagem: 'Erro ao buscar o histórico real: ' + error.message
+    }
   }
 })
