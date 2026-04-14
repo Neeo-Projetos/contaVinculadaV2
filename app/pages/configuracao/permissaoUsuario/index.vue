@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
+  <div class="min-h-full flex flex-col gap-4 p-4 md:p-6 animate-fade-in text-gray-900 dark:text-gray-100">
 
     <AppFiltro 
       v-model="filtro" 
@@ -15,7 +15,7 @@
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao">Controle de Exibição</AppBotao>
-        <AppBotao variacao="acao" icone="fa7-solid:user-plus" @click="navigateTo('/configuracao/permissaoUsuario/cadastro?id=0')">
+        <AppBotao variacao="acao" icone="fa7-solid:user-plus" @click="navigateTo('/configuracao/permissaoUsuario/cadastro?codigo=0')">
           Novo Acesso
         </AppBotao>
       </template>
@@ -37,7 +37,9 @@
         @mudarItensPorPagina="mudarItensPorPagina"
         @view="item => navigateTo(`/configuracao/permissaoUsuario/cadastro?codigo=${item.codigo}&modo=visualizar`)"
         @edit="item => navigateTo(`/configuracao/permissaoUsuario/cadastro?codigo=${item.codigo}`)"
-        iconeEditar="fa7-solid:user-shield"
+        @history="item => abrirHistorico(item.codigo)"
+        @delete="item => { /* Lógica de exclusão se necessário */ }"
+        :mostrarExcluir="true"
       >
         
         <template #cabecalho-tabela>
@@ -47,8 +49,8 @@
             Usuário</th>
           <th v-if="colunas.cpf" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
             CPF</th>
-          <th v-if="colunas.historico" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-            Histórico</th>
+          <th v-if="colunas.status" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+            Status</th>
         </template>
 
         <template #linhas-tabela="{ item }">
@@ -69,15 +71,14 @@
           <td v-if="colunas.cpf" class="px-6 py-4 text-center">
             <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ item.cpf }}</span>
           </td>
-          <td v-if="colunas.historico" class="px-6 py-4 text-center">
-            <button @click.stop="abrirHistorico(item.codigo)" class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Ver Histórico">
-              <Icon name="fa6-solid:clock-rotate-left" class="w-5 h-5" />
-            </button>
+          <td v-if="colunas.status" class="px-6 py-4 text-center">
+            <AppAtivo :ativo="item.ativo !== 0" />
           </td>
         </template>
 
         <template #cards="{ item }">
-          <AppCardListagem :titulo="item.login" :subtituloNome="'E-mail ou Documento'" :subtituloValor="item.cpf" :ativo="true"
+          <AppCardListagem :titulo="item.login" :subtituloNome="'E-mail ou Documento'" :subtituloValor="item.cpf" :ativo="item.ativo !== 0"
+            :mostrarStatus="colunas.status"
             :mostrarHistorico="colunas.historico"
             :detalhes="[
               ...(colunas.usuario ? [{ icone: 'fa7-solid:user', texto: `Usuário: ${item.nomeUsuario}` }] : [])

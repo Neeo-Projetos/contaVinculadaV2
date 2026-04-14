@@ -23,12 +23,14 @@ export function usePermissaoUsuarioListagem() {
   const colunas = reactive({
     usuario: true,
     cpf: true,
+    status: true,
     historico: true
   })
 
   const labels = {
     usuario: 'Nome do Usuário',
     cpf: 'CPF',
+    status: 'Status',
     historico: 'Botão de Histórico'
   }
   
@@ -78,13 +80,13 @@ export function usePermissaoUsuarioListagem() {
     modalExibicaoAberto.value = false
   }
 
-  const abrirHistorico = async (usuarioId: number) => {
+  const abrirHistorico = async (codigo: number) => {
     carregandoHistorico.value = true
     modalHistoricoAberto.value = true
     historicoData.value = []
     try {
       const response = await $fetch<any>('/api/configuracao/permissaoUsuario/historico', {
-        method: 'POST', body: { usuarioId }
+        method: 'POST', body: { codigo }
       })
       historicoData.value = response.data || []
     } catch (error) {

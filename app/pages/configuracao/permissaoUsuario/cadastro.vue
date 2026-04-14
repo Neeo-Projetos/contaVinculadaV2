@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
+  <div class="min-h-full flex flex-col gap-4 p-4 md:p-6 animate-fade-in text-gray-900 dark:text-gray-100">
     <AppBarraNavegacao 
       icone="fa7-solid:shield-halved" 
       :links="[{ label: 'Permissões', to: '/configuracao/permissaoUsuario' }]"
@@ -98,13 +98,8 @@
           @voltar="voltarParaLista"
           @limpar="limparFormulario"
           @excluir="abrirModalExclusao"
-        >
-          <template #extra-acoes-direita v-if="modoVisualizar">
-            <AppBotao variacao="primario" icone="fa7-solid:pencil" @click="irParaEdicao">
-              Editar
-            </AppBotao>
-          </template>
-        </AppRodapeFormulario>
+          @editar="irParaEdicao"
+        />
       </form>
     </AppCartaoFormulario>
 

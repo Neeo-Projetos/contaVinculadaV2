@@ -3,9 +3,9 @@ import { useDb } from '../../../utils/db'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const usuarioId = body.usuarioId
+  const codigo = body.codigo
 
-  if (!usuarioId) {
+  if (!codigo) {
     return { status: 'failed', message: 'Usuário não informado' }
   }
 
