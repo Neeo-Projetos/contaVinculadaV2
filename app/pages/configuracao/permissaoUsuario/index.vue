@@ -34,6 +34,7 @@
         :totalPaginas="totalPaginas"
         :paginaAtual="paginaAtual" 
         :paginasExibidas="paginasExibidas" 
+        :history="true"
         @mudarPagina="mudarPagina"
         @mudarItensPorPagina="mudarItensPorPagina"
         @view="item => navigateTo(`/configuracao/permissaoUsuario/cadastro?codigo=${item.codigo}&modo=visualizar`)"
