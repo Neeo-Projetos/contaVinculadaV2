@@ -30,8 +30,9 @@ export default defineEventHandler(async (event) => {
         if (body.cpf) {
             const cpfLimpo = body.cpf.replace(/[^\d]/g, '')
             if (cpfLimpo) {
-                baseQuery += ` AND U.cpf = @cpf`
-                request.input('cpf', sql.VarChar, cpfLimpo)
+                // Remove pontos e traços da coluna do banco para comparar apenas os números
+                baseQuery += ` AND REPLACE(REPLACE(U.cpf, '.', ''), '-', '') LIKE @cpf`
+                request.input('cpf', sql.VarChar, `%${cpfLimpo}%`)
             }
         }
 
