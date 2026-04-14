@@ -3,6 +3,7 @@
 
     <AppFiltro 
       v-model="filtro" 
+      v-model:search="filtro.login"
       v-model:viewMode="visaoAtual" 
       :campos="camposFiltro" 
       titulo="Permissões"

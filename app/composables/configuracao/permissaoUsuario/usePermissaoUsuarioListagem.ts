@@ -1,4 +1,4 @@
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 
 export function usePermissaoUsuarioListagem() {
   const carregando = ref(false)
@@ -56,6 +56,13 @@ export function usePermissaoUsuarioListagem() {
     }
   }
 
+  // Monitoramento reativo para busca "enquanto digita"
+  watch(() => filtro.login, () => {
+    // Implementamos um pequeno delay (debounce) se necessário, 
+    // mas para listas menores o disparo direto é mais fluido.
+    buscarUsuarios()
+  })
+
   const limparFiltrosAvancados = () => {
     filtro.nomeUsuario = ''
     filtro.cpf = ''
@@ -96,7 +103,10 @@ export function usePermissaoUsuarioListagem() {
     }
   }
 
-  // Removemos o Zero Auto-load da montagem conforme padrão ouro de performance!
+  // O carregamento inicial acontece apenas na primeira busca para performance.
+  onMounted(() => {
+    buscarUsuarios()
+  })
 
   return {
     carregando, buscaRealizada, visaoAtual, filtro,
