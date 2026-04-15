@@ -22,8 +22,20 @@ export default defineEventHandler(async (event) => {
     req.input('conta', parseInt(body.contaVinculada))
     query += ` AND V.codigo = @conta `
   }
+  if (body.termo && !body.projeto) {
+    req.input('termo', `%${body.termo}%`)
+    query += ` AND (P.apelido LIKE @termo OR P.descricao LIKE @termo) `
+  }
 
-  query += ` GROUP BY P.codigo, P.apelido, P.descricao ORDER BY P.apelido ASC `
+  query += ` GROUP BY P.codigo, P.apelido, P.descricao `
+
+  if (body.comSaldo === 'S') {
+    query += ` HAVING COALESCE(SUM(CASE WHEN E.tipoMovimentacao = 1 THEN E.valorMovimentacao ELSE -E.valorMovimentacao END), 0) > 0 `
+  } else if (body.comSaldo === 'N') {
+    query += ` HAVING COALESCE(SUM(CASE WHEN E.tipoMovimentacao = 1 THEN E.valorMovimentacao ELSE -E.valorMovimentacao END), 0) <= 0 `
+  }
+
+  query += ` ORDER BY P.apelido ASC `
 
   try {
     const result = await req.query(query)

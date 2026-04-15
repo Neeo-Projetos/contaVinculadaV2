@@ -32,8 +32,8 @@
         <template #cabecalho-tabela>
           <th v-if="colunas.projeto" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Projeto</th>
           <th v-if="colunas.conta" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Conta Vinculada</th>
-          <th v-if="colunas.saldo" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Saldo Atual</th>
-          <th v-if="colunas.ultMov" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Última Mov.</th>
+          <th v-if="colunas.saldo" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center w-40">Saldo Atual</th>
+          <th v-if="colunas.ultMov" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center w-40">Última Mov.</th>
           <th v-if="colunas.acoes" scope="col" class="px-6 py-4 text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center w-28">Ações</th>
         </template>
 
@@ -55,7 +55,7 @@
             <span class="text-xs text-gray-500 dark:text-gray-400 font-medium italic">{{ item.nomeBanco || item.contaVinculada || 'Não vinculada' }}</span>
           </td>
           <td v-if="colunas.saldo" class="px-6 py-4 text-center">
-            <span class="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1.5 rounded-lg tabular-nums border border-emerald-500/10">
+            <span class="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1.5 rounded-lg tabular-nums border border-emerald-500/10 whitespace-nowrap">
               R$ {{ formatarMoeda(item.saldoProjeto) }}
             </span>
           </td>
@@ -64,7 +64,7 @@
           </td>
           <td v-if="colunas.acoes" class="px-6 py-4 text-center">
             <button @click.stop="verExtrato(item.codigoProjeto)"
-              class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
+              class="p-2.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-all"
               title="Ver Extrato Detalhado">
               <Icon name="fa7-solid:eye" class="w-5 h-5" />
             </button>
@@ -133,7 +133,7 @@ const {
 const camposFiltro = computed(() => [
   { 
     key: 'nomeParam', 
-    label: 'Descrição / Projeto', 
+    label: 'Projeto', 
     type: 'autocomplete' as const, 
     placeholder: placeholderDinamico.value || 'Projeto...',
     icon: 'fa7-solid:magnifying-glass',

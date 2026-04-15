@@ -1,6 +1,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWindowSize } from '@vueuse/core'
+import { usePaginacaoFrontEnd } from '../../../global/usePaginacaoFrontEnd'
 
 export function useExtratoProjetoListagem() {
   const router = useRouter()
@@ -16,13 +17,14 @@ export function useExtratoProjetoListagem() {
   const projetosAtivos = ref<any[]>([])
   const contasAtivas = ref<any[]>([])
   
-  const sugestoesNome = ref<string[]>([])
+  const sugestoesNome = ref<any[]>([])
   const buscandoSugestoes = ref(false)
   const mostrandoSugestoes = ref(false)
+  let timerDebounce: ReturnType<typeof setTimeout>
 
   const listaCompleta = ref<any[]>([])
 
-  const filtro = reactive({
+  const filtro = ref({
     nomeParam: '', // Autocomplete de projeto
     projetoParam: '',
     contaVinculadaParam: '',
@@ -41,13 +43,11 @@ export function useExtratoProjetoListagem() {
 
   const colunasTemp = reactive({ ...colunasVisiveis })
 
-
   // Paginação Front-End
   const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
 
   const placeholderDinamico = computed(() => {
-    if (width.value < 640) return 'Buscar projeto...'
-    return 'Digite o projeto ou apelido...'
+    return 'Digite o nome do projeto...'
   })
 
   const projetosFormatados = computed(() => {
@@ -84,12 +84,12 @@ export function useExtratoProjetoListagem() {
       const response = await $fetch<{ status: string, data: any[] }>('/api/operacao/movimentacaoBancaria/extratoProjeto/listagem', {
         method: 'POST', 
         body: {
-          projeto: filtro.projetoParam,
-          contaVinculada: filtro.contaVinculadaParam,
-          dataInicio: filtro.dataInicioParam,
-          dataFim: filtro.dataFimParam,
-          termo: filtro.nomeParam,
-          comSaldo: filtro.comSaldoParam
+          projeto: filtro.value.projetoParam,
+          contaVinculada: filtro.value.contaVinculadaParam,
+          dataInicio: filtro.value.dataInicioParam,
+          dataFim: filtro.value.dataFimParam,
+          termo: filtro.value.nomeParam,
+          comSaldo: filtro.value.comSaldoParam
         }
       })
       listaCompleta.value = response.data || []
@@ -104,11 +104,14 @@ export function useExtratoProjetoListagem() {
   const abrirModalFiltroAvancado = () => { modalFiltroAvancadoAberto.value = true }
   const aplicarFiltroAvancado = () => { modalFiltroAvancadoAberto.value = false; buscarLista() }
   const limparFiltrosAvancados = () => {
-    filtro.projetoParam = ''
-    filtro.contaVinculadaParam = ''
-    filtro.dataInicioParam = ''
-    filtro.dataFimParam = ''
-    filtro.comSaldoParam = ''
+    filtro.value = {
+      nomeParam: filtro.value.nomeParam,
+      projetoParam: '',
+      contaVinculadaParam: '',
+      dataInicioParam: '',
+      dataFimParam: '',
+      comSaldoParam: 'S'
+    }
     modalFiltroAvancadoAberto.value = false
     buscarLista()
   }
@@ -124,27 +127,42 @@ export function useExtratoProjetoListagem() {
   }
 
   const buscarSugestoesNome = () => { 
-    if (filtro.nomeParam.length < 2) {
+    const termo = filtro.value.nomeParam
+    
+    // Limpa o ID se começar a digitar
+    filtro.value.projetoParam = ''
+
+    if (!termo || termo.length < 3) {
       sugestoesNome.value = []
       mostrandoSugestoes.value = false
       return
     }
 
-    const termo = filtro.nomeParam.toLowerCase()
-    sugestoesNome.value = projetosAtivos.value
-      .filter(p => 
-        (p.apelido && p.apelido.toLowerCase().includes(termo)) || 
-        (p.descricao && p.descricao.toLowerCase().includes(termo))
-      )
-      .map(p => p.descricao ? `${p.apelido} - ${p.descricao}` : p.apelido)
-    
-    mostrandoSugestoes.value = sugestoesNome.value.length > 0
+    clearTimeout(timerDebounce)
+    mostrandoSugestoes.value = true
+
+    timerDebounce = setTimeout(async () => {
+      buscandoSugestoes.value = true
+      try {
+        const resposta = await $fetch<any>('/api/cadastro/projeto/autocomplete', {
+          query: { q: termo }
+        })
+        sugestoesNome.value = resposta?.data || []
+      } catch (e) {
+        console.error('Erro autocomplete projeto', e)
+      } finally {
+        buscandoSugestoes.value = false
+      }
+    }, 400)
   }
-  const selecionarSugestao = (val: string) => { 
-    filtro.nomeParam = val
+
+  const selecionarSugestao = (sugestao: any) => { 
+    filtro.value.nomeParam = sugestao.apelido || sugestao.descricao
+    filtro.value.projetoParam = sugestao.id
     mostrandoSugestoes.value = false
     buscarLista() 
   }
+  
   const fecharSugestoesDelay = () => { setTimeout(() => { mostrandoSugestoes.value = false }, 200) }
 
   // Navegação para Detalhes
