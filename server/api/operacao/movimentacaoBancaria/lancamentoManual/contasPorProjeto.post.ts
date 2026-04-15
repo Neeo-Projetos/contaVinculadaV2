@@ -10,7 +10,8 @@ export default defineEventHandler(async (event) => {
   try {
     const pool = await useDb()
     const query = `
-      SELECT CP.codigo, B.nomeBanco as banco, CP.conta FROM cadastro.projetoContaVinculada CP
+      SELECT CP.codigo, B.nomeBanco as banco, CP.agencia, CP.digitoAgencia, CP.conta, CP.digitoConta 
+      FROM cadastro.projetoContaVinculada CP
       LEFT JOIN tabelaBasica.banco B ON B.codigo = CP.banco 
       WHERE CP.projeto = ${projeto} ORDER BY B.nomeBanco
     `

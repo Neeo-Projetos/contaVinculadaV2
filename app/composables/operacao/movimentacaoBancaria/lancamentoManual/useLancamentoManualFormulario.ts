@@ -1,18 +1,16 @@
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useAppNotificacao } from '../../../global/useAppNotificacao'
 
 export function useLancamentoManualFormulario() {
   const route = useRoute()
   const router = useRouter()
+  const { dispararAlerta } = useAppNotificacao()
   
   const registroId = route.query.id as string
   const carregandoTela = ref(false)
   const salvando = ref(false)
   const modalConfirmaTodosAberto = ref(false)
-  const modalSucessoAberto = ref(false)
-  
-  const modalAlertaAberto = ref(false)
-  const modalAlertaMensagem = ref('')
   
   const erros = reactive(new Set<string>())
 
@@ -58,16 +56,21 @@ export function useLancamentoManualFormulario() {
 
   const carregarCombos = async () => {
     try {
-      const [resProj, resTipo, resClass, resFunc] = await Promise.all([
-        $fetch<{ data: any[] }>('/api/cadastro/projeto/ativos'),
-        $fetch<any[]>('/api/tabelaBasica/tipoMovimentacao/ativos'),
-        $fetch<{ data: any[] }>('/api/tabelaBasica/classificacao/ativos'),
-        $fetch<{ data: any[] }>('/api/cadastro/funcionario/ativos')
-      ])
+      // Carregando individualmente para evitar que uma falha trave tudo
+      // E usando os endpoints corretos de listagem/ativos
+      
+      const resProj = await $fetch<{ data: any[] }>('/api/cadastro/projeto/ativos').catch(() => ({ data: [] }))
       combos.projetos = resProj.data || []
-      combos.tiposMovimentacao = resTipo || []
+
+      const resTipo = await $fetch<{ data: any[] }>('/api/tabelaBasica/tipoMovimentacao/listagem', { method: 'POST', body: { ativo: 1 } }).catch(() => ({ data: [] }))
+      combos.tiposMovimentacao = resTipo.data || []
+
+      const resClass = await $fetch<{ data: any[] }>('/api/tabelaBasica/classificacao/listagem', { method: 'POST', body: { ativo: 1 } }).catch(() => ({ data: [] }))
       combos.classificacoes = resClass.data || []
+
+      const resFunc = await $fetch<{ data: any[] }>('/api/cadastro/funcionario/listagem', { method: 'POST', body: { ativo: 1 } }).catch(() => ({ data: [] }))
       combos.funcionariosAtivos = resFunc.data || []
+
     } catch (error) {
       console.error("Erro ao carregar combos", error)
     }
@@ -83,7 +86,11 @@ export function useLancamentoManualFormulario() {
         method: 'POST', body: { projeto: idProjeto }
       })
       combos.contasVinculadas = res.data || []
-      if (res.data.length === 1) form.contaVinculada = res.data[0].codigo
+      if (res.data.length === 1) {
+        form.contaVinculada = String(res.data[0].codigo)
+      } else {
+        form.contaVinculada = ''
+      }
     } catch (e) { console.error(e) }
   }
 
@@ -100,26 +107,85 @@ export function useLancamentoManualFormulario() {
     } catch (e) { console.error(e) }
   }
 
+  const recuperarDadosParaEdicao = async () => {
+    if (!editando.value) return
+    carregandoTela.value = true
+    try {
+      const res = await $fetch<{ status: string, data: any }>('/api/operacao/movimentacaoBancaria/lancamentoManual/recupera', {
+        method: 'POST', body: { codigo: form.codigo }
+      })
+      if (res.status === 'success') {
+        const d = res.data
+        form.projeto = String(d.projeto)
+        form.contaVinculada = d.contaVinculada
+        form.tipoMovimentacao = d.tipoMovimentacao
+        form.valorMovimentacao = d.valorMovimentacao
+        form.dataMovimentacao = d.dataMovimentacao
+        form.classificacao = d.classificacao
+        form.motivo = d.motivo
+        form.funcionarios = d.funcionarios || []
+        
+        await carregarContas(form.projeto)
+      }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      carregandoTela.value = false
+    }
+  }
+
   const validarPasso0 = () => {
     erros.clear()
-    if (!form.projeto) erros.add('projeto')
-    if (!form.contaVinculada) erros.add('contaVinculada')
-    if (!form.tipoMovimentacao) erros.add('tipoMovimentacao')
-    if (!form.valorMovimentacao) erros.add('valorMovimentacao')
-    if (!form.dataMovimentacao) erros.add('dataMovimentacao')
-    if (!form.classificacao) erros.add('classificacao')
-    if (!form.motivo) erros.add('motivo')
 
-    return erros.size === 0
+    if (!form.projeto) {
+      erros.add('projeto')
+      dispararAlerta('Campo Obrigatório', 'Selecione o Projeto para continuar.', 'warning')
+      return false
+    }
+
+    if (!form.contaVinculada) {
+      erros.add('contaVinculada')
+      dispararAlerta('Campo Obrigatório', 'Selecione a Conta Vinculada.', 'warning')
+      return false
+    }
+
+    if (!form.tipoMovimentacao) {
+      erros.add('tipoMovimentacao')
+      dispararAlerta('Campo Obrigatório', 'Selecione o Tipo de Movimentação.', 'warning')
+      return false
+    }
+
+    if (!form.valorMovimentacao || form.valorMovimentacao === '0' || form.valorMovimentacao === '0,00') {
+      erros.add('valorMovimentacao')
+      dispararAlerta('Campo Obrigatório', 'Informe o Valor da movimentação.', 'warning')
+      return false
+    }
+
+    if (!form.dataMovimentacao) {
+      erros.add('dataMovimentacao')
+      dispararAlerta('Campo Obrigatório', 'Informe a Data da movimentação.', 'warning')
+      return false
+    }
+
+    if (!form.classificacao) {
+      erros.add('classificacao')
+      dispararAlerta('Campo Obrigatório', 'Selecione a Classificação.', 'warning')
+      return false
+    }
+
+    if (!form.motivo) {
+      erros.add('motivo')
+      dispararAlerta('Campo Obrigatório', 'Informe o Motivo / Observação.', 'warning')
+      return false
+    }
+
+    return true
   }
 
   const avancarPasso = () => {
     if (passoAtual.value === 0) {
       if (validarPasso0()) {
         passoAtual.value = 1
-      } else {
-        modalAlertaMensagem.value = 'Preencha os campos obrigatórios para continuar.'
-        modalAlertaAberto.value = true
       }
     }
   }
@@ -149,27 +215,30 @@ export function useLancamentoManualFormulario() {
         method: 'POST', body: form
       })
       if (res.status === 'success') {
-        modalSucessoAberto.value = true
+        dispararAlerta('Tudo Certo!', 'Lançamento registrado com sucesso!', 'success')
+        setTimeout(() => {
+          voltarParaLista()
+        }, 1500)
       } else {
-        modalAlertaMensagem.value = res.mensagem || 'Erro ao gravar registro.'
-        modalAlertaAberto.value = true
+        dispararAlerta('Erro ao Gravar', res.mensagem || 'Não foi possível salvar o lançamento.', 'error')
       }
     } catch (error) {
       console.error('Erro ao gravar:', error)
-      modalAlertaMensagem.value = 'Erro interno ao gravar dados.'
-      modalAlertaAberto.value = true
+      dispararAlerta('Erro Interno', 'Erro ao processar sua solicitação no servidor.', 'error')
     } finally {
       salvando.value = false
     }
   }
 
   const addFuncionario = () => {
-    if (!funcionarioTemp.value) return
+    if (!funcionarioTemp.value) {
+       dispararAlerta('Atenção', 'Selecione um funcionário primeiro.', 'warning')
+       return
+    }
     
     const existe = form.funcionarios.some(f => f.funcionarioId === funcionarioTemp.value.codigo && f.tipoAlteracao !== 2)
     if (existe) {
-       modalAlertaMensagem.value = 'Funcionário já adicionado à lista.'
-       modalAlertaAberto.value = true
+       dispararAlerta('Atenção', 'Este funcionário já foi adicionado à lista.', 'info')
        return
     }
 
@@ -184,9 +253,17 @@ export function useLancamentoManualFormulario() {
   }
 
   const removerFuncionariosSelecionados = () => {
+    const selecionados = form.funcionarios.filter(f => f.selecionadoParaRemover && f.tipoAlteracao !== 2)
+    if (selecionados.length === 0) {
+       dispararAlerta('Seleção Vazia', 'Marque ao menos um funcionário para remover.', 'warning')
+       return
+    }
+
     form.funcionarios.forEach(f => {
       if (f.selecionadoParaRemover) f.tipoAlteracao = 2
     })
+    
+    dispararAlerta('Removido', 'Funcionário(s) removido(s) da lista temporária.', 'success')
   }
 
   const voltarParaLista = () => router.push('/operacao/movimentacaoBancaria/lancamentoManual')
@@ -209,6 +286,19 @@ export function useLancamentoManualFormulario() {
 
   onMounted(() => {
     carregarCombos()
+    if (editando.value) {
+      recuperarDadosParaEdicao()
+    }
+  })
+
+  // Sincronização automática de contas ao mudar projeto
+  watch(() => form.projeto, (novoProjeto) => {
+    if (novoProjeto) {
+      carregarContas(novoProjeto)
+    } else {
+      combos.contasVinculadas = []
+      form.contaVinculada = ''
+    }
   })
 
   return {
@@ -223,9 +313,6 @@ export function useLancamentoManualFormulario() {
     avancarPasso,
     voltarPasso,
     modalConfirmaTodosAberto,
-    modalSucessoAberto,
-    modalAlertaAberto,
-    modalAlertaMensagem,
     funcionarioTemp,
     carregarContas,
     carregarProjetoDaConta,

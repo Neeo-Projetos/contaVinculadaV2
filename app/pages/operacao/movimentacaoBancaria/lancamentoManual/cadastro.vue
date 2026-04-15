@@ -14,7 +14,7 @@
     <AppCartaoFormulario>
       <AppSobreposicaoCarregamento :carregando="carregandoTela || salvando" :mensagem="salvando ? 'Gravando lançamento...' : 'Carregando dados...'" />
 
-      <form v-if="!carregandoTela" @submit.prevent class="space-y-8 relative z-0">
+      <form v-if="!carregandoTela" @submit.prevent class="space-y-8 relative">
         
         <!-- PASSO 0: DADOS DO LANÇAMENTO -->
         <div v-show="passoAtual === 0" class="space-y-8 animate-fade-in">
@@ -28,9 +28,7 @@
                 v-model="form.projeto" 
                 label="Projeto" 
                 placeholder="Selecione o projeto..." 
-                :opcoes="combos.projetos.map(p => ({ codigo: p.codigo, descricao: `${p.apelido} - ${p.descricao}` }))"
-                required 
-                @change="carregarContas(form.projeto)"
+                :opcoes="combos.projetos.map(p => ({ codigo: String(p.codigo), descricao: p.apelido ? `${p.apelido} - ${p.descricao}` : p.descricao }))"
               />
             </div>
 
@@ -39,9 +37,10 @@
                 v-model="form.contaVinculada" 
                 label="Conta Vinculada" 
                 placeholder="Selecione a conta..." 
-                :opcoes="combos.contasVinculadas.map(c => ({ codigo: c.codigo, descricao: `${c.conta} - ${c.banco}` }))"
-                required 
-                @change="carregarProjetoDaConta(form.contaVinculada)"
+                :opcoes="combos.contasVinculadas.map(c => ({ 
+                  codigo: String(c.codigo), 
+                  descricao: `${c.banco} - AG: ${c.agencia}${c.digitoAgencia ? '-' + c.digitoAgencia : ''} / CT: ${c.conta}${c.digitoConta ? '-' + c.digitoConta : ''}`
+                }))"
               />
             </div>
 
@@ -51,7 +50,6 @@
                 label="Tipo de Movimentação" 
                 :opcoes="combos.tiposMovimentacao.map(t => ({ codigo: t.codigo, descricao: t.descricao }))"
                 placeholder="Selecione..."
-                required 
               />
             </div>
 
@@ -59,18 +57,15 @@
               <AppInputMoeda 
                 v-model="form.valorMovimentacao" 
                 label="Valor" 
-                required 
               />
             </div>
 
             <div class="md:col-span-4" :class="{ 'animate-shake': erros.has('dataMovimentacao') }">
-              <AppInputTexto 
+              <AppInputData 
                 v-model="form.dataMovimentacao" 
                 label="Data" 
                 placeholder="DD/MM/AAAA"
-                v-maska data-maska="##/##/####"
                 icone="fa7-solid:calendar-day"
-                required 
               />
             </div>
 
@@ -80,7 +75,6 @@
                 label="Classificação" 
                 :opcoes="combos.classificacoes.map(c => ({ codigo: c.codigo, descricao: c.descricao }))"
                 placeholder="Selecione..."
-                required 
               />
             </div>
 
@@ -90,7 +84,6 @@
                 label="Motivo / Observação" 
                 placeholder="Digite o motivo..."
                 icone="fa7-solid:comment-dots"
-                required 
                 maxlength="200"
               />
             </div>
@@ -164,7 +157,7 @@
       </form>
     </AppCartaoFormulario>
 
-    <!-- Modal Confirmação Geral -->
+    <!-- Modal Confirma Todos -->
     <AppModal :isOpen="modalConfirmaTodosAberto" title="Atenção: Lançamento Geral" icon="fa7-solid:circle-nodes" tamanho="sm" @close="modalConfirmaTodosAberto = false" rodapeEntre semScroll>
       <div class="flex flex-col items-center py-2 text-center">
         <div class="relative mb-6">
@@ -183,42 +176,16 @@
       </template>
     </AppModal>
 
-    <!-- Modal Sucesso -->
-    <AppModal :isOpen="modalSucessoAberto" title="Tudo Certo!" icon="fa7-solid:circle-check" @close="voltarParaLista" semScroll>
-      <div class="flex flex-col items-center py-6 text-center">
-        <div class="relative mb-8">
-          <div class="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
-          <div class="relative w-24 h-24 bg-gradient-to-tr from-emerald-500 to-teal-600 rounded-full flex items-center justify-center shadow-2xl animate-success-pop">
-            <Icon name="fa7-solid:check" class="w-12 h-12 text-white" />
-          </div>
-        </div>
-        <p class="text-gray-500 dark:text-gray-400 text-lg mb-8">Lançamento registrado com sucesso!</p>
-      </div>
-      <template #footer>
-        <AppBotao variacao="primario" @click="voltarParaLista" class="w-full">
-          Voltar para Lista
-        </AppBotao>
-      </template>
-    </AppModal>
-
-    <!-- Modal Alerta -->
-    <AppModal :isOpen="modalAlertaAberto" title="Atenção" icon="fa7-solid:circle-exclamation" @close="modalAlertaAberto = false" tamanho="sm">
-      <div class="p-6 text-center">
-         <p class="text-gray-700 dark:text-gray-300 font-medium">{{ modalAlertaMensagem }}</p>
-      </div>
-      <template #footer>
-        <AppBotao variacao="primario" @click="modalAlertaAberto = false" class="w-full">Entendi</AppBotao>
-      </template>
-    </AppModal>
-
   </div>
 </template>
 
 <script setup lang="ts">
+import { useLancamentoManualFormulario } from '~/composables/operacao/movimentacaoBancaria/lancamentoManual/useLancamentoManualFormulario'
+
 const {
   form, combos, salvando, carregandoTela, editando, erros,
   passoAtual, passos, avancarPasso, voltarPasso,
-  modalConfirmaTodosAberto, modalSucessoAberto, modalAlertaAberto, modalAlertaMensagem,
+  modalConfirmaTodosAberto,
   funcionarioTemp, carregarContas, carregarProjetoDaConta, tentarGravar, gravar,
   addFuncionario, removerFuncionariosSelecionados, voltarParaLista, novoRegistro
 } = useLancamentoManualFormulario()
@@ -234,11 +201,5 @@ const {
 .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
 .animate-shake :deep(input), .animate-shake :deep(select) { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
 
-@keyframes success-pop {
-  0% { transform: scale(0.5); opacity: 0; }
-  70% { transform: scale(1.1); }
-  100% { transform: scale(1); opacity: 1; }
-}
-.animate-success-pop { animation: success-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
 .dark .animate-shake :deep(input) { background-color: rgba(239, 68, 68, 0.05) !important; }
 </style>

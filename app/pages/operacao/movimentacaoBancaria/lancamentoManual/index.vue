@@ -226,10 +226,10 @@ const tentarBuscar = () => {
 }
 
 const gerarExcel = () => {
-    alert('📊 Gerando relatório de lançamentos manuais (Excel)...')
+    dispararAlerta('Relatório Excel', 'A geração do relatório excel foi iniciada e será baixada em instantes.', 'info')
 }
 
 const gerarPdf = () => {
-    alert('📄 Gerando PDF dos lançamentos manuais...')
+    dispararAlerta('Relatório PDF', 'A geração do relatório PDF foi iniciada e será baixada em instantes.', 'info')
 }
 </script>
