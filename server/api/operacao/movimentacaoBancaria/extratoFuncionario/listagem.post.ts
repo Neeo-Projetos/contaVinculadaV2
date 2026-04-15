@@ -21,8 +21,26 @@ export default defineEventHandler(async (event) => {
     req.input('projeto', parseInt(body.projeto))
     query += ` AND P.codigo = @projeto `
   }
+  if (body.termo) {
+    req.input('termo', `%${body.termo}%`)
+    query += ` AND F.nomeCompleto LIKE @termo `
+  }
+  if (body.cpf) {
+    // Busca flexível por CPF (pode vir com ponto/traço ou sem)
+    const cpfLimpo = body.cpf.replace(/[.-]/g, '')
+    req.input('cpf', `%${cpfLimpo}%`)
+    query += ` AND REPLACE(REPLACE(F.cpf, '.', ''), '-', '') LIKE @cpf `
+  }
 
-  query += ` GROUP BY F.codigo, F.nomeCompleto, F.cpf, P.apelido, P.descricao ORDER BY F.nomeCompleto ASC `
+  query += ` GROUP BY F.codigo, F.nomeCompleto, F.cpf, P.apelido, P.descricao `
+  
+  if (body.comSaldo === 'S') {
+    query += ` HAVING COALESCE(SUM(CASE WHEN E.tipoMovimentacao = 1 THEN E.valorMovimentacao ELSE -E.valorMovimentacao END), 0) > 0 `
+  } else if (body.comSaldo === 'N') {
+    query += ` HAVING COALESCE(SUM(CASE WHEN E.tipoMovimentacao = 1 THEN E.valorMovimentacao ELSE -E.valorMovimentacao END), 0) <= 0 `
+  }
+
+  query += ` ORDER BY F.nomeCompleto ASC `
 
   try {
     const result = await req.query(query)

@@ -100,6 +100,9 @@
           :opcoes="projetosFormatados" />
       </div>
       <div class="md:col-span-1">
+        <AppInputCpf v-model="filtro.cpfParam" label="Filtrar por CPF" />
+      </div>
+      <div class="md:col-span-1">
         <AppInputTexto v-model="filtro.dataInicioParam" label="Início" placeholder="DD/MM/AAAA" mask="##/##/####" icone="fa7-solid:calendar-day" />
       </div>
       <div class="md:col-span-1">
@@ -133,7 +136,7 @@ const {
 const camposFiltro = computed(() => [
   { 
     key: 'nomeParam', 
-    label: 'Descrição / Funcionário', 
+    label: 'Funcionário', 
     type: 'autocomplete' as const, 
     placeholder: placeholderDinamico.value || 'Funcionário...',
     icon: 'fa7-solid:magnifying-glass',

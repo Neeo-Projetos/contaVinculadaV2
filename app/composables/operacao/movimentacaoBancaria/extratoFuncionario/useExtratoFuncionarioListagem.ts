@@ -1,6 +1,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWindowSize } from '@vueuse/core'
+import { usePaginacaoFrontEnd } from '../../../global/usePaginacaoFrontEnd'
 
 export function useExtratoFuncionarioListagem() {
   const router = useRouter()
@@ -13,17 +14,18 @@ export function useExtratoFuncionarioListagem() {
   const modalFiltroAvancadoAberto = ref(false)
   const modalExibicaoAberto = ref(false)
   
-  const sugestoesNome = ref<string[]>([])
+  const sugestoesNome = ref<any[]>([])
   const buscandoSugestoes = ref(false)
   const mostrandoSugestoes = ref(false)
+  let timerDebounce: ReturnType<typeof setTimeout>
 
   const projetosAtivos = ref<any[]>([])
-  const funcionariosAtivos = ref<any[]>([])
 
-  const filtro = reactive({
+  const filtro = ref({
     nomeParam: '', // Termo de busca principal (Autocomplete)
     projetoParam: '',
     funcionarioParam: '',
+    cpfParam: '',
     dataInicioParam: '',
     dataFimParam: '',
     comSaldoParam: 'S'
@@ -50,8 +52,7 @@ export function useExtratoFuncionarioListagem() {
   const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
 
   const placeholderDinamico = computed(() => {
-    if (width.value < 640) return 'Buscar funcionário...'
-    return 'Digite o nome ou CPF...'
+    return 'Digite o nome do funcionário...'
   })
 
   const projetosFormatados = computed(() => {
@@ -71,13 +72,8 @@ export function useExtratoFuncionarioListagem() {
 
   const carregarCombos = async () => {
     try {
-      // Carrega projetos de forma resiliente
       const resProj = await $fetch<any>('/api/cadastro/projeto/ativos').catch(() => [])
       projetosAtivos.value = resProj?.data || resProj || []
-      
-      // Carrega funcionários (se necessário para autocomplete futuro)
-      const resFunc = await $fetch<any>('/api/cadastro/funcionario/ativos').catch(() => [])
-      funcionariosAtivos.value = resFunc?.data || resFunc || []
     } catch (error) {
        console.error("Erro combos extrato funcionario", error)
     }
@@ -87,15 +83,17 @@ export function useExtratoFuncionarioListagem() {
     carregandoTela.value = true
     buscaRealizada.value = true
     try {
+      // Usamos o objeto de filtro mas garantimos que se houver um funcionarioParam (ID), ele prevalece
       const response = await $fetch<{ status: string, data: any[] }>('/api/operacao/movimentacaoBancaria/extratoFuncionario/listagem', {
         method: 'POST', 
         body: {
-          projeto: filtro.projetoParam,
-          funcionarioId: filtro.funcionarioParam,
-          dataInicio: filtro.dataInicioParam,
-          dataFim: filtro.dataFimParam,
-          termo: filtro.nomeParam,
-          comSaldo: filtro.comSaldoParam
+          projeto: filtro.value.projetoParam,
+          funcionarioId: filtro.value.funcionarioParam,
+          cpf: filtro.value.cpfParam,
+          dataInicio: filtro.value.dataInicioParam,
+          dataFim: filtro.value.dataFimParam,
+          termo: filtro.value.nomeParam,
+          comSaldo: filtro.value.comSaldoParam
         }
       })
       listaCompleta.value = response.data || []
@@ -110,11 +108,15 @@ export function useExtratoFuncionarioListagem() {
   const abrirModalFiltroAvancado = () => { modalFiltroAvancadoAberto.value = true }
   const aplicarFiltroAvancado = () => { modalFiltroAvancadoAberto.value = false; buscarLista() }
   const limparFiltrosAvancados = () => {
-    filtro.projetoParam = ''
-    filtro.funcionarioParam = ''
-    filtro.dataInicioParam = ''
-    filtro.dataFimParam = ''
-    filtro.comSaldoParam = ''
+    filtro.value = {
+      nomeParam: filtro.value.nomeParam, // Mantém o nome se estiver digitado
+      projetoParam: '',
+      funcionarioParam: '',
+      cpfParam: '',
+      dataInicioParam: '',
+      dataFimParam: '',
+      comSaldoParam: 'S'
+    }
     modalFiltroAvancadoAberto.value = false
     buscarLista()
   }
@@ -130,26 +132,44 @@ export function useExtratoFuncionarioListagem() {
   }
 
   const buscarSugestoesNome = () => {
-    if (filtro.nomeParam.length < 2) {
+    const termo = filtro.value.nomeParam
+    
+    // Limpa o ID selecionado se começar a digitar
+    filtro.value.funcionarioParam = ''
+
+    if (!termo || termo.length < 3) {
       sugestoesNome.value = []
       mostrandoSugestoes.value = false
       return
     }
 
-    const termo = filtro.nomeParam.toLowerCase()
-    sugestoesNome.value = funcionariosAtivos.value
-      .filter(f => f.nomeCompleto.toLowerCase().includes(termo))
-      .map(f => f.nomeCompleto)
-    
-    mostrandoSugestoes.value = sugestoesNome.value.length > 0
+    clearTimeout(timerDebounce)
+    mostrandoSugestoes.value = true
+
+    timerDebounce = setTimeout(async () => {
+      buscandoSugestoes.value = true
+      try {
+        const query: any = { q: termo }
+        if (filtro.value.projetoParam) query.projeto = filtro.value.projetoParam
+        
+        const resposta = await $fetch<any>('/api/cadastro/funcionario/autocomplete', { query })
+        sugestoesNome.value = resposta?.data || []
+      } catch (e) {
+        console.error('Erro autocomplete funcionário', e)
+      } finally {
+        buscandoSugestoes.value = false
+      }
+    }, 400)
   }
-  const selecionarSugestao = (val: string) => { 
-    filtro.nomeParam = val
+
+  const selecionarSugestao = (sugestao: any) => { 
+    filtro.value.nomeParam = sugestao.descricao
+    filtro.value.funcionarioParam = sugestao.id
     mostrandoSugestoes.value = false
     buscarLista() 
   }
+  
   const fecharSugestoesDelay = () => { setTimeout(() => { mostrandoSugestoes.value = false }, 200) }
-
 
   const formatarMoeda = (valor: number) => Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
@@ -175,7 +195,6 @@ export function useExtratoFuncionarioListagem() {
     colunasTemp,
     aplicarExibicao,
     projetosAtivos,
-    funcionariosAtivos,
     projetosFormatados,
     
     sugestoesNome,
