@@ -15,9 +15,16 @@ export default defineEventHandler(async (event) => {
         request.input('codigo', codigo)
 
         const sql = `
-            SELECT * 
-            FROM cadastro.Projeto 
-            WHERE codigo = @codigo
+            SELECT P.*, B.nomeBanco
+            FROM cadastro.Projeto P
+            LEFT JOIN (
+                SELECT projeto, MAX(codigo) AS contaVinculadaId 
+                FROM cadastro.projetoContaVinculada 
+                GROUP BY projeto
+            ) AS UC ON P.codigo = UC.projeto
+            LEFT JOIN cadastro.projetoContaVinculada V ON V.codigo = UC.contaVinculadaId
+            LEFT JOIN tabelaBasica.banco B ON B.codigo = V.banco 
+            WHERE P.codigo = @codigo
         `
         const result = await request.query(sql)
 
