@@ -11,17 +11,21 @@
       :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Configuração' }, { label: 'Parâmetros' }, { label: 'Ofício' }]"
       :pending="carregando"
       @buscar="buscarLista"
+      @buscarSugestao="buscarSugestaoProjeto"
+      @selecionarSugestao="selecionarSugestaoProjeto"
+      @fecharSugestao="fecharSugestaoProjeto"
       @openAdvancedFilter="abrirModalFiltroAvancado"
     >
       <template #acoes>
         <AppBotao variacao="padrao" icone="fa7-solid:desktop" @click="abrirModalExibicao">Controle de Exibição</AppBotao>
-        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/configuracao/parametros/oficio/cadastro?id=0')">
+        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/configuracao/parametros/oficio/cadastro?codigo=0')">
             Novo Registro
         </AppBotao>
       </template>
 
       <AppContainerListagem 
         ref="listagemRef"
+        v-model:filtroGlobal="filtroGlobal"
         :carregando="carregando" 
         :buscaRealizada="buscaRealizada" 
         :lista="dados || []"
@@ -33,22 +37,21 @@
         :totalPaginas="totalPaginas"
         :paginaAtual="paginaAtual" 
         :paginasExibidas="paginasExibidas" 
-        endpointDelete="/api/configuracao/parametros/oficio/excluir"
-        campoDelete="codigo"
+        :history="true"
         @mudarPagina="mudarPagina"
         @mudarItensPorPagina="mudarItensPorPagina"
-        @view="item => navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}&modo=visualizar`)"
-        @edit="item => navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}`)"
+        @view="item => navigateTo(`/configuracao/parametros/oficio/cadastro?codigo=${item.codigo}&modo=visualizar`)"
+        @edit="item => navigateTo(`/configuracao/parametros/oficio/cadastro?codigo=${item.codigo}`)"
+        @history="codigo => abrirHistorico(codigo)"
       >
         <template #cabecalho-tabela>
           <th v-if="colunas.projeto" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Projeto</th>
           <th v-if="colunas.comSaldo" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Com Saldo</th>
-          <th v-if="colunas.historico" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Histórico</th>
         </template>
 
         <template #linhas-tabela="{ item }">
           <td v-if="colunas.projeto" class="px-6 py-4 max-w-[350px]">
-            <NuxtLink :to="`/configuracao/parametros/oficio/cadastro?id=${item.codigo}&modo=visualizar`" class="flex items-center gap-3 group">
+            <NuxtLink :to="`/configuracao/parametros/oficio/cadastro?codigo=${item.codigo}&modo=visualizar`" class="flex items-center gap-3 group">
               <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all shadow-sm">
                 {{ item.apelido ? item.apelido.charAt(0).toUpperCase() : 'P' }}
               </div>
@@ -64,13 +67,6 @@
             <span v-if="item.saldoOficio" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-500/20 shadow-sm">Sim</span>
             <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 border border-red-500/20 shadow-sm">Não</span>
           </td>
-          <td v-if="colunas.historico" class="px-6 py-4 text-center">
-            <div class="flex items-center justify-center">
-              <button @click.stop="abrirHistorico(item.codigo)" class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Ver Histórico">
-                <Icon name="fa6-solid:clock-rotate-left" class="w-5 h-5" />
-              </button>
-            </div>
-          </td>
         </template>
 
         <template #cards="{ item }">
@@ -83,10 +79,10 @@
             :detalhes="[
               { icone: 'fa7-solid:barcode', texto: `Cód: ${item.codigo}` }
             ]" 
-            @ver-detalhes="navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}&modo=visualizar`)" 
-            @editar="navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}`)"
+            @ver-detalhes="navigateTo(`/configuracao/parametros/oficio/cadastro?codigo=${item.codigo}&modo=visualizar`)" 
+            @editar="navigateTo(`/configuracao/parametros/oficio/cadastro?codigo=${item.codigo}`)"
             @ver-historico="abrirHistorico(item.codigo)"
-            @clique-titulo="navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}&modo=visualizar`)" 
+            @clique-titulo="navigateTo(`/configuracao/parametros/oficio/cadastro?codigo=${item.codigo}&modo=visualizar`)" 
           >
           </AppCardListagem>
         </template>
@@ -111,18 +107,28 @@
 
 <script setup lang="ts">
 const {
-  carregando, buscaRealizada, visaoAtual, dados, filtro,
+  carregando, buscaRealizada, visaoAtual, dados, filtro, filtroGlobal,
   buscarLista, modalHistoricoAberto, historicoData, abrirHistorico, carregandoHistorico,
   modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
   modalExibicaoAberto, abrirModalExibicao, colunas, labels, aplicarExibicao, colunasTemp,
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
-  mudarPagina, mudarItensPorPagina
+  mudarPagina, mudarItensPorPagina,
+  // Autocomplete Projeto
+  sugestoesProjeto, buscandoProjeto, mostrarMenuProjeto, buscarSugestaoProjeto, selecionarSugestaoProjeto, fecharSugestaoProjeto
 } = useParametrosOficioListagem()
 
 const listagemRef = ref<any>(null)
 
 const camposFiltro = computed(() => [
-  { key: 'projetoNome', label: 'Projeto', type: 'text' as const, placeholder: 'Digite o nome do projeto...' },
+  { 
+    key: 'projetoNome', 
+    label: 'Projeto', 
+    type: 'autocomplete' as const, 
+    placeholder: 'Digite o nome do projeto...',
+    sugestoes: sugestoesProjeto.value,
+    buscando: buscandoProjeto.value,
+    mostrarMenu: mostrarMenuProjeto.value
+  },
   { 
     key: 'comSaldo', 
     label: 'Com Saldo', 

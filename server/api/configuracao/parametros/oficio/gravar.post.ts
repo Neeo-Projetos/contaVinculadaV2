@@ -1,5 +1,6 @@
 import { defineEventHandler, readBody } from 'h3'
 import { useDb } from '../../../../utils/db'
+import sql from 'mssql'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -7,34 +8,42 @@ export default defineEventHandler(async (event) => {
   const projeto = Number(body.projeto)
   let texto = body.texto
 
-  texto = texto.replace(/'/g, "''")
-
-  const usuarioLogado = 1 
+  // Usuário 1 como fallback se não houver contexto de sessão (admin padrão)
+  const usuarioAlteracao = 1 
 
   try {
-    const pool = await useDb()
+    const db = await useDb()
+    const request = db.request()
 
-    const queryVerifica = `SELECT codigo FROM configuracao.parametroOficio WHERE projeto = ${projeto} AND projeto IS NOT NULL`
-    const resultVerifica = await pool.request().query(queryVerifica)
+    // 1. Verificamos se já existe uma parametrização para esse projeto para evitar duplicatas
+    const checkResult = await request
+        .input('projetoInternal', sql.Int, projeto)
+        .query(`SELECT codigo FROM configuracao.parametroOficio WHERE projeto = @projetoInternal`)
     
-    if (resultVerifica.recordset.length > 0) {
-      codigo = resultVerifica.recordset[0].codigo
+    if (checkResult.recordset.length > 0) {
+      codigo = checkResult.recordset[0].codigo
     }
 
-    const querySaldo = `SELECT saldoOficio FROM cadastro.projeto WHERE codigo = ${projeto}`
-    const resultSaldo = await pool.request().query(querySaldo)
+    // 2. Buscamos o saldo do projeto para sincronizar com a parametrização
+    const saldoResult = await db.request()
+        .input('projetoRef', sql.Int, projeto)
+        .query(`SELECT ISNULL(saldoOficio, 0) as saldoOficio FROM cadastro.projeto WHERE codigo = @projetoRef`)
     
-    let saldoOficio = 0
-    if (resultSaldo.recordset.length > 0 && resultSaldo.recordset[0].saldoOficio == 1) {
-      saldoOficio = 1
-    }
+    const saldoOficio = saldoResult.recordset.length > 0 ? saldoResult.recordset[0].saldoOficio : 0
 
-    const queryExec = `EXEC configuracao.parametroOficio_Atualiza ${codigo}, ${projeto}, NULL, ${saldoOficio}, '${texto}', ${usuarioLogado}`
-    await pool.request().query(queryExec)
+    // 3. Executamos a atualização via Procedure (que gerencia o histórico internamente)
+    await db.request()
+        .input('codigo', sql.Int, codigo)
+        .input('projeto', sql.Int, projeto)
+        .input('unidade', sql.Int, null) // Parâmetro não utilizado conforme legado
+        .input('saldoOficio', sql.Int, saldoOficio)
+        .input('redacaoOficio', sql.VarChar, texto)
+        .input('usuarioAlteracao', sql.Int, usuarioAlteracao)
+        .query(`EXEC configuracao.parametroOficio_Atualiza @codigo, @projeto, @unidade, @saldoOficio, @redacaoOficio, @usuarioAlteracao`)
 
-    return { status: 'success', message: 'Operação realizada com sucesso.' }
-  } catch (erro) {
-    console.error('Erro ao gravar ofício:', erro)
-    return { status: 'failed', message: 'Erro ao gravar no banco.' }
+    return { status: 'success', mensagem: 'Parâmetros de ofício salvos com sucesso.' }
+  } catch (error: any) {
+    console.error('Erro ao gravar ofício:', error)
+    return { status: 'failed', mensagem: 'Falha técnica ao gravar: ' + error.message }
   }
 })

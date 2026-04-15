@@ -79,7 +79,7 @@
                           para: 
                           <span class="font-extrabold text-emerald-600 dark:text-emerald-400">{{ alt.valorNovo }}</span>
                         </p>
-
+                        <p v-else-if="alt.tipo === 'html'" class="leading-relaxed w-full whitespace-pre-line" v-html="alt.mensagem"></p>
                         <p v-else class="leading-relaxed font-bold text-gray-800 dark:text-gray-200">
                           {{ alt.mensagem }}
                         </p>

@@ -1,19 +1,20 @@
 import { defineEventHandler, readBody } from 'h3'
 import { useDb } from '../../../../utils/db'
+import sql from 'mssql'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const id = body.id
+  const codigo = body.codigo || body.id
 
-  if (!id || id === '0') {
-    return { status: 'failed', message: 'ID inválido' }
+  if (!codigo || codigo === '0') {
+    return { status: 'failed', mensagem: 'Código inválido' }
   }
 
-  const query = `SELECT codigo, projeto, redacaoOficio, saldoOficio FROM configuracao.parametroOficio WHERE codigo = ${Number(id)}`
-
   try {
-    const pool = await useDb()
-    const result = await pool.request().query(query)
+    const db = await useDb()
+    const result = await db.request()
+        .input('codigo', sql.Int, Number(codigo))
+        .query(`SELECT codigo, projeto, redacaoOficio, saldoOficio FROM configuracao.parametroOficio WHERE codigo = @codigo`)
 
     if (result.recordset.length > 0) {
       const data = result.recordset[0]
@@ -23,14 +24,14 @@ export default defineEventHandler(async (event) => {
           codigo: data.codigo,
           projeto: data.projeto,
           texto: data.redacaoOficio,
-          saldoOficio: data.saldoOficio == 1 ? 'comSaldo' : 'semSaldo'
+          saldoOficio: data.saldoOficio ? (data.saldoOficio == 1 ? 'comSaldo' : 'semSaldo') : 'semSaldo'
         }
       }
     }
     
-    return { status: 'failed', message: 'Ofício não encontrado' }
-  } catch (erro) {
-    console.error('Erro ao recuperar o ofício:', erro)
-    return { status: 'failed' }
+    return { status: 'failed', mensagem: 'Parametrização de ofício não encontrada' }
+  } catch (error: any) {
+    console.error('Erro ao recuperar o ofício:', error)
+    return { status: 'failed', mensagem: 'Erro ao buscar dados: ' + error.message }
   }
 })

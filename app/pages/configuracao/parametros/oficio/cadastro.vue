@@ -6,6 +6,9 @@
       :paginaAtual="ehEdicao ? 'Edição de Parâmetros' : 'Novo Parâmetro de Ofício'"
     >
       <template #acoes>
+          <AppBotao v-if="ehEdicao" variacao="padrao" icone="fa7-solid:clock-rotate-left" @click="abrirHistorico">
+            Histórico
+          </AppBotao>
           <AppBotao variacao="padrao" icone="fa7-solid:pen-nib" @click="navigateTo('/configuracao/parametros/oficio/padrao')">
             Redação Padrão
           </AppBotao>
@@ -30,7 +33,7 @@
                         itemValue="codigo" 
                         itemLabel="nomeExibicao" 
                         required 
-                        :somenteLeitura="modoVisualizar"
+                        :somenteLeitura="modoVisualizar || ehEdicao"
                         @change="buscarModeloPadrao"
                     />
                     <div v-if="!modoVisualizar" class="mt-4 p-4 bg-emerald-50 dark:bg-emerald-500/5 rounded-2xl border border-emerald-500/10 flex items-start gap-3">
@@ -78,49 +81,14 @@
           :editando="ehEdicao" 
           :carregandoGravar="salvando"
           :visualizar="modoVisualizar"
+          iconeEditar="fa7-solid:pencil"
+          ocultarExcluir
           @voltar="voltar"
-          @excluir="modalExclusaoAberto = true"
           @limpar="limpar"
-        >
-          <template #extra-acoes-direita v-if="modoVisualizar">
-            <AppBotao variacao="primario" icone="fa7-solid:pencil" @click="irParaEdicao">
-              Editar
-            </AppBotao>
-          </template>
-        </AppRodapeFormulario>
+          @editar="irParaEdicao"
+        />
       </form>
     </AppCartaoFormulario>
-
-    <!-- Modal de Exclusão -->
-    <AppModal 
-      :isOpen="modalExclusaoAberto" 
-      title="Atenção: Exclusão" 
-      icon="fa7-solid:trash-can"
-      tamanho="sm"
-      rodapeEntre
-      @close="modalExclusaoAberto = false"
-    >
-      <div class="flex flex-col items-center py-4 text-center">
-        <div class="relative mb-6">
-            <div class="absolute inset-0 bg-red-500/20 blur-2xl rounded-full"></div>
-            <div class="relative w-20 h-20 bg-gradient-to-tr from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-xl">
-                <Icon name="fa7-solid:file-circle-xmark" class="w-10 h-10 text-white" />
-            </div>
-        </div>
-        
-        <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-3">
-          Remover Parâmetro?
-        </h4>
-        
-        <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-[280px]">
-          Deseja realmente remover a configuração de ofício deste projeto?
-        </p>
-      </div>
-      <template #footer>
-        <AppBotao variacao="padrao" @click="modalExclusaoAberto = false">Cancelar</AppBotao>
-        <AppBotao variacao="perigo" icone="fa7-solid:trash-can" @click="excluir">Sim, remover</AppBotao>
-      </template>
-    </AppModal>
 
     <!-- Modal Alerta Erro -->
     <AppModal 
@@ -150,14 +118,18 @@
       <template #footer><AppBotao variacao="primario" @click="voltar" class="w-full h-14 text-lg rounded-2xl">Voltar para Listagem</AppBotao></template>
     </AppModal>
 
+    <AppModalHistorico :aberto="modalHistoricoAberto" :historico="historicoData"
+      :carregando="carregandoHistorico" @close="modalHistoricoAberto = false" />
+
   </div>
 </template>
 
 <script setup lang="ts">
 const {
-  carregandoTela, salvando, modalExclusaoAberto, form, projetos, ehEdicao, variaveis, modoVisualizar, irParaEdicao,
-  carregarProjetos, carregarDados, buscarModeloPadrao, gravar, excluir, limpar, voltar,
-  erros, modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta, modalSucessoAberto
+  carregandoTela, salvando, form, projetos, ehEdicao, variaveis, modoVisualizar, irParaEdicao,
+  carregarProjetos, carregarDados, buscarModeloPadrao, gravar, limpar, voltar,
+  erros, modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta, modalSucessoAberto,
+  modalHistoricoAberto, historicoData, carregandoHistorico, abrirHistorico
 } = useParametrosOficioFormulario()
 </script>
 

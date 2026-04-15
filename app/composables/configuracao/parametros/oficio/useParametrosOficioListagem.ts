@@ -1,12 +1,14 @@
 import { ref, reactive, computed, onMounted } from 'vue'
+import { usePaginacaoFrontEnd } from '../../../global/usePaginacaoFrontEnd'
 
 export function useParametrosOficioListagem() {
   const carregando = ref(false)
   const buscaRealizada = ref(false)
   const visaoAtual = ref<'lista' | 'cards'>('lista')
 
-  const filtro = reactive({
+  const filtro = ref({
     projetoNome: '',
+    projetoId: '' as string | number,
     comSaldo: ''
   })
 
@@ -39,11 +41,54 @@ export function useParametrosOficioListagem() {
   const modalFiltroAvancadoAberto = ref(false)
   const abrirModalFiltroAvancado = () => modalFiltroAvancadoAberto.value = true
   const limparFiltrosAvancados = () => {
-    Object.assign(filtro, { projetoNome: '', comSaldo: '' })
+    filtro.value = { projetoNome: '', projetoId: '', comSaldo: '' }
     buscarLista()
   }
   const aplicarFiltroAvancado = () => {
     modalFiltroAvancadoAberto.value = false
+    buscarLista()
+  }
+
+  // Autocomplete de Projeto
+  const sugestoesProjeto = ref<any[]>([])
+  const buscandoProjeto = ref(false)
+  const mostrarMenuProjeto = ref(false)
+  let timerDebounce: ReturnType<typeof setTimeout>
+
+  const buscarSugestaoProjeto = async () => {
+    const termo = filtro.value.projetoNome
+    
+    // Limpa o projetoId ao começar a digitar uma nova busca
+    filtro.value.projetoId = ''
+
+    if (!termo || termo.length < 3) {
+      sugestoesProjeto.value = []
+      mostrarMenuProjeto.value = false
+      return
+    }
+
+    clearTimeout(timerDebounce)
+    mostrarMenuProjeto.value = true
+
+    timerDebounce = setTimeout(async () => {
+      buscandoProjeto.value = true
+      try {
+        const resp = await $fetch<any>('/api/cadastro/projeto/autocomplete', {
+          query: { q: termo }
+        })
+        sugestoesProjeto.value = resp.data || []
+      } catch (err) {
+        console.error('Erro no autocomplete', err)
+      } finally {
+        buscandoProjeto.value = false
+      }
+    }, 400)
+  }
+
+  const selecionarSugestaoProjeto = (data: { key: string, sugestao: any }) => {
+    filtro.value.projetoNome = data.sugestao.apelido || data.sugestao.descricao
+    filtro.value.projetoId = data.sugestao.id
+    mostrarMenuProjeto.value = false
     buscarLista()
   }
 
@@ -52,7 +97,7 @@ export function useParametrosOficioListagem() {
     buscaRealizada.value = true
     try {
       const response = await $fetch<any>('/api/configuracao/parametros/oficio/listagem', {
-        method: 'POST', body: filtro
+        method: 'POST', body: filtro.value
       })
       listaCompleta.value = response.data || []
       paginacao.mudarPagina(1)
@@ -67,24 +112,14 @@ export function useParametrosOficioListagem() {
   const modalHistoricoAberto = ref(false)
   const carregandoHistorico = ref(false)
   const historicoData = ref<any[]>([])
-  const abrirHistorico = async (id: number) => {
+  const abrirHistorico = async (codigo: number) => {
     modalHistoricoAberto.value = true
     carregandoHistorico.value = true
     try {
       const response = await $fetch<any>('/api/configuracao/parametros/oficio/historico', {
-        method: 'POST', body: { parametroOficio: id }
+        method: 'POST', body: { codigo }
       })
-      
-      // Mapeamento para o padrão esperado pelo componente AppModalHistorico
-      historicoData.value = (response.data || []).map((item: any) => ({
-        ...item,
-        usuario: item.usuarioAlteracao,
-        dataHora: item.dataAlteracao,
-        alteracoes: (item.alteracoes || []).map((alt: any) => {
-          if (typeof alt === 'string') return { mensagem: alt }
-          return alt
-        })
-      }))
+      historicoData.value = response.data || []
     } catch (error) {
       console.error('Erro ao buscar histórico', error)
     } finally {
@@ -110,9 +145,16 @@ export function useParametrosOficioListagem() {
     historicoData,
     abrirHistorico,
 
+    // Autocomplete Projeto
+    sugestoesProjeto,
+    buscandoProjeto,
+    mostrarMenuProjeto,
+    buscarSugestaoProjeto,
+    selecionarSugestaoProjeto,
+    fecharSugestaoProjeto: () => mostrarMenuProjeto.value = false,
 
-
-    // Paginação
+    // Paginação e Filtro Global
+    filtroGlobal: paginacao.filtroGlobal,
     dados: paginacao.listaPaginada,
     paginaAtual: paginacao.paginaAtual,
     itensPorPagina: paginacao.itensPorPagina,
