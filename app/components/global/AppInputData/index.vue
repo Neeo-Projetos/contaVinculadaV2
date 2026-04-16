@@ -12,7 +12,6 @@
         <Icon :name="icone || 'fa7-solid:calendar-days'" />
       </div>
       
-      <!-- Campo de Texto com Máscara -->
       <input 
         ref="inputRef" 
         :id="id" 
@@ -30,7 +29,6 @@
         ]" 
       />
 
-      <!-- Input de Data Nativo Escondido para o Picker -->
       <input 
         ref="datePickerRef"
         type="date"

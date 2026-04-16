@@ -51,14 +51,15 @@ export function useLancamentoManualFormulario() {
   })
 
   const funcionarioTemp = ref<any>(null)
+  const buscaFuncionario = ref('')
+  const buscandoFuncionario = ref(false)
+  const sugestoesFuncionarios = ref<any[]>([])
+  const mostrarMenuFuncionario = ref(false)
 
   const editando = computed(() => form.codigo !== '0' && !!form.codigo)
 
   const carregarCombos = async () => {
     try {
-      // Carregando individualmente para evitar que uma falha trave tudo
-      // E usando os endpoints corretos de listagem/ativos
-      
       const resProj = await $fetch<{ data: any[] }>('/api/cadastro/projeto/ativos').catch(() => ({ data: [] }))
       combos.projetos = resProj.data || []
 
@@ -68,9 +69,7 @@ export function useLancamentoManualFormulario() {
       const resClass = await $fetch<{ data: any[] }>('/api/tabelaBasica/classificacao/listagem', { method: 'POST', body: { ativo: 1 } }).catch(() => ({ data: [] }))
       combos.classificacoes = resClass.data || []
 
-      const resFunc = await $fetch<{ data: any[] }>('/api/cadastro/funcionario/listagem', { method: 'POST', body: { ativo: 1 } }).catch(() => ({ data: [] }))
-      combos.funcionariosAtivos = resFunc.data || []
-
+      combos.funcionariosAtivos = []
     } catch (error) {
       console.error("Erro ao carregar combos", error)
     }
@@ -136,49 +135,41 @@ export function useLancamentoManualFormulario() {
 
   const validarPasso0 = () => {
     erros.clear()
-
     if (!form.projeto) {
       erros.add('projeto')
       dispararAlerta('Campo Obrigatório', 'Selecione o Projeto para continuar.', 'warning')
       return false
     }
-
     if (!form.contaVinculada) {
       erros.add('contaVinculada')
       dispararAlerta('Campo Obrigatório', 'Selecione a Conta Vinculada.', 'warning')
       return false
     }
-
     if (!form.tipoMovimentacao) {
       erros.add('tipoMovimentacao')
       dispararAlerta('Campo Obrigatório', 'Selecione o Tipo de Movimentação.', 'warning')
       return false
     }
-
     if (!form.valorMovimentacao || form.valorMovimentacao === '0' || form.valorMovimentacao === '0,00') {
       erros.add('valorMovimentacao')
       dispararAlerta('Campo Obrigatório', 'Informe o Valor da movimentação.', 'warning')
       return false
     }
-
     if (!form.dataMovimentacao) {
       erros.add('dataMovimentacao')
       dispararAlerta('Campo Obrigatório', 'Informe a Data da movimentação.', 'warning')
       return false
     }
-
     if (!form.classificacao) {
       erros.add('classificacao')
       dispararAlerta('Campo Obrigatório', 'Selecione a Classificação.', 'warning')
       return false
     }
-
     if (!form.motivo) {
       erros.add('motivo')
       dispararAlerta('Campo Obrigatório', 'Informe o Motivo / Observação.', 'warning')
       return false
     }
-
     return true
   }
 
@@ -230,9 +221,47 @@ export function useLancamentoManualFormulario() {
     }
   }
 
+  const buscarFuncionariosAutoComplete = async () => {
+    if (buscaFuncionario.value.length < 3) {
+      sugestoesFuncionarios.value = []
+      mostrarMenuFuncionario.value = false
+      return
+    }
+
+    buscandoFuncionario.value = true
+    mostrarMenuFuncionario.value = true
+
+    try {
+      const res = await $fetch<{ status: string, data: any[] }>('/api/operacao/movimentacaoBancaria/lancamentoManual/funcionarios', {
+        method: 'POST',
+        body: {
+          termo: buscaFuncionario.value,
+          projeto: form.projeto
+        }
+      })
+
+      if (res.status === 'success') {
+        sugestoesFuncionarios.value = res.data || []
+      }
+    } catch (error) {
+      console.error('Erro ao buscar funcionários para autocomplete:', error)
+    } finally {
+      buscandoFuncionario.value = false
+    }
+  }
+
+  const selecionarFuncionario = (sugestao: any) => {
+    funcionarioTemp.value = {
+      codigo: sugestao.codigo,
+      nomeCompleto: sugestao.nomeCompleto
+    }
+    buscaFuncionario.value = sugestao.nomeCompleto
+    mostrarMenuFuncionario.value = false
+  }
+
   const addFuncionario = () => {
     if (!funcionarioTemp.value) {
-       dispararAlerta('Atenção', 'Selecione um funcionário primeiro.', 'warning')
+       dispararAlerta('Atenção', 'Pesquise e selecione um funcionário primeiro.', 'warning')
        return
     }
     
@@ -249,7 +278,11 @@ export function useLancamentoManualFormulario() {
       tipoAlteracao: 1,
       selecionadoParaRemover: false
     })
+
+    // Limpei a busca pra permitir adicionar o próximo rápido
     funcionarioTemp.value = null
+    buscaFuncionario.value = ''
+    sugestoesFuncionarios.value = []
   }
 
   const removerFuncionariosSelecionados = () => {
@@ -260,6 +293,7 @@ export function useLancamentoManualFormulario() {
     }
 
     form.funcionarios.forEach(f => {
+      // Marquei como removido (tipo 2) pra o banco saber que é pra deletar
       if (f.selecionadoParaRemover) f.tipoAlteracao = 2
     })
     
@@ -282,6 +316,9 @@ export function useLancamentoManualFormulario() {
       motivo: '',
       funcionarios: []
     })
+    // Limpei a busca de funcionários no novo registro
+    buscaFuncionario.value = ''
+    funcionarioTemp.value = null
   }
 
   onMounted(() => {
@@ -291,10 +328,12 @@ export function useLancamentoManualFormulario() {
     }
   })
 
-  // Sincronização automática de contas ao mudar projeto
+  // Sincronizei as contas e limpei a busca se o projeto mudar
   watch(() => form.projeto, (novoProjeto) => {
     if (novoProjeto) {
       carregarContas(novoProjeto)
+      buscaFuncionario.value = ''
+      funcionarioTemp.value = null
     } else {
       combos.contasVinculadas = []
       form.contaVinculada = ''
@@ -302,6 +341,7 @@ export function useLancamentoManualFormulario() {
   })
 
   return {
+    // Dados reativos do formulário
     form,
     combos,
     carregandoTela,
@@ -310,10 +350,19 @@ export function useLancamentoManualFormulario() {
     erros,
     passoAtual,
     passos,
+    // Ações de navegação e gravação
     avancarPasso,
     voltarPasso,
     modalConfirmaTodosAberto,
+    // Ações do Autocomplete de Funcionários
     funcionarioTemp,
+    buscaFuncionario,
+    buscandoFuncionario,
+    sugestoesFuncionarios,
+    mostrarMenuFuncionario,
+    buscarFuncionariosAutoComplete,
+    selecionarFuncionario,
+    // Carregamento de dados
     carregarContas,
     carregarProjetoDaConta,
     tentarGravar,

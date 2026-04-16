@@ -18,14 +18,14 @@
           <span class="text-xs font-black uppercase tracking-widest">Buscando sugestões...</span>
         </div>
         <ul v-else-if="sugestoes.length > 0" class="py-1.5 font-bold">
-          <li v-for="sugestao in sugestoes" :key="sugestao.id || sugestao.descricao"
+          <li v-for="sugestao in sugestoes" :key="sugestao[itemValue] || sugestao[itemLabel]"
             @mousedown.prevent="selecionar(sugestao)"
             class="flex items-center gap-3 px-5 py-3 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 cursor-pointer transition-all border-b border-gray-50 dark:border-gray-800/50 last:border-0 group">
             <Icon name="fa6-solid:magnifying-glass"
               class="w-3.5 h-3.5 text-gray-400 group-hover:text-emerald-500 transition-colors shrink-0" />
             <span
               class="text-sm text-gray-700 dark:text-gray-300 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400"
-              v-html="destacarTexto(sugestao.descricao)"></span>
+              v-html="destacarTexto(sugestao[itemLabel])"></span>
           </li>
         </ul>
         <div v-else-if="!buscando && String(modelValue).length >= 3"
@@ -47,7 +47,9 @@ const props = defineProps({
   required: { type: Boolean, default: false },
   sugestoes: { type: Array as PropType<any[]>, default: () => [] },
   buscando: { type: Boolean, default: false },
-  mostrarMenu: { type: Boolean, default: false }
+  mostrarMenu: { type: Boolean, default: false },
+  itemValue: { type: String, default: 'id' },
+  itemLabel: { type: String, default: 'descricao' }
 })
 
 const emit = defineEmits(['update:modelValue', 'buscar', 'selecionar', 'enter', 'fechar'])

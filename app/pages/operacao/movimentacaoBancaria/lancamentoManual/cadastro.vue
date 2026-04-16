@@ -97,14 +97,20 @@
           </AppFormularioSecao>
 
           <div class="space-y-6">
-            <div class="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-4 items-end">
+            <div class="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-4 items-end animate-fade-in">
               <div class="flex-1 w-full">
-                <AppSelect 
-                  v-model="funcionarioTemp" 
-                  label="Funcionário" 
-                  placeholder="Selecione para adicionar..."
-                  :opcoes="combos.funcionariosAtivos.map(f => ({ codigo: f, descricao: f.nomeCompleto }))"
-                  returnObject
+                <AppInputAutocomplete 
+                  v-model="buscaFuncionario" 
+                  label="Pesquisar Funcionário" 
+                  placeholder="Digite o nome (min. 3 caracteres)..."
+                  :sugestoes="sugestoesFuncionarios"
+                  :buscando="buscandoFuncionario"
+                  :mostrarMenu="mostrarMenuFuncionario"
+                  item-value="codigo"
+                  item-label="nomeCompleto"
+                  @buscar="buscarFuncionariosAutoComplete"
+                  @selecionar="selecionarFuncionario"
+                  @fechar="mostrarMenuFuncionario = false"
                 />
               </div>
               <div class="flex gap-2 w-full md:w-auto">
@@ -186,7 +192,10 @@ const {
   form, combos, salvando, carregandoTela, editando, erros,
   passoAtual, passos, avancarPasso, voltarPasso,
   modalConfirmaTodosAberto,
-  funcionarioTemp, carregarContas, carregarProjetoDaConta, tentarGravar, gravar,
+  funcionarioTemp,
+  buscaFuncionario, buscandoFuncionario, sugestoesFuncionarios, mostrarMenuFuncionario,
+  buscarFuncionariosAutoComplete, selecionarFuncionario,
+  carregarContas, carregarProjetoDaConta, tentarGravar, gravar,
   addFuncionario, removerFuncionariosSelecionados, voltarParaLista, novoRegistro
 } = useLancamentoManualFormulario()
 </script>
