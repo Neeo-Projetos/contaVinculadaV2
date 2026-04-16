@@ -26,7 +26,7 @@
         class="w-full rounded-xl py-3 text-sm transition-all placeholder-gray-400 border pl-11 pr-4"
         :class="[
           somenteLeitura ? 'bg-gray-100 dark:bg-gray-800/50 cursor-not-allowed opacity-70 pointer-events-none text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700/50' : 
-          (erroInterno || erro ? 'border-red-500 bg-red-50/50 dark:bg-red-900/10 text-gray-800 dark:text-gray-200' : 'bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700/70 focus:border-emerald-500/20 focus:ring-emerald-500/10 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2')
+          (erro ? 'border-red-500 bg-red-50/50 dark:bg-red-900/10 text-gray-800 dark:text-gray-200' : 'bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700/70 focus:border-emerald-500/20 focus:ring-emerald-500/10 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2')
         ]" 
       />
 
@@ -61,12 +61,9 @@ const emit = defineEmits(['update:modelValue', 'validar'])
 const { dispararAlerta } = useAppNotificacao()
 const inputRef = ref<HTMLInputElement | null>(null)
 const datePickerRef = ref<HTMLInputElement | null>(null)
-const erroInterno = ref('')
-
 const onInput = (e: any) => {
   const value = e.target.value
   emit('update:modelValue', value)
-  if (erroInterno.value) erroInterno.value = ''
 }
 
 const abrirCalendario = () => {
@@ -92,53 +89,42 @@ const onDatePicked = (e: any) => {
   const [year, month, day] = dateValue.split('-')
   const formatted = `${day}/${month}/${year}`
   emit('update:modelValue', formatted)
-  erroInterno.value = ''
+  validarData()
 }
 
 const validarData = () => {
   const valor = props.modelValue
-  if (!valor || valor.length < 10) {
-    erroInterno.value = ''
-    return
-  }
+  if (!valor || valor.length < 10) return
 
   const partes = valor.split('/')
-  if (partes.length !== 3) {
-    erroInterno.value = 'Data incompleta'
-    return
-  }
+  if (partes.length !== 3) return
 
   const day = Number(partes[0])
   const month = Number(partes[1])
   const year = Number(partes[2])
   
   if (isNaN(day) || isNaN(month) || isNaN(year)) {
-    erroInterno.value = 'Data inválida'
+    emit('update:modelValue', '')
+    inputRef.value?.blur()
     return
   }
 
   const d = new Date(year, month - 1, day)
-  
-  const isValid = d.getFullYear() === year && 
-                  d.getMonth() === month - 1 && 
-                  d.getDate() === day
+  const isValid = d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day
   
   if (!isValid) {
-    erroInterno.value = 'Data inválida'
     dispararAlerta('Data Inválida', 'A data informada não existe no calendário.', 'error')
+    emit('update:modelValue', '')
+    inputRef.value?.blur()
   } else {
     if (year < 1900 || year > 2100) {
-        erroInterno.value = 'Ano inválido'
         dispararAlerta('Ano Inválido', 'O ano deve estar entre 1900 e 2100.', 'warning')
-    } else {
-        erroInterno.value = ''
+        emit('update:modelValue', '')
+        inputRef.value?.blur()
     }
   }
 }
 
-watch(() => props.erro, (newVal) => {
-  if (newVal) erroInterno.value = ''
-})
 
 defineExpose({
   focus: () => inputRef.value?.focus()

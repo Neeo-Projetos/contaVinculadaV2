@@ -32,7 +32,7 @@
 
       <Transition name="dropdown">
         <div v-if="aberto && !somenteLeitura"
-          class="absolute top-full mt-1.5 left-0 w-full z-50 bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-gray-700/80 rounded-xl shadow-2xl backdrop-blur-xl py-1 overflow-hidden">
+          class="absolute top-full mt-1.5 left-0 w-full z-50 bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-gray-700/80 rounded-xl shadow-2xl py-1 overflow-hidden">
 
           <div
             class="max-h-60 w-full overflow-y-auto overflow-x-hidden
