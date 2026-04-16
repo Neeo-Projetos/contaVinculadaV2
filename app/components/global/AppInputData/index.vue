@@ -43,6 +43,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useAppNotificacao } from '~/composables/global/useAppNotificacao'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -96,21 +97,21 @@ const onDatePicked = (e: any) => {
 
 const validarData = () => {
   const valor = props.modelValue
-  if (!valor) {
+  if (!valor || valor.length < 10) {
     erroInterno.value = ''
     return
   }
 
   const partes = valor.split('/')
-  if (valor.length > 0 && (valor.length < 10 || partes.length !== 3)) {
+  if (partes.length !== 3) {
     erroInterno.value = 'Data incompleta'
-    dispararAlerta('Data Incompleta', 'Por favor, informe a data completa no formato DD/MM/AAAA.', 'warning')
     return
   }
 
-  const [day, month, year] = partes.map(Number)
+  const day = Number(partes[0])
+  const month = Number(partes[1])
+  const year = Number(partes[2])
   
-  // Verifica se a conversão resultou em números válidos
   if (isNaN(day) || isNaN(month) || isNaN(year)) {
     erroInterno.value = 'Data inválida'
     return
@@ -118,7 +119,9 @@ const validarData = () => {
 
   const d = new Date(year, month - 1, day)
   
-  const isValid = d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day
+  const isValid = d.getFullYear() === year && 
+                  d.getMonth() === month - 1 && 
+                  d.getDate() === day
   
   if (!isValid) {
     erroInterno.value = 'Data inválida'
