@@ -56,7 +56,41 @@ export function useLancamentoManualFormulario() {
   const sugestoesFuncionarios = ref<any[]>([])
   const mostrarMenuFuncionario = ref(false)
 
+  // Filtros e Paginação local para a tabela de funcionários vinculados
+  const filtroFuncionario = ref('')
+  const paginaFuncionario = ref(1)
+  const itensPorPaginaFuncionario = ref(10)
+
   const editando = computed(() => form.codigo !== '0' && !!form.codigo)
+
+  // Filtrei a lista de funcionários que já foram adicionados
+  const funcionariosFiltrados = computed(() => {
+    const lista = form.funcionarios.filter(f => f.tipoAlteracao !== 2)
+    if (!filtroFuncionario.value) return lista
+    const busca = filtroFuncionario.value.toLowerCase()
+    return lista.filter(f => (f.funcionarioNome || '').toLowerCase().includes(busca))
+  })
+
+  // Fiz o fatiamento para a paginação da tabela
+  const totalPaginasFuncionario = computed(() => Math.ceil(funcionariosFiltrados.value.length / itensPorPaginaFuncionario.value))
+  const funcionariosPaginados = computed(() => {
+    const inicio = (paginaFuncionario.value - 1) * itensPorPaginaFuncionario.value
+    return funcionariosFiltrados.value.slice(inicio, inicio + itensPorPaginaFuncionario.value)
+  })
+
+  const registroInicialFuncionario = computed(() => funcionariosFiltrados.value.length === 0 ? 0 : (paginaFuncionario.value - 1) * itensPorPaginaFuncionario.value + 1)
+  const registroFinalFuncionario = computed(() => Math.min(paginaFuncionario.value * itensPorPaginaFuncionario.value, funcionariosFiltrados.value.length))
+  const paginasExibidasFuncionario = computed(() => Array.from({ length: totalPaginasFuncionario.value }, (_, i) => i + 1))
+
+  const todosFuncionariosMarcados = computed(() => {
+    const lista = funcionariosFiltrados.value
+    return lista.length > 0 && lista.every(f => f.selecionadoParaRemover)
+  })
+
+  const marcarDesmarcarTodosFuncionarios = () => {
+    const novoEstado = !todosFuncionariosMarcados.value
+    funcionariosFiltrados.value.forEach(f => f.selecionadoParaRemover = novoEstado)
+  }
 
   const carregarCombos = async () => {
     try {
@@ -354,7 +388,7 @@ export function useLancamentoManualFormulario() {
     avancarPasso,
     voltarPasso,
     modalConfirmaTodosAberto,
-    // Ações do Autocomplete de Funcionários
+    // Autocomplete de Funcionários
     funcionarioTemp,
     buscaFuncionario,
     buscandoFuncionario,
@@ -362,7 +396,19 @@ export function useLancamentoManualFormulario() {
     mostrarMenuFuncionario,
     buscarFuncionariosAutoComplete,
     selecionarFuncionario,
-    // Carregamento de dados
+    // Tabela e Paginação de Funcionários
+    filtroFuncionario,
+    paginaFuncionario,
+    itensPorPaginaFuncionario,
+    funcionariosFiltrados,
+    funcionariosPaginados,
+    totalPaginasFuncionario,
+    registroInicialFuncionario,
+    registroFinalFuncionario,
+    paginasExibidasFuncionario,
+    todosFuncionariosMarcados,
+    marcarDesmarcarTodosFuncionarios,
+    // Métodos de apoio
     carregarContas,
     carregarProjetoDaConta,
     tentarGravar,

@@ -123,30 +123,88 @@
               </div>
             </div>
 
-            <div v-if="form.funcionarios.filter(f => f.tipoAlteracao !== 2).length > 0" class="border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-[#1e2029]">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="bg-gray-50 dark:bg-gray-800/50">
-                    <th class="p-4 w-12 text-center border-b border-gray-100 dark:border-gray-800">
-                       <Icon name="fa7-solid:check-double" class="text-gray-300" />
-                    </th>
-                    <th class="p-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-800">Funcionário</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                  <tr v-for="(item, index) in form.funcionarios.filter(f => f.tipoAlteracao !== 2)" :key="index" class="hover:bg-gray-50/50 transition-colors">
-                    <td class="p-4 text-center">
-                      <input type="checkbox" v-model="item.selecionadoParaRemover" class="w-5 h-5 rounded-lg border-gray-200 text-emerald-500 focus:ring-emerald-500 cursor-pointer" />
-                    </td>
-                    <td class="p-4 font-bold text-sm text-gray-700 dark:text-gray-300">{{ item.funcionarioNome }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div v-else class="text-center py-12 bg-gray-50/30 dark:bg-gray-900/10 rounded-3xl border-2 border-dashed border-gray-100 dark:border-gray-800">
-              <Icon name="fa7-solid:users-slash" class="w-12 h-12 text-gray-200 mb-4" />
-              <p class="text-base text-gray-400 font-medium">Nenhum funcionário vinculado.</p>
-              <p class="text-xs text-gray-300 mt-1">O lançamento será aplicado a todos do projeto por padrão.</p>
+            <!-- Barra de Busca e Ações da Tabela de Vínculos -->
+            <template v-if="form.funcionarios.filter(f => f.tipoAlteracao !== 2).length > 0">
+              <div class="flex flex-col sm:flex-row items-center gap-4">
+                <div class="flex-1 w-full">
+                  <AppInputTexto 
+                    v-model="filtroFuncionario"
+                    placeholder="Filtrar funcionários já adicionados..."
+                    icone="fa7-solid:magnifying-glass"
+                    label=""
+                    class="!mb-0"
+                  />
+                </div>
+
+                <AppBotao 
+                  :variacao="todosFuncionariosMarcados ? 'perigo' : 'padrao'"
+                  :icone="todosFuncionariosMarcados ? 'fa7-solid:xmark' : 'fa7-solid:check-double'" 
+                  @click.prevent="marcarDesmarcarTodosFuncionarios"
+                  class="!h-11 !px-6 !text-[10px] !rounded-xl shadow-sm w-full sm:w-auto uppercase font-black tracking-widest"
+                >
+                  {{ todosFuncionariosMarcados ? 'Desmarcar Todos' : 'Marcar Todos' }}
+                </AppBotao>
+              </div>
+
+              <!-- Listagem Premium -->
+              <AppContainerListagem
+                :lista="funcionariosPaginados"
+                :carregando="false"
+                :buscaRealizada="true"
+                :totalRegistros="funcionariosFiltrados.length"
+                :registroInicial="registroInicialFuncionario"
+                :registroFinal="registroFinalFuncionario"
+                :totalPaginas="totalPaginasFuncionario"
+                :paginaAtual="paginaFuncionario"
+                :itensPorPagina="itensPorPaginaFuncionario"
+                :paginasExibidas="paginasExibidasFuncionario"
+                :view="false"
+                :edit="false"
+                class="mb-0 overflow-hidden rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm"
+                @mudarPagina="paginaFuncionario = $event"
+              >
+                <template #cabecalho-tabela>
+                  <th class="p-5 w-16 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Sel.</th>
+                  <th class="p-5 text-gray-400 text-[10px] font-black uppercase tracking-widest text-left">Funcionário</th>
+                </template>
+
+                <template #linhas-tabela="{ item }">
+                  <td class="p-5 text-center transition-colors cursor-pointer hover:bg-emerald-50/10" @click.stop="item.selecionadoParaRemover = !item.selecionadoParaRemover">
+                    <div class="flex items-center justify-center">
+                      <AppCheckbox :modelValue="item.selecionadoParaRemover" />
+                    </div>
+                  </td>
+                  <td class="p-5">
+                    <div class="flex items-center gap-4">
+                      <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-[11px] group-hover:scale-110 transition-transform uppercase">
+                        {{ (item.funcionarioNome || 'F').charAt(0) }}
+                      </div>
+                      <div class="flex flex-col min-w-0">
+                        <span class="text-sm font-bold text-gray-800 dark:text-gray-100 group-hover:text-emerald-600 transition-colors truncate">
+                          {{ item.funcionarioNome }}
+                        </span>
+                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-tighter opacity-60">
+                          Código: {{ item.funcionarioId }}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                </template>
+              </AppContainerListagem>
+
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 px-2 opacity-70">
+                <Icon name="fa7-solid:circle-info" class="text-emerald-500 w-4 h-4" />
+                Clique em qualquer lugar da linha para selecionar.
+              </p>
+            </template>
+
+            <div v-else class="text-center py-16 bg-gray-50/30 dark:bg-gray-900/10 rounded-3xl border-2 border-dashed border-gray-100 dark:border-gray-800 animate-fade-in shadow-inner">
+              <div class="relative inline-block mb-6">
+                <div class="absolute inset-0 bg-gray-200/20 blur-2xl rounded-full animate-pulse"></div>
+                <Icon name="fa7-solid:users-slash" class="w-16 h-16 text-gray-200 relative z-10" />
+              </div>
+              <p class="text-lg text-gray-400 font-black uppercase tracking-tighter">Nenhum funcionário vinculado</p>
+              <p class="text-xs text-gray-300 mt-2 font-bold uppercase tracking-widest">O lançamento será aplicado a todos do projeto por padrão.</p>
             </div>
           </div>
         </div>
@@ -195,6 +253,10 @@ const {
   funcionarioTemp,
   buscaFuncionario, buscandoFuncionario, sugestoesFuncionarios, mostrarMenuFuncionario,
   buscarFuncionariosAutoComplete, selecionarFuncionario,
+  filtroFuncionario, paginaFuncionario, itensPorPaginaFuncionario,
+  funcionariosFiltrados, funcionariosPaginados, totalPaginasFuncionario,
+  registroInicialFuncionario, registroFinalFuncionario, paginasExibidasFuncionario,
+  todosFuncionariosMarcados, marcarDesmarcarTodosFuncionarios,
   carregarContas, carregarProjetoDaConta, tentarGravar, gravar,
   addFuncionario, removerFuncionariosSelecionados, voltarParaLista, novoRegistro
 } = useLancamentoManualFormulario()
