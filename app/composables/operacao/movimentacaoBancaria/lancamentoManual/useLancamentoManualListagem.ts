@@ -197,7 +197,7 @@ export function useLancamentoManualListagem() {
 
   const formatarMoeda = (valor: number) => Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 
-  const novoRegistro = () => router.push('/operacao/movimentacaoBancaria/lancamentoManual/cadastro?id=0')
+  const novoRegistro = () => router.push('/operacao/movimentacaoBancaria/lancamentoManual/cadastro?codigo=0')
 
   onMounted(() => {
     carregarCombos()

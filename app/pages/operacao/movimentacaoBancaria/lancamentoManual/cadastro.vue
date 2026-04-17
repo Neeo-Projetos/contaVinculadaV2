@@ -4,7 +4,7 @@
     <AppBarraNavegacao 
       icone="fa7-solid:file-invoice-dollar" 
       :links="[{ label: 'Lançamento Manual', to: '/operacao/movimentacaoBancaria/lancamentoManual' }]"
-      :paginaAtual="editando ? 'Editando Lançamento' : 'Novo Lançamento'"
+      :paginaAtual="modoVisualizar ? 'Detalhes do Lançamento' : 'Novo Lançamento'"
     />
 
     <div class="mb-4">
@@ -29,6 +29,7 @@
                 label="Projeto" 
                 placeholder="Selecione o projeto..." 
                 :opcoes="combos.projetos.map(p => ({ codigo: String(p.codigo), descricao: p.apelido ? `${p.apelido} - ${p.descricao}` : p.descricao }))"
+                :somenteLeitura="modoVisualizar"
               />
             </div>
 
@@ -41,6 +42,7 @@
                   codigo: String(c.codigo), 
                   descricao: `${c.banco} - AG: ${c.agencia}${c.digitoAgencia ? '-' + c.digitoAgencia : ''} / CT: ${c.conta}${c.digitoConta ? '-' + c.digitoConta : ''}`
                 }))"
+                :somenteLeitura="modoVisualizar"
               />
             </div>
 
@@ -50,6 +52,7 @@
                 label="Tipo de Movimentação" 
                 :opcoes="combos.tiposMovimentacao.map(t => ({ codigo: t.codigo, descricao: t.descricao }))"
                 placeholder="Selecione..."
+                :somenteLeitura="modoVisualizar"
               />
             </div>
 
@@ -57,6 +60,7 @@
               <AppInputMoeda 
                 v-model="form.valorMovimentacao" 
                 label="Valor" 
+                :somenteLeitura="modoVisualizar"
               />
             </div>
 
@@ -66,6 +70,7 @@
                 label="Data" 
                 placeholder="DD/MM/AAAA"
                 icone="fa7-solid:calendar-day"
+                :somenteLeitura="modoVisualizar"
               />
             </div>
 
@@ -75,6 +80,7 @@
                 label="Classificação" 
                 :opcoes="combos.classificacoes.map(c => ({ codigo: c.codigo, descricao: c.descricao }))"
                 placeholder="Selecione..."
+                :somenteLeitura="modoVisualizar"
               />
             </div>
 
@@ -85,6 +91,7 @@
                 placeholder="Digite o motivo..."
                 icone="fa7-solid:comment-dots"
                 maxlength="200"
+                :somenteLeitura="modoVisualizar"
               />
             </div>
           </div>
@@ -97,7 +104,7 @@
           </AppFormularioSecao>
 
           <div class="space-y-6">
-            <div class="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-4 items-end animate-fade-in">
+            <div v-if="!modoVisualizar" class="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-4 items-end animate-fade-in">
               <div class="flex-1 w-full">
                 <AppInputAutocomplete 
                   v-model="buscaFuncionario" 
@@ -137,6 +144,7 @@
                 </div>
 
                 <AppBotao 
+                  v-if="!modoVisualizar"
                   :variacao="todosFuncionariosMarcados ? 'perigo' : 'padrao'"
                   :icone="todosFuncionariosMarcados ? 'fa7-solid:xmark' : 'fa7-solid:check-double'" 
                   @click.prevent="marcarDesmarcarTodosFuncionarios"
@@ -169,9 +177,9 @@
                 </template>
 
                 <template #linhas-tabela="{ item }">
-                  <td class="p-5 text-center transition-colors cursor-pointer hover:bg-emerald-50/10" @click.stop="item.selecionadoParaRemover = !item.selecionadoParaRemover">
+                  <td class="p-5 text-center transition-colors" :class="!modoVisualizar ? 'cursor-pointer hover:bg-emerald-50/10' : ''" @click.stop="!modoVisualizar && (item.selecionadoParaRemover = !item.selecionadoParaRemover)">
                     <div class="flex items-center justify-center">
-                      <AppCheckbox :modelValue="item.selecionadoParaRemover" />
+                      <AppCheckbox :modelValue="item.selecionadoParaRemover" :somenteLeitura="modoVisualizar" />
                     </div>
                   </td>
                   <td class="p-5">
@@ -212,12 +220,20 @@
         <AppRodapeFormulario 
           :editando="editando" 
           :carregandoGravar="salvando"
+          :visualizar="modoVisualizar"
+          :ocultarEditar="modoVisualizar"
           :labelGravar="passoAtual === 0 ? 'Próximo Passo' : (editando ? 'Atualizar Lançamento' : 'Finalizar Cadastro')"
           :iconeGravar="passoAtual === 0 ? 'fa7-solid:arrow-right' : 'fa7-solid:check'"
           @voltar="voltarPasso"
           @gravar="passoAtual === 0 ? avancarPasso() : tentarGravar()"
           @limpar="novoRegistro"
-        />
+        >
+          <template #extra-acoes-direita v-if="modoVisualizar && passoAtual === 0">
+            <AppBotao variacao="primario" icone="fa7-solid:arrow-right" @click="avancarPasso">
+              Próximo Passo
+            </AppBotao>
+          </template>
+        </AppRodapeFormulario>
       </form>
     </AppCartaoFormulario>
 
@@ -248,7 +264,7 @@ import { useLancamentoManualFormulario } from '~/composables/operacao/movimentac
 
 const {
   form, combos, salvando, carregandoTela, editando, erros,
-  passoAtual, passos, avancarPasso, voltarPasso,
+  passoAtual, passos, modoVisualizar, avancarPasso, voltarPasso,
   modalConfirmaTodosAberto,
   funcionarioTemp,
   buscaFuncionario, buscandoFuncionario, sugestoesFuncionarios, mostrarMenuFuncionario,

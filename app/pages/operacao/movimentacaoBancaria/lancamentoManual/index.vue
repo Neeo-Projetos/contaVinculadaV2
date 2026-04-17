@@ -51,7 +51,7 @@
 
         <template #linhas-tabela="{ item }">
           <td class="px-6 py-4">
-            <NuxtLink :to="`/operacao/movimentacaoBancaria/lancamentoManual/cadastro?id=${item.codigo}`" class="flex flex-col group">
+            <NuxtLink :to="`/operacao/movimentacaoBancaria/lancamentoManual/cadastro?codigo=${item.codigo}&modo=visualizar`" class="flex flex-col group">
               <span class="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{{ item.projeto }}</span>
               <span class="text-xs text-gray-500 dark:text-gray-400 font-medium italic">{{ item.contaVinculada }}</span>
             </NuxtLink>
@@ -72,15 +72,10 @@
           </td>
           <td v-if="colunas.acoes" class="px-6 py-4 text-center">
              <div class="flex items-center justify-center gap-2">
-                <button @click="abrirModalDetalhes(item.codigo)"
+                <NuxtLink :to="`/operacao/movimentacaoBancaria/lancamentoManual/cadastro?codigo=${item.codigo}&modo=visualizar`"
                   class="w-10 h-10 flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 rounded-xl transition-all active:scale-95 shadow-sm"
                   title="Ver Detalhes">
                   <Icon name="fa7-solid:eye" class="w-4 h-4" />
-                </button>
-                <NuxtLink :to="`/operacao/movimentacaoBancaria/lancamentoManual/cadastro?id=${item.codigo}`"
-                  class="w-10 h-10 flex items-center justify-center text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 rounded-xl transition-all active:scale-95 shadow-sm"
-                  title="Editar">
-                  <Icon name="fa7-solid:pen" class="w-4 h-4" />
                 </NuxtLink>
                 <button @click="abrirModalFuncionarios(item.codigo)"
                   :disabled="item.funcionario !== 1"
@@ -106,7 +101,7 @@
               { icone: 'fa7-solid:calendar-day', texto: item.dataMovimentacao },
               { icone: 'fa7-solid:tag', texto: item.tipoMovimentacao }
             ]" @ver-detalhes="abrirModalDetalhes(item.codigo)"
-            @clique-titulo="navigateTo(`/operacao/movimentacaoBancaria/lancamentoManual/cadastro?id=${item.codigo}`)" />
+            @clique-titulo="navigateTo(`/operacao/movimentacaoBancaria/lancamentoManual/cadastro?codigo=${item.codigo}`)" />
         </template>
       </AppContainerListagem>
     </AppFiltro>

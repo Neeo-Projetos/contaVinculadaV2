@@ -7,7 +7,9 @@ export function useLancamentoManualFormulario() {
   const router = useRouter()
   const { dispararAlerta } = useAppNotificacao()
   
-  const registroId = route.query.id as string
+  const registroCodigo = route.query.codigo as string
+  const editando = computed(() => registroCodigo !== '0' && !!registroCodigo)
+  const modoVisualizar = computed(() => route.query.modo === 'visualizar' || editando.value)
   const carregandoTela = ref(false)
   const salvando = ref(false)
   const modalConfirmaTodosAberto = ref(false)
@@ -31,7 +33,7 @@ export function useLancamentoManualFormulario() {
   }
 
   const form = reactive<FormLancamento>({
-    codigo: registroId || '0',
+    codigo: registroCodigo || '0',
     projeto: '',
     contaVinculada: '',
     tipoMovimentacao: '',
@@ -61,7 +63,7 @@ export function useLancamentoManualFormulario() {
   const paginaFuncionario = ref(1)
   const itensPorPaginaFuncionario = ref(10)
 
-  const editando = computed(() => form.codigo !== '0' && !!form.codigo)
+
 
   // Filtrei a lista de funcionários que já foram adicionados
   const funcionariosFiltrados = computed(() => {
@@ -337,7 +339,7 @@ export function useLancamentoManualFormulario() {
   const voltarParaLista = () => router.push('/operacao/movimentacaoBancaria/lancamentoManual')
 
   const novoRegistro = () => {
-    router.push('/operacao/movimentacaoBancaria/lancamentoManual/cadastro?id=0')
+    router.push('/operacao/movimentacaoBancaria/lancamentoManual/cadastro?codigo=0')
     passoAtual.value = 0
     Object.assign(form, {
       codigo: '0',
@@ -384,6 +386,7 @@ export function useLancamentoManualFormulario() {
     erros,
     passoAtual,
     passos,
+    modoVisualizar,
     // Ações de navegação e gravação
     avancarPasso,
     voltarPasso,
