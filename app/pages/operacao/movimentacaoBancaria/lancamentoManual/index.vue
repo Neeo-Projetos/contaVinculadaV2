@@ -117,27 +117,11 @@
     <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labels" @aplicar="aplicarExibicao"
       @close="modalExibicaoAberto = false" />
 
-    <AppModal :isOpen="modalDetalhesAberto" title="Datalhes do Lançamento" icon="fa7-solid:circle-info" @close="modalDetalhesAberto = false" tamanho="md">
-       <div class="space-y-6">
-        <div class="p-5 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
-          <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Motivo do Lançamento</label>
-          <p class="text-gray-700 dark:text-gray-300 font-medium leading-relaxed font-bold">{{ detalhes.motivo }}</p>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="p-4 bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800">
-            <span class="text-[9px] font-black uppercase text-gray-400 block mb-1">Usuário</span>
-            <span class="font-bold text-gray-700 dark:text-gray-300">{{ detalhes.usuarioCadastro }}</span>
-          </div>
-          <div class="p-4 bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800">
-            <span class="text-[9px] font-black uppercase text-gray-400 block mb-1">Data Registro</span>
-            <span class="font-bold text-gray-700 dark:text-gray-300">{{ detalhes.dataCadastro }}</span>
-          </div>
-        </div>
-      </div>
-      <template #footer>
-        <AppBotao variacao="padrao" @click="modalDetalhesAberto = false" class="w-full h-12 uppercase text-[10px] font-black tracking-widest">Fechar Detalhes</AppBotao>
-      </template>
-    </AppModal>
+    <AppModalDetalhes 
+      :aberto="modalDetalhesAberto" 
+      :dados="detalhes" 
+      @close="modalDetalhesAberto = false" 
+    />
 
     <AppModal :isOpen="modalFuncionarioAberto" title="Funcionários Vinculados" icon="fa7-solid:users" @close="modalFuncionarioAberto = false" tamanho="sm">
       <div class="p-2">

@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
       const data = result.recordset[0]
       if (data.dataCadastro) {
         const d = new Date(data.dataCadastro)
-        data.dataCadastro = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+        data.dataCadastro = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()} - ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
       }
       return { status: 'success', data }
     }
