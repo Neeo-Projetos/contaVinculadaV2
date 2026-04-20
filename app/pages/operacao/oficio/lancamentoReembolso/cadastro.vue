@@ -18,10 +18,10 @@
     <AppCartaoFormulario>
       <AppSobreposicaoCarregamento :carregando="carregandoTela || salvando" :mensagem="salvando ? 'Gravando dados...' : 'Carregando informações...'" />
 
-      <form v-if="!carregandoTela" @submit.prevent="avancarPasso" class="space-y-12 relative z-0">
+      <form v-if="!carregandoTela" @submit.prevent class="space-y-12 relative">
         
         <!-- PASSO 1: INFORMAÇÕES DO LANÇAMENTO -->
-        <div v-if="passoAtual === 1" class="animate-fade-in">
+        <div v-if="passoAtual === 1" class="animate-fade-in relative z-10">
           <AppFormularioSecao icone="fa7-solid:circle-info">
             INFORMAÇÕES GERAIS DO LANÇAMENTO
           </AppFormularioSecao>
@@ -31,13 +31,9 @@
               <AppSelect 
                 v-model="form.projeto" 
                 label="PROJETO" 
-                placeholder="Selecione o projeto na lista..." 
-                :opcoes="projetosFormatados" 
-                itemValue="codigo" 
-                itemLabel="label" 
-                required 
+                placeholder="Selecione o projeto..." 
+                :opcoes="combos.projetos.map(p => ({ codigo: String(p.codigo), descricao: p.apelido ? `${p.apelido} - ${p.descricao}` : p.descricao }))"
                 :somente-leitura="editando"
-                @change="carregarContas(form.projeto)"
               />
             </div>
             
@@ -45,67 +41,51 @@
               <AppSelect 
                 v-model="form.contaVinculada" 
                 label="CONTA VINCULADA" 
-                placeholder="Selecione a conta bancária..." 
-                :opcoes="contasVinculadas" 
-                itemValue="codigo" 
-                itemLabel="label"
-                required 
+                placeholder="Selecione a conta..." 
+                :opcoes="combos.contasVinculadas" 
                 :somente-leitura="editando"
-                @change="carregarProjetoDaConta(form.contaVinculada)"
               />
             </div>
 
             <div class="md:col-span-4">
               <AppSelect 
                 v-model="form.tipoMovimentacao" 
-                label="TIPO DA MOVIMENTAÇÃO" 
+                label="TIPO DE MOVIMENTAÇÃO" 
                 placeholder="Selecione o tipo..." 
-                :opcoes="tiposMovimentacao" 
-                itemValue="codigo" 
-                itemLabel="descricao"
-                required 
+                :opcoes="combos.tiposMovimentacao" 
                 :somente-leitura="editando"
               />
             </div>
 
-            <div class="md:col-span-3">
-              <AppInputTexto 
+            <div class="md:col-span-4">
+              <AppInputMoeda 
                 v-model="form.valorMovimentacao" 
-                label="VALOR DA MOVIMENTAÇÃO" 
-                placeholder="0,00" 
-                icone="fa7-solid:dollar-sign"
-                required 
+                label="VALOR" 
                 :somente-leitura="editando"
-                @input="formatarValor('valorMovimentacao')"
               />
             </div>
 
-            <div class="md:col-span-2">
-              <AppInputTexto 
+            <div class="md:col-span-4">
+              <AppInputData 
                 v-model="form.dataMovimentacao" 
-                label="DATA DA MOV." 
-                placeholder="dd/mm/aaaa" 
-                icone="fa7-solid:calendar-days"
-                required 
-                v-maska="'##/##/####'"
+                label="DATA" 
+                placeholder="DD/MM/AAAA"
+                icone="fa7-solid:calendar-day"
                 :somente-leitura="editando"
               />
             </div>
 
-            <div class="md:col-span-3">
+            <div class="md:col-span-4">
               <AppSelect 
                 v-model="form.classificacaoLancamento" 
-                label="CLASSIFICAÇÃO DO LANC." 
+                label="CLASSIFICAÇÃO" 
                 placeholder="Selecione..." 
-                :opcoes="classificacoes" 
-                itemValue="codigo" 
-                itemLabel="descricao"
-                required 
+                :opcoes="combos.classificacoes" 
                 :somente-leitura="editando"
               />
             </div>
 
-            <div class="md:col-span-12">
+            <div class="md:col-span-8">
               <AppInputTexto 
                 v-model="form.motivo" 
                 label="MOTIVO / JUSTIFICATIVA" 
@@ -113,7 +93,6 @@
                 icone="fa7-solid:comment-dots"
                 textarea
                 rows="3"
-                required 
                 :somente-leitura="editando"
               />
             </div>
@@ -121,7 +100,7 @@
         </div>
 
         <!-- PASSO 2: INFORMAÇÕES DO OFÍCIO -->
-        <div v-if="passoAtual === 2" class="animate-fade-in">
+        <div v-if="passoAtual === 2" class="animate-fade-in relative z-10">
           <AppFormularioSecao icone="fa7-solid:stamp">
             INFORMAÇÕES DO OFÍCIO DE REEMBOLSO
           </AppFormularioSecao>
@@ -133,32 +112,25 @@
                 label="Nº DO OFÍCIO" 
                 placeholder="Digite o número..." 
                 icone="fa7-solid:hashtag"
-                required 
                 :somente-leitura="editando"
               />
             </div>
 
             <div class="md:col-span-3">
-              <AppInputTexto 
+              <AppInputData 
                 v-model="form.dataOficio" 
                 label="DATA DO OFÍCIO" 
-                placeholder="dd/mm/aaaa" 
+                placeholder="DD/MM/AAAA"
                 icone="fa7-solid:calendar-check"
-                required 
-                v-maska="'##/##/####'"
                 :somente-leitura="editando"
               />
             </div>
 
             <div class="md:col-span-3">
-              <AppInputTexto 
+              <AppInputMoeda 
                 v-model="form.valorOficio" 
                 label="VALOR DO OFÍCIO" 
-                placeholder="0,00" 
-                icone="fa7-solid:dollar-sign"
-                required 
                 :somente-leitura="editando"
-                @input="formatarValor('valorOficio')"
               />
             </div>
 
@@ -167,34 +139,27 @@
                 v-model="form.status" 
                 label="STATUS ATUAL" 
                 placeholder="Selecione o status..." 
-                :opcoes="statusList" 
-                itemValue="codigo" 
-                itemLabel="descricao"
-                required 
+                :opcoes="combos.statusList" 
                 :somente-leitura="editando"
               />
             </div>
 
             <div class="md:col-span-3">
-              <AppInputTexto 
+              <AppInputData 
                 v-model="form.dataResposta" 
                 label="DATA DA RESPOSTA" 
-                placeholder="dd/mm/aaaa" 
+                placeholder="DD/MM/AAAA"
                 icone="fa7-solid:calendar-minus"
-                required 
-                v-maska="'##/##/####'"
                 :somente-leitura="editando"
               />
             </div>
 
             <div class="md:col-span-3">
-              <AppInputTexto 
+              <AppInputData 
                 v-model="form.dataEntrada" 
                 label="DATA DE ENTRADA" 
-                placeholder="dd/mm/aaaa" 
+                placeholder="DD/MM/AAAA"
                 icone="fa7-solid:calendar-plus"
-                required 
-                v-maska="'##/##/####'"
                 :somente-leitura="editando"
               />
             </div>
@@ -204,10 +169,7 @@
                   v-model="form.classificacaoOficio" 
                   label="CLASSIFICAÇÃO DO OFÍCIO" 
                   placeholder="Selecione a classificação..." 
-                  :opcoes="classificacoes" 
-                  itemValue="codigo" 
-                  itemLabel="descricao"
-                  required 
+                  :opcoes="combos.classificacoes" 
                   :somente-leitura="editando"
                 />
             </div>
@@ -215,67 +177,122 @@
         </div>
 
         <!-- PASSO 3: FUNCIONÁRIOS -->
-        <div v-if="passoAtual === 3" class="animate-fade-in">
-          <AppFormularioSecao icone="fa7-solid:users-rectangle">
-            APLICAÇÃO EM FUNCIONÁRIOS (OPCIONAL)
+        <div v-if="passoAtual === 3" class="space-y-8 animate-fade-in">
+          <AppFormularioSecao icone="fa7-solid:users-gear">
+            Vincular Funcionários (Opcional)
           </AppFormularioSecao>
-          
-          <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest mt-2 mb-6 flex items-center gap-2">
-            <Icon name="fa7-solid:circle-exclamation" class="w-4 h-4" />
-            <span>Caso nenhum funcionário seja listado, o lançamento será aplicado globalmente ao projeto.</span>
-          </p>
 
-          <div v-if="!editando" class="grid grid-cols-1 md:grid-cols-12 gap-x-4 gap-y-6 items-end">
-            <div class="md:col-span-8">
-              <AppSelect 
-                v-model="funcionarioTemp" 
-                label="SELECIONE O FUNCIONÁRIO" 
-                placeholder="Busque pelo nome..." 
-                :opcoes="funcionariosAtivos" 
-                itemValue="codigo" 
-                itemLabel="nomeCompleto" 
-                returnObject
-              />
+          <div class="space-y-6">
+            <div v-if="!editando" class="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-4 items-end animate-fade-in text-gray-900">
+              <div class="flex-1 w-full">
+                <AppInputAutocomplete 
+                  v-model="buscaFuncionario" 
+                  label="Pesquisar Funcionário" 
+                  placeholder="Digite o nome (min. 3 caracteres)..."
+                  :sugestoes="sugestoesFuncionarios"
+                  :buscando="buscandoFuncionario"
+                  :mostrarMenu="mostrarMenuFuncionario"
+                  item-value="codigo"
+                  item-label="nomeCompleto"
+                  @buscar="buscarFuncionariosAutoComplete"
+                  @selecionar="selecionarFuncionario"
+                  @fechar="mostrarMenuFuncionario = false"
+                />
+              </div>
+              <div class="flex gap-2 w-full md:w-auto">
+                <AppBotao variacao="primario" @click="addFuncionario" class="flex-1 md:flex-none h-12">
+                   <Icon name="fa7-solid:plus" class="mr-2" /> Adicionar
+                </AppBotao>
+                <AppBotao variacao="perigo" @click="removerFuncionariosSelecionados" class="flex-1 md:flex-none h-12">
+                  <Icon name="fa7-solid:trash-can" />
+                </AppBotao>
+              </div>
             </div>
-            <div class="md:col-span-4 flex gap-2">
-              <AppBotao variacao="padrao" icone="fa7-solid:plus" class="flex-1" @click="addFuncionario">Adicionar</AppBotao>
-              <AppBotao variacao="perigo" icone="fa7-solid:minus" class="flex-1" @click="removerFuncionario">Remover</AppBotao>
-            </div>
-          </div>
 
-          <div class="mt-8 overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm bg-gray-50/50 dark:bg-gray-900/10">
-            <table class="w-full text-left border-collapse font-bold uppercase tracking-widest text-[10px]">
-              <thead>
-                <tr class="bg-white dark:bg-[#1e2029]">
-                  <th class="p-4 w-12 text-center"></th>
-                  <th class="p-4 text-gray-400">Nome do Funcionário</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(item, index) in form.funcionarios.filter(f => f.tipoAlteracao !== 2)" :key="index" 
-                    class="border-t border-gray-100 dark:border-gray-800 hover:bg-white dark:hover:bg-[#1e2029] transition-colors group">
-                  <td class="p-4 text-center">
-                    <AppCheckbox v-model="item.selecionadoParaRemover" :somente-leitura="editando" />
-                  </td>
-                  <td class="p-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 font-extrabold text-[10px]">
-                            {{ item.funcionarioNome.charAt(0).toUpperCase() }}
-                        </div>
-                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ item.funcionarioNome }}</span>
+            <!-- Barra de Busca e Ações da Tabela de Vínculos -->
+            <template v-if="form.funcionarios.filter(f => f.tipoAlteracao !== 2).length > 0">
+              <div class="flex flex-col sm:flex-row items-center gap-4">
+                <div class="flex-1 w-full">
+                  <AppInputTexto 
+                    v-model="filtroFuncionario"
+                    placeholder="Filtrar funcionários já adicionados..."
+                    icone="fa7-solid:magnifying-glass"
+                    label=""
+                    class="!mb-0"
+                  />
+                </div>
+
+                <AppBotao 
+                  v-if="!editando"
+                  :variacao="todosFuncionariosMarcados ? 'perigo' : 'padrao'"
+                  :icone="todosFuncionariosMarcados ? 'fa7-solid:xmark' : 'fa7-solid:check-double'" 
+                  @click.prevent="marcarDesmarcarTodosFuncionarios"
+                  class="!h-11 !px-6 !text-[10px] !rounded-xl shadow-sm w-full sm:w-auto uppercase font-black tracking-widest"
+                >
+                  {{ todosFuncionariosMarcados ? 'Desmarcar Todos' : 'Marcar Todos' }}
+                </AppBotao>
+              </div>
+
+              <!-- Listagem Premium -->
+              <AppContainerListagem
+                :lista="funcionariosPaginados"
+                :carregando="false"
+                :buscaRealizada="true"
+                :totalRegistros="funcionariosFiltrados.length"
+                :registroInicial="registroInicialFuncionario"
+                :registroFinal="registroFinalFuncionario"
+                :totalPaginas="totalPaginasFuncionario"
+                :paginaAtual="paginaFuncionario"
+                :itensPorPagina="itensPorPaginaFuncionario"
+                :paginasExibidas="paginasExibidasFuncionario"
+                :view="false"
+                :edit="false"
+                class="mb-0 overflow-hidden rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm text-gray-900"
+                @mudarPagina="paginaFuncionario = $event"
+              >
+                <template #cabecalho-tabela>
+                  <th class="p-5 w-16 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Sel.</th>
+                  <th class="p-5 text-gray-400 text-[10px] font-black uppercase tracking-widest text-left">Funcionário</th>
+                </template>
+
+                <template #linhas-tabela="{ item }">
+                  <td class="p-5 text-center transition-colors" :class="!editando ? 'cursor-pointer hover:bg-emerald-50/10' : ''" @click.stop="!editando && (item.selecionadoParaRemover = !item.selecionadoParaRemover)">
+                    <div class="flex items-center justify-center">
+                      <AppCheckbox :modelValue="item.selecionadoParaRemover" :somenteLeitura="editando" />
                     </div>
                   </td>
-                </tr>
-                <tr v-if="form.funcionarios.filter(f => f.tipoAlteracao !== 2).length === 0">
-                    <td colspan="2" class="p-10 text-center text-gray-400">
-                        <div class="flex flex-col items-center gap-2 opacity-60">
-                            <Icon name="fa7-solid:users-slash" class="w-10 h-10 mb-2" />
-                            <p class="text-[10px] font-black uppercase tracking-widest">Nenhum Selecionado</p>
-                        </div>
-                    </td>
-                </tr>
-              </tbody>
-            </table>
+                  <td class="p-5">
+                    <div class="flex items-center gap-4">
+                      <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-[11px] group-hover:scale-110 transition-transform uppercase">
+                        {{ (item.funcionarioNome || 'F').charAt(0) }}
+                      </div>
+                      <div class="flex flex-col min-w-0">
+                        <span class="text-sm font-bold text-gray-800 dark:text-gray-100 group-hover:text-emerald-600 transition-colors truncate">
+                          {{ item.funcionarioNome }}
+                        </span>
+                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-tighter opacity-60">
+                          Código: {{ item.funcionarioId }}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                </template>
+              </AppContainerListagem>
+
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 px-2 opacity-70">
+                <Icon name="fa7-solid:circle-info" class="text-emerald-500 w-4 h-4" />
+                Clique em qualquer lugar da linha para selecionar.
+              </p>
+            </template>
+
+            <div v-else class="text-center py-16 bg-gray-50/30 dark:bg-gray-900/10 rounded-3xl border-2 border-dashed border-gray-100 dark:border-gray-800 animate-fade-in shadow-inner">
+              <div class="relative inline-block mb-6">
+                <div class="absolute inset-0 bg-gray-200/20 blur-2xl rounded-full animate-pulse"></div>
+                <Icon name="fa7-solid:users-slash" class="w-16 h-16 text-gray-200 relative z-10" />
+              </div>
+              <p class="text-lg text-gray-400 font-black uppercase tracking-tighter">Nenhum funcionário vinculado</p>
+              <p class="text-xs text-gray-300 mt-2 font-bold uppercase tracking-widest">O lançamento será aplicado a todos do projeto por padrão.</p>
+            </div>
           </div>
         </div>
 
@@ -285,6 +302,7 @@
           :labelVoltar="passoAtual === 1 ? 'Retornar à Lista' : 'Etapa Anterior'"
           :labelGravar="editando ? (passoAtual === totalPassos ? 'Fechar Visualização' : 'Próxima Etapa') : (passoAtual === totalPassos ? 'Finalizar Cadastro' : 'Próxima Etapa')"
           :iconeGravar="editando ? (passoAtual === totalPassos ? 'fa7-solid:xmark' : 'fa7-solid:arrow-right') : (passoAtual === totalPassos ? 'fa7-solid:check-double' : 'fa7-solid:arrow-right')"
+          class="relative z-0"
           @voltar="voltarPasso"
           @limpar="limparFormulario"
           @gravar="editando && passoAtual === totalPassos ? voltarParaLista() : avancarPasso()"
@@ -318,9 +336,15 @@
 <script setup lang="ts">
 const {
   carregandoTela, salvando, modalConfirmaProjeto, modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem,
-  fecharModalAlerta, form, editando, projetosAtivos, contasVinculadas, tiposMovimentacao, classificacoes,
-  funcionariosAtivos, statusList, funcionarioTemp, projetosFormatados, formatarValor, carregarContas,
-  carregarProjetoDaConta, addFuncionario, removerFuncionario, tentarGravar, gravar, limparFormulario, voltarParaLista,
+  fecharModalAlerta, form, editando, combos,
+  funcionarioTemp, buscaFuncionario, buscandoFuncionario, sugestoesFuncionarios, mostrarMenuFuncionario,
+  buscarFuncionariosAutoComplete, selecionarFuncionario,
+  filtroFuncionario, paginaFuncionario, itensPorPaginaFuncionario,
+  funcionariosFiltrados, funcionariosPaginados, totalPaginasFuncionario,
+  registroInicialFuncionario, registroFinalFuncionario, paginasExibidasFuncionario,
+  todosFuncionariosMarcados, marcarDesmarcarTodosFuncionarios,
+  carregarContas, carregarProjetoDaConta, addFuncionario,
+  removerFuncionariosSelecionados, tentarGravar, gravar, limparFormulario, voltarParaLista,
   passoAtual, totalPassos, avancarPasso, voltarPasso
 } = useLancamentoReembolsoFormulario()
 </script>

@@ -1,4 +1,4 @@
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 export function useLancamentoReembolsoFormulario() {
@@ -39,21 +39,54 @@ export function useLancamentoReembolsoFormulario() {
     funcionarios: [] as any[]
   })
 
-  // Combos
-  const projetos = ref<any[]>([])
-  const contasVinculadas = ref<any[]>([])
-  const tiposMovimentacao = ref<any[]>([])
-  const classificacoes = ref<any[]>([])
-  const funcionariosAtivos = ref<any[]>([])
-  const statusList = ref<any[]>([])
-  const funcionarioTemp = ref<any>('')
-
-  const projetosFormatados = computed(() => {
-    return projetos.value.map(p => ({
-      codigo: p.codigo,
-      label: `${p.apelido} - ${p.descricao}`
-    }))
+  const combos = reactive({
+    projetos: [] as any[],
+    contasVinculadas: [] as any[],
+    tiposMovimentacao: [] as any[],
+    classificacoes: [] as any[],
+    funcionariosAtivos: [] as any[],
+    statusList: [] as any[]
   })
+
+  const funcionarioTemp = ref<any>(null)
+  const buscaFuncionario = ref('')
+  const buscandoFuncionario = ref(false)
+  const sugestoesFuncionarios = ref<any[]>([])
+  const mostrarMenuFuncionario = ref(false)
+
+  // Filtros e Paginação local para a tabela de funcionários vinculados
+  const filtroFuncionario = ref('')
+  const paginaFuncionario = ref(1)
+  const itensPorPaginaFuncionario = ref(10)
+
+  // Filtrei a lista de funcionários que já foram adicionados
+  const funcionariosFiltrados = computed(() => {
+    const lista = form.funcionarios.filter(f => f.tipoAlteracao !== 2)
+    if (!filtroFuncionario.value) return lista
+    const busca = filtroFuncionario.value.toLowerCase()
+    return lista.filter(f => (f.funcionarioNome || '').toLowerCase().includes(busca))
+  })
+
+  // Fiz o fatiamento para a paginação da tabela
+  const totalPaginasFuncionario = computed(() => Math.ceil(funcionariosFiltrados.value.length / itensPorPaginaFuncionario.value))
+  const funcionariosPaginados = computed(() => {
+    const inicio = (paginaFuncionario.value - 1) * itensPorPaginaFuncionario.value
+    return funcionariosFiltrados.value.slice(inicio, inicio + itensPorPaginaFuncionario.value)
+  })
+
+  const registroInicialFuncionario = computed(() => funcionariosFiltrados.value.length === 0 ? 0 : (paginaFuncionario.value - 1) * itensPorPaginaFuncionario.value + 1)
+  const registroFinalFuncionario = computed(() => Math.min(paginaFuncionario.value * itensPorPaginaFuncionario.value, funcionariosFiltrados.value.length))
+  const paginasExibidasFuncionario = computed(() => Array.from({ length: totalPaginasFuncionario.value }, (_, i) => i + 1))
+
+  const todosFuncionariosMarcados = computed(() => {
+    const lista = funcionariosFiltrados.value
+    return lista.length > 0 && lista.every(f => f.selecionadoParaRemover)
+  })
+
+  const marcarDesmarcarTodosFuncionarios = () => {
+    const novoEstado = !todosFuncionariosMarcados.value
+    funcionariosFiltrados.value.forEach(f => f.selecionadoParaRemover = novoEstado)
+  }
 
   const formatarValor = (campo: 'valorMovimentacao' | 'valorOficio') => {
     form[campo] = String(form[campo]).replace(/[^0-9.,]/g, "")
@@ -61,52 +94,108 @@ export function useLancamentoReembolsoFormulario() {
 
   const carregarCombos = async () => {
     try {
-      const [resProj, resTipo, resClass, resFunc, resStatus] = await Promise.all([
-        $fetch<{data: any[]}>('/api/cadastro/projeto/ativos'),
-        $fetch<any[]>('/api/tabelaBasica/tipoMovimentacao/recupera'),
-        $fetch<{data: any[]}>('/api/tabelaBasica/classificacao/ativos'),
-        $fetch<{data: any[]}>('/api/cadastro/funcionario/ativos'),
-        $fetch<{data: any[]}>('/api/tabelaBasica/status/ativos') 
-      ])
-      projetos.value = resProj.data || []
-      tiposMovimentacao.value = resTipo || []
-      classificacoes.value = resClass.data || []
-      funcionariosAtivos.value = resFunc.data || []
-      statusList.value = (resStatus.data || []).filter((s:any) => s.codigo === 1 || s.codigo === 3)
-    } catch (e) { console.error("Erro ao carregar combos", e) }
+      // Carreguei os combos de forma independente para evitar que um erro trave tudo (Igual ao Manual)
+      const resProj = await $fetch<{ data: any[] }>('/api/cadastro/projeto/ativos').catch(() => ({ data: [] }))
+      combos.projetos = resProj.data || []
+
+      const resTipo = await $fetch<{ data: any[] }>('/api/tabelaBasica/tipoMovimentacao/listagem', { method: 'POST', body: { ativo: 1 } }).catch(() => ({ data: [] }))
+      combos.tiposMovimentacao = resTipo.data || []
+
+      const resClass = await $fetch<{ data: any[] }>('/api/tabelaBasica/classificacao/listagem', { method: 'POST', body: { ativo: 1 } }).catch(() => ({ data: [] }))
+      combos.classificacoes = resClass.data || []
+
+      combos.funcionariosAtivos = []
+
+      const resStatus = await $fetch<{ data: any[] }>('/api/operacao/oficio/lancamentoReembolso/status', { method: 'POST' }).catch(() => ({ data: [] }))
+      combos.statusList = resStatus.data || []
+
+    } catch (e) {
+      console.error("Erro ao carregar combos", e)
+    }
   }
 
   const carregarContas = async (idProjeto: string) => {
+    if (!idProjeto) {
+      combos.contasVinculadas = []
+      return
+    }
     try {
-      const res = await $fetch<any[]>('/api/operacao/movimentacaoBancaria/lancamentoManual/contasPorProjeto', {
+      const res = await $fetch<{ status: string, data: any[] }>('/api/operacao/oficio/lancamentoReembolso/contasPorProjeto', {
         method: 'POST', body: { projeto: idProjeto }
       })
-      contasVinculadas.value = (res || []).map(c => ({
+      combos.contasVinculadas = (res.data || []).map(c => ({
         ...c,
-        label: `${c.agencia}/${c.conta} - ${c.banco}`
+        codigo: String(c.codigo),
+        descricao: `${c.banco} - AG: ${c.agencia}${c.digitoAgencia ? '-' + c.digitoAgencia : ''} / CT: ${c.conta}${c.digitoConta ? '-' + c.digitoConta : ''}`
       }))
-      if (res.length === 1) form.contaVinculada = res[0].codigo
+      if (res.data.length === 1) {
+        form.contaVinculada = String(res.data[0].codigo)
+      } else {
+        form.contaVinculada = ''
+      }
     } catch(e) { console.error("Erro ao carregar contas", e) }
   }
 
   const carregarProjetoDaConta = async (idConta: string) => {
+    if (!idConta) return
     try {
-      const res = await $fetch<{projeto: number}>('/api/operacao/movimentacaoBancaria/lancamentoManual/projetoPorConta', {
+      const res = await $fetch<{ status: string, data: { projeto: number } }>('/api/operacao/oficio/lancamentoReembolso/projetoPorConta', {
         method: 'POST', body: { conta: idConta }
       })
-      if(res.projeto) form.projeto = String(res.projeto)
+      if (res.data?.projeto) {
+        form.projeto = String(res.data.projeto)
+        await carregarContas(form.projeto)
+      }
     } catch(e) { console.error("Erro ao carregar projeto da conta", e) }
+  }
+
+  const buscarFuncionariosAutoComplete = async () => {
+    if (buscaFuncionario.value.length < 3) {
+      sugestoesFuncionarios.value = []
+      mostrarMenuFuncionario.value = false
+      return
+    }
+
+    buscandoFuncionario.value = true
+    mostrarMenuFuncionario.value = true
+
+    try {
+      const res = await $fetch<{ status: string, data: any[] }>('/api/operacao/oficio/lancamentoReembolso/funcionarios', {
+        method: 'POST',
+        body: {
+          termo: buscaFuncionario.value,
+          projeto: form.projeto
+        }
+      })
+
+      if (res.status === 'success') {
+        sugestoesFuncionarios.value = res.data || []
+      }
+    } catch (error) {
+      console.error('Erro ao buscar funcionários para autocomplete:', error)
+    } finally {
+      buscandoFuncionario.value = false
+    }
+  }
+
+  const selecionarFuncionario = (sugestao: any) => {
+    funcionarioTemp.value = {
+      codigo: sugestao.codigo,
+      nomeCompleto: sugestao.nomeCompleto
+    }
+    buscaFuncionario.value = sugestao.nomeCompleto
+    mostrarMenuFuncionario.value = false
   }
 
   const addFuncionario = () => {
     if (!funcionarioTemp.value) {
-        mostrarAlerta("Atenção", "Selecione um funcionário.")
+        mostrarAlerta("Atenção", "Pesquise e selecione um funcionário primeiro.")
         return
     }
     
     const existe = form.funcionarios.some(f => f.funcionarioId === funcionarioTemp.value.codigo && f.tipoAlteracao !== 2)
     if (existe) {
-        mostrarAlerta("Atenção", "Este funcionário já foi adicionado.")
+        mostrarAlerta("Atenção", "Este funcionário já foi adicionado à lista.")
         return
     }
 
@@ -117,13 +206,26 @@ export function useLancamentoReembolsoFormulario() {
       tipoAlteracao: 1,
       selecionadoParaRemover: false
     })
-    funcionarioTemp.value = ''
+
+    // Limpei a busca pra permitir adicionar o próximo rápido
+    funcionarioTemp.value = null
+    buscaFuncionario.value = ''
+    sugestoesFuncionarios.value = []
   }
 
-  const removerFuncionario = () => {
+  const removerFuncionariosSelecionados = () => {
+    const selecionados = form.funcionarios.filter(f => f.selecionadoParaRemover && f.tipoAlteracao !== 2)
+    if (selecionados.length === 0) {
+       mostrarAlerta('Seleção Vazia', 'Marque ao menos um funcionário para remover.')
+       return
+    }
+
     form.funcionarios.forEach(f => {
+      // Marquei como removido (tipo 2) pra o banco saber que é pra deletar
       if (f.selecionadoParaRemover) f.tipoAlteracao = 2
     })
+    
+    mostrarAlerta('Removido', 'Funcionário(s) removido(s) da lista temporária.')
   }
 
   const mostrarAlerta = (titulo: string, mensagem: string) => {
@@ -256,6 +358,26 @@ export function useLancamentoReembolsoFormulario() {
     carregandoTela.value = false
   })
 
+  // Sincronizei as contas se o projeto mudar (Igual ao Manual)
+  watch(() => form.projeto, (novoProjeto) => {
+    if (novoProjeto) {
+      carregarContas(novoProjeto)
+      // Limpei a busca de funcionários se o projeto mudar
+      buscaFuncionario.value = ''
+      funcionarioTemp.value = null
+    } else {
+      combos.contasVinculadas = []
+      form.contaVinculada = ''
+    }
+  })
+
+  // Sincronizei o projeto se a conta mudar
+  watch(() => form.contaVinculada, (novaConta) => {
+    if (novaConta && !form.projeto) {
+      carregarProjetoDaConta(novaConta)
+    }
+  })
+
   return {
     carregandoTela,
     salvando,
@@ -270,20 +392,31 @@ export function useLancamentoReembolsoFormulario() {
     fecharModalAlerta,
     form,
     editando,
-    projetos,
-    contasVinculadas,
-    tiposMovimentacao,
-    classificacoes,
-    funcionariosAtivos,
-    statusList,
+    combos,
     funcionarioTemp,
-    projetosAtivos: projetos, // Adicionando o alias ou retorno direto
-    projetosFormatados,
-    formatarValor,
+    buscaFuncionario,
+    buscandoFuncionario,
+    sugestoesFuncionarios,
+    mostrarMenuFuncionario,
+    buscarFuncionariosAutoComplete,
+    selecionarFuncionario,
+    // Tabela e Paginação de Funcionários
+    filtroFuncionario,
+    paginaFuncionario,
+    itensPorPaginaFuncionario,
+    funcionariosFiltrados,
+    funcionariosPaginados,
+    totalPaginasFuncionario,
+    registroInicialFuncionario,
+    registroFinalFuncionario,
+    paginasExibidasFuncionario,
+    todosFuncionariosMarcados,
+    marcarDesmarcarTodosFuncionarios,
+    // Métodos de apoio
     carregarContas,
     carregarProjetoDaConta,
     addFuncionario,
-    removerFuncionario,
+    removerFuncionariosSelecionados,
     tentarGravar,
     gravar,
     limparFormulario,

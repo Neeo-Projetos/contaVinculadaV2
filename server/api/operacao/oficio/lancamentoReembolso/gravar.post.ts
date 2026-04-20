@@ -1,5 +1,6 @@
 import { defineEventHandler, readBody } from 'h3'
 import { useDb } from '../../../../utils/db'
+import { comum } from '../../../../utils/comum'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -8,26 +9,20 @@ export default defineEventHandler(async (event) => {
   const projeto = Number(body.projeto)
   const contaVinculada = Number(body.contaVinculada)
   const tipoMovimentacao = Number(body.tipoMovimentacao)
-  const valorMovimentacao = Number(String(body.valorMovimentacao).replace(',', '.'))
+  const valorMovimentacao = comum.validaValorSql(body.valorMovimentacao)
   
-  const formataDataSql = (dStr: string) => {
-    if(!dStr) return 'NULL'
-    const [d, m, y] = dStr.split('/')
-    return `'${y}-${m}-${d}'`
-  }
-
-  const dataMovimentacao = formataDataSql(body.dataMovimentacao)
-  const dataOficio = formataDataSql(body.dataOficio)
-  const dataResposta = formataDataSql(body.dataResposta)
-  const dataEntrada = formataDataSql(body.dataEntrada)
+  const dataMovimentacao = comum.formatarDataSql(body.dataMovimentacao) ? `'${comum.formatarDataSql(body.dataMovimentacao)}'` : 'NULL'
+  const dataOficio = comum.formatarDataSql(body.dataOficio) ? `'${comum.formatarDataSql(body.dataOficio)}'` : 'NULL'
+  const dataResposta = comum.formatarDataSql(body.dataResposta) ? `'${comum.formatarDataSql(body.dataResposta)}'` : 'NULL'
+  const dataEntrada = comum.formatarDataSql(body.dataEntrada) ? `'${comum.formatarDataSql(body.dataEntrada)}'` : 'NULL'
 
   const classificacaoLancamento = Number(body.classificacaoLancamento)
-  const valorOficio = Number(String(body.valorOficio).replace(',', '.'))
+  const valorOficio = comum.validaValorSql(body.valorOficio)
   const classificacaoOficio = Number(body.classificacaoOficio)
-  const numeroOficio = `'${body.numeroOficio.replace(/'/g, "''")}'`
+  const numeroOficio = body.numeroOficio ? `'${String(body.numeroOficio).replace(/'/g, "''")}'` : "''"
   const status = Number(body.status)
   
-  const motivo = `'${body.motivo.replace(/'/g, "''")}'`
+  const motivo = body.motivo ? `'${String(body.motivo).replace(/'/g, "''")}'` : "''"
   const usuario = 1 
 
   let xmlFuncionario = "<ArrayOfFuncionario>"

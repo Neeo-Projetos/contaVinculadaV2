@@ -120,5 +120,22 @@ export const comum = {
   validaValorRecupera(valor: number | null): string {
     if (valor === null || valor === undefined) return '0,00'
     return new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor)
+  },
+
+  /**
+   * Converte valor moeda formatado (R$ 1.234,56) para decimal SQL (1234.56)
+   */
+  validaValorSql(valor: string | number | null): number {
+    if (valor === null || valor === undefined || valor === '') return 0
+    if (typeof valor === 'number') return valor
+    
+    const limpo = String(valor)
+      .replace('R$', '')
+      .replace(/\s/g, '')
+      .replace(/\./g, '')
+      .replace(',', '.')
+    
+    const num = parseFloat(limpo)
+    return isNaN(num) ? 0 : num
   }
 }
