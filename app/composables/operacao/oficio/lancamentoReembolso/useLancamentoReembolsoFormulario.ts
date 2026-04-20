@@ -5,7 +5,7 @@ export function useLancamentoReembolsoFormulario() {
   const route = useRoute()
   const router = useRouter()
   
-  const idRaw = route.query.id
+  const codigo = route.query.codigo
   const editando = computed(() => !!form.codigo && form.codigo !== '0')
 
   const carregandoTela = ref(false)
@@ -21,7 +21,7 @@ export function useLancamentoReembolsoFormulario() {
   const modalAlertaMensagem = ref('')
 
   const form = reactive({
-    codigo: idRaw ? String(idRaw) : '0',
+    codigo: codigo ? String(codigo) : '0',
     projeto: '',
     contaVinculada: '',
     tipoMovimentacao: '',
@@ -215,8 +215,27 @@ export function useLancamentoReembolsoFormulario() {
     }
   }
 
+  const recuperarDados = async () => {
+    if (!editando.value) return
+    carregandoTela.value = true
+    try {
+      const resp = await $fetch<{ status: string, data: any }>('/api/operacao/oficio/lancamentoReembolso/recupera', {
+        method: 'POST',
+        body: { codigo: form.codigo }
+      })
+      if (resp.status === 'success') {
+        Object.assign(form, resp.data)
+        if (form.projeto) await carregarContas(form.projeto)
+      }
+    } catch (e) {
+      console.error("Erro ao recuperar dados", e)
+    } finally {
+      carregandoTela.value = false
+    }
+  }
+
   const limparFormulario = () => {
-    router.push('/operacao/oficio/lancamentoReembolso/cadastro?id=0')
+    router.push('/operacao/oficio/lancamentoReembolso/cadastro?codigo=0')
     Object.assign(form, {
         codigo: '0', projeto: '', contaVinculada: '', tipoMovimentacao: '',
         valorMovimentacao: '', dataMovimentacao: '', classificacaoLancamento: '',
@@ -231,9 +250,8 @@ export function useLancamentoReembolsoFormulario() {
   onMounted(async () => {
     carregandoTela.value = true
     await carregarCombos()
-    // Se fosse edição, aqui carregaríamos os dados
     if (editando.value) {
-        // Lógica de recuperação se necessário (atualment no PHP não tinha edição clara na listagem, mas o cadastro.vue previa)
+        await recuperarDados()
     }
     carregandoTela.value = false
   })

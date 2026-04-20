@@ -151,24 +151,26 @@ export function useLancamentoReembolsoListagem() {
     projetoSearch.value = ''
   }
 
-  const abrirModalDetalhes = async (id: number) => {
+  const abrirModalDetalhes = async (codigo: number) => {
     try {
-      const response = await $fetch<any>('/api/operacao/oficio/lancamentoReembolso/detalhes', {
+      const response = await $fetch<{ status: string, data: any }>('/api/operacao/oficio/lancamentoReembolso/detalhes', {
         method: 'POST',
-        body: { lancamentoReembolso: id }
+        body: { codigo: codigo }
       })
-      detalhes.value = response
-      modalDetalhesAberto.value = true
+      if (response.status === 'success') {
+        detalhes.value = response.data
+        modalDetalhesAberto.value = true
+      }
     } catch (error) {
       console.error("Erro ao buscar detalhes", error)
     }
   }
 
-  const abrirModalFuncionarios = async (id: number) => {
+  const abrirModalFuncionarios = async (codigo: number) => {
     try {
       const response = await $fetch<any[]>('/api/operacao/oficio/lancamentoReembolso/funcionarios', {
         method: 'POST',
-        body: { lancamentoReembolso: id }
+        body: { codigo: codigo }
       })
       listaFuncionariosModal.value = response || []
       modalFuncionarioAberto.value = true
@@ -177,11 +179,11 @@ export function useLancamentoReembolsoListagem() {
     }
   }
 
-  const gerarPdfOficio = (id: number) => {
-    window.open(`/api/configuracao/parametros/oficio/pdf?codigo=${id}`, '_blank')
+  const gerarPdfOficio = (codigo: number) => {
+    window.open(`/api/configuracao/parametros/oficio/pdf?codigo=${codigo}`, '_blank')
   }
 
-  const novoRegistro = () => router.push('/operacao/oficio/lancamentoReembolso/cadastro?id=0')
+  const novoRegistro = () => router.push('/operacao/oficio/lancamentoReembolso/cadastro?codigo=0')
 
   const abrirModalExibicao = () => {
     Object.assign(colunasTemp, colunasVisiveis)

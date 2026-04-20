@@ -43,16 +43,10 @@ export default defineEventHandler(async (event) => {
     const result = await req.query(query)
 
     const dataFormatada = result.recordset.map((row: any) => {
-      const formatar = (dataSql: any) => {
-        if(!dataSql) return ''
-        const d = new Date(dataSql)
-        return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`
-      }
-
-      row.dataMovimentacao = formatar(row.dataMovimentacao)
-      row.dataOficio = formatar(row.dataOficio)
-      row.dataResposta = formatar(row.dataResposta)
-      row.dataEntrada = formatar(row.dataEntrada)
+      row.dataMovimentacao = comum.formatarDataBr(row.dataMovimentacao)
+      row.dataOficio = comum.formatarDataBr(row.dataOficio)
+      row.dataResposta = comum.formatarDataBr(row.dataResposta)
+      row.dataEntrada = comum.formatarDataBr(row.dataEntrada)
       return row
     })
 

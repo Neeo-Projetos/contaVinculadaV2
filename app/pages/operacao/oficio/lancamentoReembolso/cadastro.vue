@@ -36,6 +36,7 @@
                 itemValue="codigo" 
                 itemLabel="label" 
                 required 
+                :somente-leitura="editando"
                 @change="carregarContas(form.projeto)"
               />
             </div>
@@ -49,6 +50,7 @@
                 itemValue="codigo" 
                 itemLabel="label"
                 required 
+                :somente-leitura="editando"
                 @change="carregarProjetoDaConta(form.contaVinculada)"
               />
             </div>
@@ -62,6 +64,7 @@
                 itemValue="codigo" 
                 itemLabel="descricao"
                 required 
+                :somente-leitura="editando"
               />
             </div>
 
@@ -72,6 +75,7 @@
                 placeholder="0,00" 
                 icone="fa7-solid:dollar-sign"
                 required 
+                :somente-leitura="editando"
                 @input="formatarValor('valorMovimentacao')"
               />
             </div>
@@ -84,6 +88,7 @@
                 icone="fa7-solid:calendar-days"
                 required 
                 v-maska="'##/##/####'"
+                :somente-leitura="editando"
               />
             </div>
 
@@ -96,6 +101,7 @@
                 itemValue="codigo" 
                 itemLabel="descricao"
                 required 
+                :somente-leitura="editando"
               />
             </div>
 
@@ -108,6 +114,7 @@
                 textarea
                 rows="3"
                 required 
+                :somente-leitura="editando"
               />
             </div>
           </div>
@@ -127,6 +134,7 @@
                 placeholder="Digite o número..." 
                 icone="fa7-solid:hashtag"
                 required 
+                :somente-leitura="editando"
               />
             </div>
 
@@ -138,6 +146,7 @@
                 icone="fa7-solid:calendar-check"
                 required 
                 v-maska="'##/##/####'"
+                :somente-leitura="editando"
               />
             </div>
 
@@ -148,6 +157,7 @@
                 placeholder="0,00" 
                 icone="fa7-solid:dollar-sign"
                 required 
+                :somente-leitura="editando"
                 @input="formatarValor('valorOficio')"
               />
             </div>
@@ -161,6 +171,7 @@
                 itemValue="codigo" 
                 itemLabel="descricao"
                 required 
+                :somente-leitura="editando"
               />
             </div>
 
@@ -172,6 +183,7 @@
                 icone="fa7-solid:calendar-minus"
                 required 
                 v-maska="'##/##/####'"
+                :somente-leitura="editando"
               />
             </div>
 
@@ -183,6 +195,7 @@
                 icone="fa7-solid:calendar-plus"
                 required 
                 v-maska="'##/##/####'"
+                :somente-leitura="editando"
               />
             </div>
 
@@ -195,6 +208,7 @@
                   itemValue="codigo" 
                   itemLabel="descricao"
                   required 
+                  :somente-leitura="editando"
                 />
             </div>
           </div>
@@ -211,7 +225,7 @@
             <span>Caso nenhum funcionário seja listado, o lançamento será aplicado globalmente ao projeto.</span>
           </p>
 
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-x-4 gap-y-6 items-end">
+          <div v-if="!editando" class="grid grid-cols-1 md:grid-cols-12 gap-x-4 gap-y-6 items-end">
             <div class="md:col-span-8">
               <AppSelect 
                 v-model="funcionarioTemp" 
@@ -241,7 +255,7 @@
                 <tr v-for="(item, index) in form.funcionarios.filter(f => f.tipoAlteracao !== 2)" :key="index" 
                     class="border-t border-gray-100 dark:border-gray-800 hover:bg-white dark:hover:bg-[#1e2029] transition-colors group">
                   <td class="p-4 text-center">
-                    <AppCheckbox v-model="item.selecionadoParaRemover" />
+                    <AppCheckbox v-model="item.selecionadoParaRemover" :somente-leitura="editando" />
                   </td>
                   <td class="p-4">
                     <div class="flex items-center gap-3">
@@ -269,11 +283,11 @@
           :editando="editando" 
           :carregandoGravar="salvando"
           :labelVoltar="passoAtual === 1 ? 'Retornar à Lista' : 'Etapa Anterior'"
-          :labelGravar="passoAtual === totalPassos ? 'Finalizar Cadastro' : 'Próxima Etapa'"
-          :iconeGravar="passoAtual === totalPassos ? 'fa7-solid:check-double' : 'fa7-solid:arrow-right'"
+          :labelGravar="editando ? (passoAtual === totalPassos ? 'Fechar Visualização' : 'Próxima Etapa') : (passoAtual === totalPassos ? 'Finalizar Cadastro' : 'Próxima Etapa')"
+          :iconeGravar="editando ? (passoAtual === totalPassos ? 'fa7-solid:xmark' : 'fa7-solid:arrow-right') : (passoAtual === totalPassos ? 'fa7-solid:check-double' : 'fa7-solid:arrow-right')"
           @voltar="voltarPasso"
           @limpar="limparFormulario"
-          @gravar="avancarPasso"
+          @gravar="editando && passoAtual === totalPassos ? voltarParaLista() : avancarPasso()"
         />
       </form>
     </AppCartaoFormulario>

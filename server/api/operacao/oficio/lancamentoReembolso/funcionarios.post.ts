@@ -2,8 +2,8 @@ import { defineEventHandler, readBody } from 'h3'
 import { useDb } from '../../../../utils/db'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-  const id = Number(body.lancamentoReembolso)
+  const { codigo: codigoBody } = await readBody(event)
+  const codigo = Number(codigoBody)
 
   try {
     const pool = await useDb()
@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
       SELECT F.nomeCompleto AS funcionario 
       FROM operacao.lancamentoReembolsoFuncionario LR
       LEFT JOIN cadastro.funcionario F ON F.codigo = LR.funcionario
-      WHERE LR.lancamentoReembolso = ${id}
+      WHERE LR.lancamentoReembolso = ${codigo}
     `
     const result = await pool.request().query(query)
     return result.recordset
