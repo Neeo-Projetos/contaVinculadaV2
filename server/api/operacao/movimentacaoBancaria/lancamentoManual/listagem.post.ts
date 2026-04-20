@@ -31,10 +31,7 @@ export default defineEventHandler(async (event) => {
     const result = await pool.request().query(query)
     
     const dataFormatada = result.recordset.map(row => {
-      if(row.dataMovimentacao){
-        const d = new Date(row.dataMovimentacao)
-        row.dataMovimentacao = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`
-      }
+      row.dataMovimentacao = comum.formatarDataBr(row.dataMovimentacao)
       return row
     })
 

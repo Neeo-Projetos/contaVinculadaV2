@@ -115,8 +115,8 @@
     </AppFiltro>
 
     <AppModalDetalhes 
-        :isOpen="modalDetalhesAberto" 
-        :detalhes="detalhes"
+        :aberto="modalDetalhesAberto" 
+        :dados="detalhes"
         @close="modalDetalhesAberto = false"
     />
 

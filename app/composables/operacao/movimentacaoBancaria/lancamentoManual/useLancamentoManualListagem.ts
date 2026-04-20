@@ -175,20 +175,20 @@ export function useLancamentoManualListagem() {
   const modalFuncionarioAberto = ref(false)
   const listaFuncionariosModal = ref<any[]>([])
 
-  const abrirModalDetalhes = async (id: number) => {
+  const abrirModalDetalhes = async (codigo: number) => {
     try {
       const response = await $fetch<{ status: string, data: any }>('/api/operacao/movimentacaoBancaria/lancamentoManual/detalhes', {
-        method: 'POST', body: { lancamentoManual: id }
+        method: 'POST', body: { codigo }
       })
       detalhes.value = response.data
       modalDetalhesAberto.value = true
     } catch (error) { console.error(error) }
   }
 
-  const abrirModalFuncionarios = async (id: number) => {
+  const abrirModalFuncionarios = async (codigo: number) => {
     try {
       const response = await $fetch<{ status: string, data: any[] }>('/api/operacao/movimentacaoBancaria/lancamentoManual/funcionarios', {
-        method: 'POST', body: { lancamentoManual: id }
+        method: 'POST', body: { codigo }
       })
       listaFuncionariosModal.value = response.data || []
       modalFuncionarioAberto.value = true

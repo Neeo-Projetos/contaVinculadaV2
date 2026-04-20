@@ -1,5 +1,6 @@
 import { defineEventHandler, readBody } from 'h3'
 import { useDb } from '../../../../utils/db'
+import { comum } from '../../../../utils/comum'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -24,11 +25,11 @@ export default defineEventHandler(async (event) => {
 
     const lancamento = resultPrincipal.recordset[0]
     
-    // Formata a data para YYYY-MM-DD (compatível com o input type="date")
-    if (lancamento.dataMovimentacao) {
-      const d = new Date(lancamento.dataMovimentacao)
-      lancamento.dataMovimentacao = d.toISOString().split('T')[0]
-    }
+    // Formata a data para BR (DD/MM/AAAA) usando o utilitário comum
+    lancamento.dataMovimentacao = comum.formatarDataBr(lancamento.dataMovimentacao)
+    
+    // Formata o valor para visualização usando o utilitário comum
+    lancamento.valorMovimentacao = comum.validaValorRecupera(lancamento.valorMovimentacao)
 
     // Recupera funcionários vinculados
     const queryFuncionarios = `
