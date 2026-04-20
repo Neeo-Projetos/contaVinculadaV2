@@ -110,11 +110,6 @@ export function useLancamentoEstornoListagem() {
   }
 
   const buscarLista = async () => {
-    if (!filtro.value.dataInicioParam || !filtro.value.dataFimParam) {
-      // Usando modal ou alerta padronizado no futuro, por enquanto o alert básico do componente
-      return 'datas_obrigatorias'
-    }
-
     carregandoTela.value = true
     buscaRealizada.value = true
     try {
@@ -160,14 +155,26 @@ export function useLancamentoEstornoListagem() {
     modalExibicaoAberto.value = false
   }
 
-  // Lógica de Modais Específicos
+  const modalDetalhesAberto = ref(false)
+  const detalhes = ref({ motivo: '', usuarioCadastro: '', dataCadastro: '' })
+
   const modalFuncionarioAberto = ref(false)
   const listaFuncionariosModal = ref<any[]>([])
+
+  const abrirModalDetalhes = async (codigo: number, tipo: number) => {
+    try {
+      const response = await $fetch<{ status: string, data: any }>('/api/operacao/movimentacaoBancaria/lancamentoEstorno/detalhes', {
+        method: 'POST', body: { codigo, tipoLancamento: tipo }
+      })
+      detalhes.value = response.data
+      modalDetalhesAberto.value = true
+    } catch (error) { console.error(error) }
+  }
 
   const abrirModalFuncionarios = async (codigo: number, tipo: number) => {
     try {
       const response = await $fetch<{ status: string, data: any[] } | any[]>('/api/operacao/movimentacaoBancaria/lancamentoEstorno/funcionarios', {
-        method: 'POST', body: { codigoLancamento: codigo, tipoLancamento: tipo }
+        method: 'POST', body: { codigo, tipoLancamento: tipo }
       })
       // Ajuste para suportar os dois formatos (antes e depois da padronização da API)
       listaFuncionariosModal.value = Array.isArray(response) ? response : (response.data || [])
@@ -183,7 +190,7 @@ export function useLancamentoEstornoListagem() {
   let timerRelogio: any = null
 
   const estornoObj = reactive({
-    codigoLancamento: 0,
+    codigo: 0,
     tipoLancamento: 0,
     motivo: '',
     pin: ''
@@ -195,7 +202,7 @@ export function useLancamentoEstornoListagem() {
   }
 
   const prepararEstorno = (item: any) => {
-    estornoObj.codigoLancamento = item.codigo
+    estornoObj.codigo = item.codigo
     estornoObj.tipoLancamento = item.tipoLancamento
     estornoObj.motivo = ''
     estornoObj.pin = ''
@@ -286,6 +293,9 @@ export function useLancamentoEstornoListagem() {
     funcionariosAtivos,
     
     // Modais específicos
+    modalDetalhesAberto,
+    detalhes,
+    abrirModalDetalhes,
     modalFuncionarioAberto,
     listaFuncionariosModal,
     abrirModalFuncionarios,

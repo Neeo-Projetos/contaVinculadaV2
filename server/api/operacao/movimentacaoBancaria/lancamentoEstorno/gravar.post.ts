@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const db = await useDb()
 
-  const { codigoLancamento, tipoLancamento, motivo } = body
+  const { codigo, tipoLancamento, motivo } = await readBody(event)
   const usuarioEstorno = 1 
 
   try {
@@ -14,13 +14,13 @@ export default defineEventHandler(async (event) => {
       sqlLancamento = `
         SELECT LM.valorMovimentacao, LM.tipoMovimentacao, F.funcionario FROM operacao.lancamentoManual LM
         LEFT JOIN operacao.lancamentoManualFuncionario F ON F.lancamentoManual = LM.codigo
-        WHERE LM.codigo = ${codigoLancamento}
+        WHERE LM.codigo = ${codigo}
         `
     } else if (tipoLancamento === 3) {
       sqlLancamento = `
         SELECT LR.valorOficio AS valorMovimentacao, LR.tipoMovimentacao, F.funcionario FROM operacao.lancamentoReembolso LR
         LEFT JOIN operacao.lancamentoReembolsoFuncionario F ON F.lancamentoReembolso = LR.codigo
-        WHERE LR.codigo = ${codigoLancamento}
+        WHERE LR.codigo = ${codigo}
         `
     } else {
       return { status: 'failed', mensagem: 'Tipo de lançamento inválido.' }
@@ -50,7 +50,7 @@ export default defineEventHandler(async (event) => {
         EXEC operacao.lancamentoEstorno_Atualiza 
         0, 
         ${tipoLancamento}, 
-        ${codigoLancamento}, 
+        ${codigo}, 
         ${motivoFormatado}, 
         ${valorEstorno}, 
         ${tipoMovimentacaoEstorno}, 

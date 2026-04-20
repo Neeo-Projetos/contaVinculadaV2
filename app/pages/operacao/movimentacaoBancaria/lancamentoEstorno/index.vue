@@ -75,16 +75,21 @@
           <td v-if="colunas.acoes" class="px-6 py-4 text-center">
             <div class="flex items-center justify-center gap-2">
               <button @click="abrirModalFuncionarios(item.codigo, item.tipoLancamento)" title="Ver Funcionários"
-                class="w-9 h-9 flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 rounded-xl transition-all shadow-sm">
+                class="w-10 h-10 flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 rounded-xl transition-all active:scale-95 shadow-sm">
                 <Icon name="fa7-solid:users" class="w-4 h-4" />
+              </button>
+
+              <button @click="abrirModalDetalhes(item.codigo, item.tipoLancamento)" title="Mais Detalhes"
+                class="w-10 h-10 flex items-center justify-center text-slate-600 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/80 rounded-xl transition-all active:scale-95 shadow-sm border border-slate-200/50 dark:border-slate-700/50">
+                <Icon name="fa7-solid:indent" class="w-4 h-4" />
               </button>
               
               <button v-if="item.estorno === 0" @click="prepararEstorno(item)" title="Realizar Estorno"
-                class="w-9 h-9 flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 rounded-xl transition-all shadow-sm">
+                class="w-10 h-10 flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 rounded-xl transition-all active:scale-95 shadow-sm">
                 <Icon name="fa7-solid:reply" class="w-4 h-4" />
               </button>
               
-              <div v-else class="w-9 h-9 flex items-center justify-center text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl shadow-sm" title="Já Estornado">
+              <div v-else class="w-10 h-10 flex items-center justify-center text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl shadow-sm border border-emerald-500/20" title="Já Estornado">
                 <Icon name="fa7-solid:circle-check" class="w-4 h-4" />
               </div>
             </div>
@@ -114,6 +119,12 @@
     </AppFiltro>
 
     <!-- Modais -->
+    <AppModalDetalhes 
+        :aberto="modalDetalhesAberto" 
+        :dados="detalhes" 
+        @close="modalDetalhesAberto = false" 
+    />
+
     <AppModal :isOpen="modalFuncionarioAberto" title="Funcionários Vinculados" icon="fa7-solid:users"
       @close="modalFuncionarioAberto = false" tamanho="sm">
       <div class="p-2">
@@ -121,7 +132,7 @@
           <div v-for="(func, index) in listaFuncionariosModal" :key="index" class="py-4 flex items-center gap-4 group">
             <div
               class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/10 group-hover:bg-emerald-500/20 transition-all font-black text-sm text-emerald-600 uppercase">
-              {{ func.funcionario.charAt(0) }}
+              {{ func.funcionario.charAt(0).toUpperCase() }}
             </div>
             <span class="font-bold text-gray-700 dark:text-gray-200 text-sm uppercase tracking-tight">{{
               func.funcionario
@@ -224,6 +235,7 @@ const {
   projetoSearch, sugestoesProjetos, buscandoProjetos, mostrarMenuProjetos,
   buscarProjetosAutocomplete, selecionarProjetoAutocomplete, fecharSugestoesDelay,
   modalFuncionarioAberto, listaFuncionariosModal, abrirModalFuncionarios,
+  modalDetalhesAberto, detalhes, abrirModalDetalhes,
   modalEstornoAberto, modalPinAberto, mostrarPin, processandoEstorno, dataEstornoDisplay, estornoObj,
   prepararEstorno, avancarParaPin, finalizarEstorno,
   formatarMoeda,
@@ -235,26 +247,6 @@ const { dispararAlerta } = useAppNotificacao()
 
 const camposFiltro = computed(() => [
   {
-    key: 'dataInicioParam',
-    label: 'Início',
-    type: 'text' as const,
-    placeholder: 'Data Início',
-    mask: '##/##/####',
-    icon: 'fa7-solid:calendar-day',
-    colSpan: 'md:col-span-2',
-    required: true
-  },
-  {
-    key: 'dataFimParam',
-    label: 'Fim',
-    type: 'text' as const,
-    placeholder: 'Data Fim',
-    mask: '##/##/####',
-    icon: 'fa7-solid:calendar-day',
-    colSpan: 'md:col-span-2',
-    required: true
-  },
-  {
     key: 'projetoParam',
     label: 'Projeto',
     type: 'autocomplete' as const,
@@ -263,14 +255,28 @@ const camposFiltro = computed(() => [
     buscando: buscandoProjetos.value,
     mostrarMenu: mostrarMenuProjetos.value,
     colSpan: 'md:col-span-5'
+  },
+  {
+    key: 'dataInicioParam',
+    label: 'Início',
+    type: 'text' as const,
+    placeholder: 'Data Início',
+    mask: '##/##/####',
+    icon: 'fa7-solid:calendar-day',
+    colSpan: 'md:col-span-2'
+  },
+  {
+    key: 'dataFimParam',
+    label: 'Fim',
+    type: 'text' as const,
+    placeholder: 'Data Fim',
+    mask: '##/##/####',
+    icon: 'fa7-solid:calendar-day',
+    colSpan: 'md:col-span-2'
   }
 ])
 
 const tentarBuscar = async () => {
-  if (!filtro.value.dataInicioParam || !filtro.value.dataFimParam) {
-    dispararAlerta('Campos Obrigatórios', 'Data Início e Data Fim são obrigatórias para consulta.', 'warning')
-    return
-  }
   await buscarLista()
 }
 
@@ -301,6 +307,6 @@ const gerarExcel = () => {
 }
 
 const novoEstorno = () => {
-  navigateTo('/operacao/movimentacaoBancaria/lancamentoEstorno/cadastro?id=0')
+  navigateTo('/operacao/movimentacaoBancaria/lancamentoEstorno/cadastro?codigo=0')
 }
 </script>

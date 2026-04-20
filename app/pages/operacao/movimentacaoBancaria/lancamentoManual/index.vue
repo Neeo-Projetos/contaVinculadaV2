@@ -164,26 +164,6 @@ const {
 const { dispararAlerta } = useAppNotificacao()
 
 const camposFiltro = computed(() => [
-  {
-    key: 'dataInicioParam',
-    label: 'Início',
-    type: 'text' as const,
-    placeholder: 'Data Início',
-    mask: '##/##/####',
-    icon: 'fa7-solid:calendar-day',
-    colSpan: 'md:col-span-2',
-    required: true
-  },
-  {
-    key: 'dataFimParam',
-    label: 'Fim',
-    type: 'text' as const,
-    placeholder: 'Data Fim',
-    mask: '##/##/####',
-    icon: 'fa7-solid:calendar-day',
-    colSpan: 'md:col-span-2',
-    required: true
-  },
   { 
     key: 'projetoId', 
     label: 'Projeto', 
@@ -193,14 +173,28 @@ const camposFiltro = computed(() => [
     buscando: buscandoProjetos.value,
     mostrarMenu: mostrarMenuProjetos.value,
     colSpan: 'md:col-span-5'
+  },
+  {
+    key: 'dataInicioParam',
+    label: 'Início',
+    type: 'text' as const,
+    placeholder: 'Data Início',
+    mask: '##/##/####',
+    icon: 'fa7-solid:calendar-day',
+    colSpan: 'md:col-span-2'
+  },
+  {
+    key: 'dataFimParam',
+    label: 'Fim',
+    type: 'text' as const,
+    placeholder: 'Data Fim',
+    mask: '##/##/####',
+    icon: 'fa7-solid:calendar-day',
+    colSpan: 'md:col-span-2'
   }
 ])
 
 const tentarBuscar = () => {
-  if (!filtro.value.dataInicioParam || !filtro.value.dataFimParam) {
-    dispararAlerta('Campos Obrigatórios', 'As datas de início e fim são obrigatórias para a busca.', 'warning')
-    return
-  }
   buscarLista()
 }
 

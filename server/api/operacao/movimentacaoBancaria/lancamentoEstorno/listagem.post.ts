@@ -1,5 +1,6 @@
 import { defineEventHandler, readBody } from 'h3'
 import { useDb } from '../../../../utils/db'
+import { comum } from '../../../../utils/comum'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -72,13 +73,11 @@ export default defineEventHandler(async (event) => {
   RM.tipoLancamento, RM.estorno ORDER BY RM.codigo DESC`
 
   try {
+    const pool = await useDb()
     const result = await req.query(query)
 
     const dataFormatada = result.recordset.map((row: any) => {
-      if(row.dataMovimentacao){
-        const d = new Date(row.dataMovimentacao)
-        row.dataMovimentacao = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`
-      }
+      row.dataMovimentacao = comum.formatarDataBr(row.dataMovimentacao)
       return row
     })
 
