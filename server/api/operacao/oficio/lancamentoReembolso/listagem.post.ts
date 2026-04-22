@@ -10,6 +10,7 @@ export default defineEventHandler(async (event) => {
       LR.codigo, P.codigo AS codigoProjeto, P.descricao AS projeto, 
       TM.descricao AS tipoMovimentacao, LR.dataMovimentacao, LR.valorMovimentacao, 
       LR.dataCadastro, U.login AS usuarioCadastro, 
+      CL.descricao AS classificacao,
       CONCAT(C.agencia,'/',C.conta,' - ',B.nomeBanco) AS contaVinculada, 
       CASE WHEN EXISTS(SELECT codigo FROM operacao.lancamentoReembolsoFuncionario WHERE lancamentoReembolso = LR.codigo) THEN 1 ELSE 0 END AS funcionario,
       LR.dataOficio, LR.valorOficio, LR.dataResposta, LR.dataEntrada, S.descricao AS status
@@ -20,6 +21,7 @@ export default defineEventHandler(async (event) => {
     LEFT JOIN cadastro.projetoContaVinculada C ON C.codigo = LR.contaVinculada
     LEFT JOIN tabelaBasica.banco B ON B.codigo = C.banco
     LEFT JOIN tabelaBasica.status S ON S.codigo = LR.status
+    LEFT JOIN tabelaBasica.classificacao CL ON CL.codigo = LR.classificacaoLancamento
     WHERE (0=0)
   `
 

@@ -42,46 +42,50 @@
         :edit="false"
       >
         <template #cabecalho-tabela>
-          <th v-if="colunas.projeto" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Projeto</th>
-          <th v-if="colunas.contaVinculada" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Conta Vinculada</th>
-          <th v-if="colunas.tipoMov" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center min-w-[140px]">Tipo Mov.</th>
-          <th v-if="colunas.vlrMov" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center min-w-[140px]">Vlr Mov.</th>
-          <th v-if="colunas.dataOficio" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Data Ofício</th>
+          <th v-if="colunas.projeto" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Projeto / Conta</th>
+          <th v-if="colunas.tipoMov" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Movimentação</th>
+          <th v-if="colunas.vlrMov" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center min-w-[140px]">Valor</th>
+          <th v-if="colunas.dataOficio" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Data</th>
           <th v-if="colunas.status" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
           <th v-if="colunas.acoes" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Ações</th>
         </template>
 
         <template #linhas-tabela="{ item }">
           <td v-if="colunas.projeto" class="p-4">
-            <NuxtLink :to="`/operacao/oficio/lancamentoReembolso/cadastro?codigo=${item.codigo}`" class="font-bold text-sm text-gray-800 dark:text-gray-200 hover:text-emerald-500 transition-colors uppercase">
-              {{ item.projeto }}
+            <NuxtLink :to="`/operacao/oficio/lancamentoReembolso/cadastro?codigo=${item.codigo}&modo=visualizar`" class="flex flex-col group">
+              <span class="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors uppercase tracking-tight">
+                {{ item.projeto }}
+              </span>
+              <span class="text-[11px] text-gray-400 font-bold uppercase tracking-tighter opacity-70 group-hover:text-emerald-500/60 transition-colors">
+                {{ item.contaVinculada }}
+              </span>
             </NuxtLink>
           </td>
-          <td v-if="colunas.contaVinculada" class="p-4 text-sm font-medium text-gray-500 dark:text-gray-400 italic">
-            {{ item.contaVinculada }}
+          <td v-if="colunas.tipoMov" class="p-4">
+              <div class="flex flex-col">
+                <span class="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-tight">{{ item.tipoMovimentacao }}</span>
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{{ item.classificacao }}</span>
+              </div>
           </td>
-          <td v-if="colunas.tipoMov" class="p-4 text-center">
-              <span class="text-[10px] bg-gray-100 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider border border-gray-200 dark:border-gray-700">
-                {{ item.tipoMovimentacao }}
-              </span>
-          </td>
-          <td v-if="colunas.vlrMov" class="p-4 text-center font-black text-emerald-600 dark:text-emerald-400 text-base tabular-nums">
-            R$ {{ item.valorMovimentacao }}
+          <td v-if="colunas.vlrMov" class="p-4 text-center">
+            <span class="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-lg tabular-nums">
+              R$ {{ item.valorMovimentacao }}
+            </span>
           </td>
           <td v-if="colunas.dataOficio" class="p-4 text-center text-xs font-bold text-gray-500">
             {{ item.dataOficio }}
           </td>
-          <td v-if="colunas.status" class="p-4 text-center">
+          <td v-if="colunas.status" class="p-4 text-center uppercase">
             <span :class="item.status === 'Aprovado' || item.status === 'Liquidado' ? 'text-green-600 bg-green-50 border-green-200 dark:bg-green-500/10 dark:border-green-500/20' : 'text-amber-600 bg-amber-50 border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20'" class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border">
               {{ item.status }}
             </span>
           </td>
           <td v-if="colunas.acoes" class="p-4 text-center">
             <div class="flex items-center justify-center gap-2">
-              <button @click="abrirModalDetalhes(item.codigo)" 
+              <NuxtLink :to="`/operacao/oficio/lancamentoReembolso/cadastro?codigo=${item.codigo}&modo=visualizar`" 
                 class="w-10 h-10 flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 rounded-xl transition-all active:scale-95 shadow-sm" title="Ver Detalhes">
                 <Icon name="fa7-solid:eye" class="w-4 h-4" />
-              </button>
+              </NuxtLink>
               <button @click="abrirModalFuncionarios(item.codigo)" 
                 :disabled="item.funcionario !== 1"
                 :class="item.funcionario === 1 ? 'text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20' : 'text-gray-300 opacity-40 cursor-not-allowed'" 
@@ -107,8 +111,8 @@
               { icone: 'fa7-solid:calendar-check', texto: `Ofício: ${item.dataOficio}` },
               { icone: 'fa7-solid:clock-rotate-left', texto: `Status: ${item.status}` }
             ]" 
-            @ver-detalhes="abrirModalDetalhes(item.codigo)"
-            @clique-titulo="navigateTo(`/operacao/oficio/lancamentoReembolso/cadastro?codigo=${item.codigo}`)" 
+            @ver-detalhes="navigateTo(`/operacao/oficio/lancamentoReembolso/cadastro?codigo=${item.codigo}&modo=visualizar`)"
+            @clique-titulo="navigateTo(`/operacao/oficio/lancamentoReembolso/cadastro?codigo=${item.codigo}&modo=visualizar`)" 
           />
         </template>
       </AppContainerListagem>

@@ -4,7 +4,7 @@
     <AppBarraNavegacao 
       icone="fa7-solid:file-invoice-dollar" 
       :links="[{ label: 'Lançamento Reembolso', to: '/operacao/oficio/lancamentoReembolso' }]"
-      :paginaAtual="editando ? `Edição: Ofício nº ${form.numeroOficio}` : 'Novo Lançamento'"
+      :paginaAtual="modoVisualizar ? 'Detalhes do Lançamento' : 'Novo Lançamento'"
     />
 
     <div class="mb-2">
@@ -32,8 +32,8 @@
                 v-model="form.projeto" 
                 label="PROJETO" 
                 placeholder="Selecione o projeto..." 
-                :opcoes="combos.projetos.map(p => ({ codigo: String(p.codigo), descricao: p.apelido ? `${p.apelido} - ${p.descricao}` : p.descricao }))"
-                :somente-leitura="editando"
+                :opcoes="combos.projetos.map(p => ({ codigo: p.codigo, descricao: p.apelido ? `${p.apelido} - ${p.descricao}` : p.descricao }))"
+                :somente-leitura="modoVisualizar"
               />
             </div>
             
@@ -43,7 +43,7 @@
                 label="CONTA VINCULADA" 
                 placeholder="Selecione a conta..." 
                 :opcoes="combos.contasVinculadas" 
-                :somente-leitura="editando"
+                :somente-leitura="modoVisualizar"
               />
             </div>
 
@@ -53,7 +53,7 @@
                 label="TIPO DE MOVIMENTAÇÃO" 
                 placeholder="Selecione o tipo..." 
                 :opcoes="combos.tiposMovimentacao" 
-                :somente-leitura="editando"
+                :somente-leitura="modoVisualizar"
               />
             </div>
 
@@ -61,7 +61,7 @@
               <AppInputMoeda 
                 v-model="form.valorMovimentacao" 
                 label="VALOR" 
-                :somente-leitura="editando"
+                :somente-leitura="modoVisualizar"
               />
             </div>
 
@@ -71,7 +71,7 @@
                 label="DATA" 
                 placeholder="DD/MM/AAAA"
                 icone="fa7-solid:calendar-day"
-                :somente-leitura="editando"
+                :somente-leitura="modoVisualizar"
               />
             </div>
 
@@ -81,7 +81,7 @@
                 label="CLASSIFICAÇÃO" 
                 placeholder="Selecione..." 
                 :opcoes="combos.classificacoes" 
-                :somente-leitura="editando"
+                :somente-leitura="modoVisualizar"
               />
             </div>
 
@@ -93,7 +93,7 @@
                 icone="fa7-solid:comment-dots"
                 textarea
                 rows="3"
-                :somente-leitura="editando"
+                :somente-leitura="modoVisualizar"
               />
             </div>
           </div>
@@ -112,7 +112,7 @@
                 label="Nº DO OFÍCIO" 
                 placeholder="Digite o número..." 
                 icone="fa7-solid:hashtag"
-                :somente-leitura="editando"
+                :somente-leitura="modoVisualizar"
               />
             </div>
 
@@ -122,7 +122,7 @@
                 label="DATA DO OFÍCIO" 
                 placeholder="DD/MM/AAAA"
                 icone="fa7-solid:calendar-check"
-                :somente-leitura="editando"
+                :somente-leitura="modoVisualizar"
               />
             </div>
 
@@ -130,7 +130,7 @@
               <AppInputMoeda 
                 v-model="form.valorOficio" 
                 label="VALOR DO OFÍCIO" 
-                :somente-leitura="editando"
+                :somente-leitura="modoVisualizar"
               />
             </div>
 
@@ -140,7 +140,7 @@
                 label="STATUS ATUAL" 
                 placeholder="Selecione o status..." 
                 :opcoes="combos.statusList" 
-                :somente-leitura="editando"
+                :somente-leitura="modoVisualizar"
               />
             </div>
 
@@ -150,7 +150,7 @@
                 label="DATA DA RESPOSTA" 
                 placeholder="DD/MM/AAAA"
                 icone="fa7-solid:calendar-minus"
-                :somente-leitura="editando"
+                :somente-leitura="modoVisualizar"
               />
             </div>
 
@@ -160,7 +160,7 @@
                 label="DATA DE ENTRADA" 
                 placeholder="DD/MM/AAAA"
                 icone="fa7-solid:calendar-plus"
-                :somente-leitura="editando"
+                :somente-leitura="modoVisualizar"
               />
             </div>
 
@@ -170,7 +170,7 @@
                   label="CLASSIFICAÇÃO DO OFÍCIO" 
                   placeholder="Selecione a classificação..." 
                   :opcoes="combos.classificacoes" 
-                  :somente-leitura="editando"
+                  :somente-leitura="modoVisualizar"
                 />
             </div>
           </div>
@@ -183,7 +183,7 @@
           </AppFormularioSecao>
 
           <div class="space-y-6">
-            <div v-if="!editando" class="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-4 items-end animate-fade-in text-gray-900">
+            <div v-if="!modoVisualizar" class="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-4 items-end animate-fade-in text-gray-900">
               <div class="flex-1 w-full">
                 <AppInputAutocomplete 
                   v-model="buscaFuncionario" 
@@ -223,7 +223,7 @@
                 </div>
 
                 <AppBotao 
-                  v-if="!editando"
+                  v-if="!modoVisualizar"
                   :variacao="todosFuncionariosMarcados ? 'perigo' : 'padrao'"
                   :icone="todosFuncionariosMarcados ? 'fa7-solid:xmark' : 'fa7-solid:check-double'" 
                   @click.prevent="marcarDesmarcarTodosFuncionarios"
@@ -256,9 +256,9 @@
                 </template>
 
                 <template #linhas-tabela="{ item }">
-                  <td class="p-5 text-center transition-colors" :class="!editando ? 'cursor-pointer hover:bg-emerald-50/10' : ''" @click.stop="!editando && (item.selecionadoParaRemover = !item.selecionadoParaRemover)">
+                  <td class="p-5 text-center transition-colors" :class="!modoVisualizar ? 'cursor-pointer hover:bg-emerald-50/10' : ''" @click.stop="!modoVisualizar && (item.selecionadoParaRemover = !item.selecionadoParaRemover)">
                     <div class="flex items-center justify-center">
-                      <AppCheckbox :modelValue="item.selecionadoParaRemover" :somenteLeitura="editando" />
+                      <AppCheckbox :modelValue="item.selecionadoParaRemover" :somenteLeitura="modoVisualizar" />
                     </div>
                   </td>
                   <td class="p-5">
@@ -299,13 +299,15 @@
         <AppRodapeFormulario 
           :editando="editando" 
           :carregandoGravar="salvando"
+          :visualizar="modoVisualizar"
+          :ocultarEditar="modoVisualizar"
           :labelVoltar="passoAtual === 1 ? 'Retornar à Lista' : 'Etapa Anterior'"
-          :labelGravar="editando ? (passoAtual === totalPassos ? 'Fechar Visualização' : 'Próxima Etapa') : (passoAtual === totalPassos ? 'Finalizar Cadastro' : 'Próxima Etapa')"
-          :iconeGravar="editando ? (passoAtual === totalPassos ? 'fa7-solid:xmark' : 'fa7-solid:arrow-right') : (passoAtual === totalPassos ? 'fa7-solid:check-double' : 'fa7-solid:arrow-right')"
+          :labelGravar="passoAtual === totalPassos ? (modoVisualizar ? 'Fechar' : 'Finalizar Cadastro') : 'Próxima Etapa'"
+          :iconeGravar="passoAtual === totalPassos ? (modoVisualizar ? 'fa7-solid:xmark' : 'fa7-solid:check-double') : 'fa7-solid:arrow-right'"
           class="relative z-0"
           @voltar="voltarPasso"
           @limpar="limparFormulario"
-          @gravar="editando && passoAtual === totalPassos ? voltarParaLista() : avancarPasso()"
+          @gravar="modoVisualizar && passoAtual === totalPassos ? voltarParaLista() : avancarPasso()"
         />
       </form>
     </AppCartaoFormulario>
@@ -345,6 +347,6 @@ const {
   todosFuncionariosMarcados, marcarDesmarcarTodosFuncionarios,
   carregarContas, carregarProjetoDaConta, addFuncionario,
   removerFuncionariosSelecionados, tentarGravar, gravar, limparFormulario, voltarParaLista,
-  passoAtual, totalPassos, avancarPasso, voltarPasso
+  passoAtual, totalPassos, avancarPasso, voltarPasso, modoVisualizar
 } = useLancamentoReembolsoFormulario()
 </script>

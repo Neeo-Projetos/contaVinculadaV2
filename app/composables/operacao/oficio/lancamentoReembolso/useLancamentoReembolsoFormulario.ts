@@ -7,6 +7,7 @@ export function useLancamentoReembolsoFormulario() {
   
   const codigo = route.query.codigo
   const editando = computed(() => !!form.codigo && form.codigo !== '0')
+  const modoVisualizar = computed(() => route.query.modo === 'visualizar' || editando.value)
 
   const carregandoTela = ref(false)
   const salvando = ref(false)
@@ -96,18 +97,18 @@ export function useLancamentoReembolsoFormulario() {
     try {
       // Carreguei os combos de forma independente para evitar que um erro trave tudo (Igual ao Manual)
       const resProj = await $fetch<{ data: any[] }>('/api/cadastro/projeto/ativos').catch(() => ({ data: [] }))
-      combos.projetos = resProj.data || []
+      combos.projetos = (resProj.data || []).map(p => ({ ...p, codigo: String(p.codigo) }))
 
       const resTipo = await $fetch<{ data: any[] }>('/api/tabelaBasica/tipoMovimentacao/listagem', { method: 'POST', body: { ativo: 1 } }).catch(() => ({ data: [] }))
-      combos.tiposMovimentacao = resTipo.data || []
+      combos.tiposMovimentacao = (resTipo.data || []).map(t => ({ ...t, codigo: String(t.codigo) }))
 
       const resClass = await $fetch<{ data: any[] }>('/api/tabelaBasica/classificacao/listagem', { method: 'POST', body: { ativo: 1 } }).catch(() => ({ data: [] }))
-      combos.classificacoes = resClass.data || []
+      combos.classificacoes = (resClass.data || []).map(c => ({ ...c, codigo: String(c.codigo) }))
 
       combos.funcionariosAtivos = []
 
       const resStatus = await $fetch<{ data: any[] }>('/api/operacao/oficio/lancamentoReembolso/status', { method: 'POST' }).catch(() => ({ data: [] }))
-      combos.statusList = resStatus.data || []
+      combos.statusList = (resStatus.data || []).map(s => ({ ...s, codigo: String(s.codigo) }))
 
     } catch (e) {
       console.error("Erro ao carregar combos", e)
@@ -326,7 +327,24 @@ export function useLancamentoReembolsoFormulario() {
         body: { codigo: form.codigo }
       })
       if (resp.status === 'success') {
-        Object.assign(form, resp.data)
+        const d = resp.data
+        form.projeto = d.projeto ? String(d.projeto) : ''
+        form.contaVinculada = d.contaVinculada ? String(d.contaVinculada) : ''
+        form.tipoMovimentacao = d.tipoMovimentacao ? String(d.tipoMovimentacao) : ''
+        form.classificacaoLancamento = d.classificacaoLancamento ? String(d.classificacaoLancamento) : ''
+        form.classificacaoOficio = d.classificacaoOficio ? String(d.classificacaoOficio) : ''
+        form.status = d.status ? String(d.status) : ''
+        
+        form.valorMovimentacao = d.valorMovimentacao
+        form.dataMovimentacao = d.dataMovimentacao
+        form.motivo = d.motivo
+        form.dataOficio = d.dataOficio
+        form.valorOficio = d.valorOficio
+        form.dataResposta = d.dataResposta
+        form.dataEntrada = d.dataEntrada
+        form.numeroOficio = d.numeroOficio
+        form.funcionarios = d.funcionarios || []
+
         if (form.projeto) await carregarContas(form.projeto)
       }
     } catch (e) {
@@ -398,6 +416,7 @@ export function useLancamentoReembolsoFormulario() {
     buscandoFuncionario,
     sugestoesFuncionarios,
     mostrarMenuFuncionario,
+    modoVisualizar,
     buscarFuncionariosAutoComplete,
     selecionarFuncionario,
     // Tabela e Paginação de Funcionários
