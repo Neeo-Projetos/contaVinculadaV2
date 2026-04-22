@@ -125,32 +125,11 @@
         @close="modalDetalhesAberto = false" 
     />
 
-    <AppModal :isOpen="modalFuncionarioAberto" title="Funcionários Vinculados" icon="fa7-solid:users"
-      @close="modalFuncionarioAberto = false" tamanho="sm">
-      <div class="p-2">
-        <div v-if="listaFuncionariosModal.length > 0" class="divide-y divide-gray-50 dark:divide-gray-800 px-4">
-          <div v-for="(func, index) in listaFuncionariosModal" :key="index" class="py-4 flex items-center gap-4 group">
-            <div
-              class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/10 group-hover:bg-emerald-500/20 transition-all font-black text-sm text-emerald-600 uppercase">
-              {{ func.funcionario.charAt(0).toUpperCase() }}
-            </div>
-            <span class="font-bold text-gray-700 dark:text-gray-200 text-sm uppercase tracking-tight">{{
-              func.funcionario
-              }}</span>
-          </div>
-        </div>
-        <div v-else class="py-12 flex flex-col items-center text-center gap-4 text-gray-500 dark:text-gray-400">
-          <Icon name="fa7-solid:circle-nodes" class="w-16 h-16 text-blue-500/20" />
-          <p class="font-black text-lg uppercase tracking-tighter text-gray-400">Projeto Global</p>
-          <p class="font-bold text-xs max-w-[200px]">Este lançamento foi aplicado a todos os funcionários vinculados ao
-            projeto.</p>
-        </div>
-      </div>
-      <template #footer>
-        <AppBotao variacao="padrao" @click="modalFuncionarioAberto = false"
-          class="w-full h-12 font-black uppercase tracking-widest text-[10px]">Fechar Painel</AppBotao>
-      </template>
-    </AppModal>
+    <AppModalFuncionarios 
+        :aberto="modalFuncionarioAberto" 
+        :lista="listaFuncionariosModal"
+        @close="modalFuncionarioAberto = false"
+    />
 
     <AppModal :isOpen="modalEstornoAberto" title="Motivo do Estorno" icon="fa7-solid:pen-fancy"
       @close="modalEstornoAberto = false" tamanho="sm">

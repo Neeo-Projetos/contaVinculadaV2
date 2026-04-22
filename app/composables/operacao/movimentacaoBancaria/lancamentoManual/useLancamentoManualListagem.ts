@@ -4,15 +4,15 @@ import { useWindowSize } from '@vueuse/core'
 export function useLancamentoManualListagem() {
   const router = useRouter()
   const { width } = useWindowSize()
-  
+
   const carregandoTela = ref(false)
   const buscaRealizada = ref(false)
   const visaoAtual = ref<'lista' | 'cards'>('lista')
-  
+
   const modalHistoricoAberto = ref(false)
   const historicoSelecionado = ref<any[]>([])
   const carregandoHistorico = ref(false)
-  
+
   const modalFiltroAvancadoAberto = ref(false)
   const modalExibicaoAberto = ref(false)
 
@@ -87,7 +87,7 @@ export function useLancamentoManualListagem() {
   const colunasTemp = reactive({ ...colunasVisiveis })
 
   const listaCompleta = ref<any[]>([])
-  
+
   // Como o sistema parece usar uma paginação front-end padrão
   const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
 
@@ -116,7 +116,7 @@ export function useLancamentoManualListagem() {
       projetosAtivos.value = resProj.data || []
       tiposMovimentacao.value = resTipo || []
     } catch (error) {
-       console.error("Erro combos", error)
+      console.error("Erro combos", error)
     }
   }
 
@@ -125,7 +125,7 @@ export function useLancamentoManualListagem() {
     buscaRealizada.value = true
     try {
       const response = await $fetch<any>('/api/operacao/movimentacaoBancaria/lancamentoManual/listagem', {
-        method: 'POST', 
+        method: 'POST',
         body: {
           projeto: filtro.value.projetoId,
           tipoMovimentacao: filtro.value.tipoMovimentacaoParam,
@@ -147,11 +147,11 @@ export function useLancamentoManualListagem() {
   const aplicarFiltroAvancado = () => { modalFiltroAvancadoAberto.value = false; buscarLista() }
   const limparFiltrosAvancados = () => {
     filtro.value = {
-        projetoId: '',
-        tipoMovimentacaoParam: '',
-        dataInicioParam: '',
-        dataFimParam: '',
-        ativoParam: '1'
+      projetoId: '',
+      tipoMovimentacaoParam: '',
+      dataInicioParam: '',
+      dataFimParam: '',
+      ativoParam: '1'
     }
     projetoSearch.value = ''
     modalFiltroAvancadoAberto.value = false
@@ -230,7 +230,7 @@ export function useLancamentoManualListagem() {
     aplicarExibicao,
     projetosAtivos,
     tiposMovimentacao,
-    
+
     // Antigos modais mantidos
     modalDetalhesAberto,
     detalhes,
@@ -238,7 +238,7 @@ export function useLancamentoManualListagem() {
     listaFuncionariosModal,
     abrirModalDetalhes,
     abrirModalFuncionarios,
-    
+
     formatarMoeda,
     novoRegistro,
 

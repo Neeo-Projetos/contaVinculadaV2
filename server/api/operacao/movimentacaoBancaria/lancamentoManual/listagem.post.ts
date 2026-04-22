@@ -3,9 +3,9 @@ import { useDb } from '../../../../utils/db'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  
+
   let query = `
-    SELECT DISTINCT LM.codigo, P.descricao AS projeto, TM.descricao AS tipoMovimentacao, LM.dataMovimentacao, LM.valorMovimentacao, LM.dataCadastro, 
+    SELECT DISTINCT LM.codigo, P.descricao AS projeto, P.apelido, TM.descricao AS tipoMovimentacao, LM.dataMovimentacao, LM.valorMovimentacao, LM.dataCadastro, 
     F.descricao AS classificacao, U.login AS usuarioCadastro, CONCAT(C.agencia,'/',C.conta,' - ',B.nomeBanco) AS contaVinculada, CASE WHEN EXISTS 
     (SELECT codigo FROM operacao.lancamentoManualFuncionario WHERE lancamentoManual = LM.codigo) THEN 1 ELSE 0 END AS funcionario FROM operacao.lancamentoManual LM
     LEFT JOIN cadastro.projeto P ON P.codigo = LM.projeto
@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
   try {
     const pool = await useDb()
     const result = await pool.request().query(query)
-    
+
     const dataFormatada = result.recordset.map(row => {
       row.dataMovimentacao = comum.formatarDataBr(row.dataMovimentacao)
       return row

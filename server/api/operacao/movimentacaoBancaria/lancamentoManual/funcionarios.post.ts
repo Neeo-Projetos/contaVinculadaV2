@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
     if (buscaTermo || (projeto && !codigo)) {
       request.input('term', `%${buscaTermo}%`)
       let sql = `
-        SELECT codigo, nomeCompleto 
+        SELECT codigo, nomeCompleto, cpf 
         FROM cadastro.Funcionario 
         WHERE ativo = 1
       `
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
       }
 
       sql += ` ORDER BY nomeCompleto `
-      
+
       const result = await request.query(sql)
       return { status: 'success', data: result.recordset }
     }
@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
     // Recuperei os funcionários já vinculados ao lançamento informado
     if (codigo) {
       const query = `
-        SELECT F.nomeCompleto AS funcionario, F.codigo
+        SELECT F.nomeCompleto AS funcionario, F.codigo, F.cpf
         FROM operacao.lancamentoManualFuncionario LM
         LEFT JOIN cadastro.funcionario F ON F.codigo = LM.funcionario
         WHERE LM.lancamentoManual = ${codigo}
@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
     }
 
     return { status: 'success', data: [] }
-    
+
   } catch (erro) {
     console.error('Erro na API de funcionários:', erro)
     return { status: 'failed', mensagem: 'Erro ao processar requisição.' }

@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
     if (buscaTermo || (projeto && !codigo)) {
       request.input('term', `%${buscaTermo}%`)
       let sql = `
-        SELECT codigo, nomeCompleto 
+        SELECT codigo, nomeCompleto, cpf 
         FROM cadastro.Funcionario 
         WHERE ativo = 1
       `
@@ -30,25 +30,39 @@ export default defineEventHandler(async (event) => {
       }
 
       sql += ` ORDER BY nomeCompleto `
-      
+
       const result = await request.query(sql)
       return { status: 'success', data: result.recordset }
     }
 
     // 2. Recuperei os funcionários já vinculados ao lançamento informado (para edição se necessário)
     if (codigo) {
-      const query = `
-        SELECT F.codigo as funcionarioId, F.nomeCompleto AS funcionarioNome
+      let query = `
+        SELECT F.codigo as funcionarioId, F.nomeCompleto AS funcionarioNome, F.cpf
         FROM operacao.lancamentoReembolsoFuncionario RF
         INNER JOIN cadastro.funcionario F ON F.codigo = RF.funcionario
         WHERE RF.lancamentoReembolso = ${codigo}
       `
-      const result = await request.query(query)
+      let result = await request.query(query)
+      
+      // Se for um lançamento GLOBAL (sem vínculos específicos), busco todos os funcionários do projeto
+      if (result.recordset.length === 0 && projeto) {
+        request.input('idProjeto', projeto)
+        const sqlGlobal = `
+          SELECT codigo as funcionarioId, nomeCompleto AS funcionarioNome, cpf
+          FROM cadastro.Funcionario
+          WHERE projeto = @idProjeto AND ativo = 1
+          ORDER BY nomeCompleto
+        `
+        const resGlobal = await request.query(sqlGlobal)
+        return { status: 'success', data: resGlobal.recordset }
+      }
+
       return { status: 'success', data: result.recordset }
     }
 
     return { status: 'success', data: [] }
-    
+
   } catch (erro) {
     console.error('Erro na API de funcionários:', erro)
     return { status: 'failed', mensagem: 'Erro ao processar requisição.' }

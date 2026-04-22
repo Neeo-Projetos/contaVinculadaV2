@@ -16,7 +16,7 @@ export function useLancamentoReembolsoListagem() {
 
   // Modal de Exibição (Padrão Ouro)
   const modalExibicaoAberto = ref(false)
-  
+
   const placeholderDinamico = computed(() => {
     if (width.value < 640) return 'Filtrar por projeto...'
     return 'Filtrar por projeto ou tipo de movimentação...'
@@ -142,11 +142,11 @@ export function useLancamentoReembolsoListagem() {
 
   const limparFiltros = () => {
     filtro.value = {
-        projetoId: '',
-        tipoMovimentacao: '',
-        dataInicioParam: '',
-        dataFimParam: '',
-        ativoParam: '1'
+      projetoId: '',
+      tipoMovimentacao: '',
+      dataInicioParam: '',
+      dataFimParam: '',
+      ativoParam: '1'
     }
     projetoSearch.value = ''
   }
@@ -166,13 +166,13 @@ export function useLancamentoReembolsoListagem() {
     }
   }
 
-  const abrirModalFuncionarios = async (codigo: number) => {
+  const abrirModalFuncionarios = async (codigo: number, projetoId: number) => {
     try {
-      const response = await $fetch<any[]>('/api/operacao/oficio/lancamentoReembolso/funcionarios', {
+      const response = await $fetch<{ status: string, data: any[] }>('/api/operacao/oficio/lancamentoReembolso/funcionarios', {
         method: 'POST',
-        body: { codigo: codigo }
+        body: { codigo: codigo, projeto: projetoId }
       })
-      listaFuncionariosModal.value = response || []
+      listaFuncionariosModal.value = response.data || []
       modalFuncionarioAberto.value = true
     } catch (error) {
       console.error("Erro ao buscar funcionários", error)
@@ -209,7 +209,7 @@ export function useLancamentoReembolsoListagem() {
     buscarLista,
     filtrar,
     novoRegistro,
-    
+
     // Modais específicos
     modalDetalhesAberto,
     detalhes,

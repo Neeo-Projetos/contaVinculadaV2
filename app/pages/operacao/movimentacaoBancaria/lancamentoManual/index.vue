@@ -50,27 +50,29 @@
         </template>
 
         <template #linhas-tabela="{ item }">
-          <td class="px-6 py-4">
+          <td class="p-4">
             <NuxtLink :to="`/operacao/movimentacaoBancaria/lancamentoManual/cadastro?codigo=${item.codigo}&modo=visualizar`" class="flex flex-col group">
-              <span class="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{{ item.projeto }}</span>
+              <span class="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors uppercase tracking-tight">
+                {{ item.apelido }} - {{ item.projeto }}
+              </span>
               <span class="text-xs text-gray-500 dark:text-gray-400 font-medium italic">{{ item.contaVinculada }}</span>
             </NuxtLink>
           </td>
-          <td v-if="colunas.valor" class="px-6 py-4 text-center">
-            <span class="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-lg tabular-nums">
+          <td v-if="colunas.valor" class="p-4 text-center">
+            <span class="whitespace-nowrap text-sm font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-lg tabular-nums">
               R$ {{ formatarMoeda(item.valorMovimentacao) }}
             </span>
           </td>
-          <td v-if="colunas.tipo" class="px-6 py-4">
+          <td v-if="colunas.tipo" class="p-4 text-center">
             <div class="flex flex-col">
               <span class="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-tight">{{ item.tipoMovimentacao }}</span>
               <span v-if="colunas.classificacao" class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{{ item.classificacao }}</span>
             </div>
           </td>
-          <td v-if="colunas.data" class="px-6 py-4 text-center font-bold text-gray-500 tabular-nums">
+          <td v-if="colunas.data" class="p-4 text-center font-bold text-gray-500 tabular-nums">
             <span class="text-xs tracking-tighter">{{ item.dataMovimentacao }}</span>
           </td>
-          <td v-if="colunas.acoes" class="px-6 py-4 text-center">
+          <td v-if="colunas.acoes" class="p-4 text-center">
              <div class="flex items-center justify-center gap-2">
                 <NuxtLink :to="`/operacao/movimentacaoBancaria/lancamentoManual/cadastro?codigo=${item.codigo}&modo=visualizar`"
                   class="w-10 h-10 flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 rounded-xl transition-all active:scale-95 shadow-sm"
@@ -123,26 +125,11 @@
       @close="modalDetalhesAberto = false" 
     />
 
-    <AppModal :isOpen="modalFuncionarioAberto" title="Funcionários Vinculados" icon="fa7-solid:users" @close="modalFuncionarioAberto = false" tamanho="sm">
-      <div class="p-2">
-        <div v-if="listaFuncionariosModal.length > 0" class="divide-y divide-gray-50 dark:divide-gray-800 px-4">
-          <div v-for="(func, index) in listaFuncionariosModal" :key="index" class="py-4 flex items-center gap-3 group">
-            <div class="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center border border-emerald-500/10 group-hover:bg-emerald-500/20 transition-all text-emerald-600 font-black text-sm uppercase">
-               {{ func.funcionario.charAt(0) }}
-            </div>
-            <span class="font-bold text-gray-700 dark:text-gray-200 text-sm uppercase tracking-tight">{{ func.funcionario }}</span>
-          </div>
-        </div>
-        <div v-else class="py-12 flex flex-col items-center text-center gap-4 text-gray-500 dark:text-gray-400">
-           <Icon name="fa7-solid:circle-exclamation" class="w-12 h-12 text-amber-500 opacity-20" />
-           <p class="font-black uppercase tracking-tighter text-lg text-gray-400">Projeto Global</p>
-           <p class="font-bold text-xs max-w-[200px]">Este lançamento foi aplicado a todos os funcionários vinculados ao projeto.</p>
-        </div>
-      </div>
-      <template #footer>
-        <AppBotao variacao="padrao" @click="modalFuncionarioAberto = false" class="w-full h-12 uppercase text-[10px] font-black tracking-widest">Fechar Painel</AppBotao>
-      </template>
-    </AppModal>
+    <AppModalFuncionarios 
+        :aberto="modalFuncionarioAberto" 
+        :lista="listaFuncionariosModal"
+        @close="modalFuncionarioAberto = false"
+    />
 
   </div>
 </template>

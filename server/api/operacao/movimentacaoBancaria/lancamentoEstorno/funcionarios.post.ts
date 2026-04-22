@@ -12,13 +12,13 @@ export default defineEventHandler(async (event) => {
 
     if (tipoLancamento == 2) {
       query = `
-        SELECT F.nomeCompleto AS funcionario FROM operacao.lancamentoManualFuncionario LMF
+        SELECT F.nomeCompleto AS funcionario, F.cpf FROM operacao.lancamentoManualFuncionario LMF
         INNER JOIN cadastro.funcionario F ON F.codigo = LMF.funcionario
         WHERE LMF.lancamentoManual = ${codigo}
         `
     } else if (tipoLancamento == 3) {
       query = `
-        SELECT F.nomeCompleto AS funcionario FROM operacao.lancamentoReembolsoFuncionario LRF
+        SELECT F.nomeCompleto AS funcionario, F.cpf FROM operacao.lancamentoReembolsoFuncionario LRF
         INNER JOIN cadastro.funcionario F ON F.codigo = LRF.funcionario
         WHERE LRF.lancamentoReembolso = ${codigo}
         `

@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   
   let query = `
     SELECT DISTINCT 
-      LR.codigo, P.codigo AS codigoProjeto, P.descricao AS projeto, 
+      LR.codigo, P.codigo AS codigoProjeto, P.descricao AS projeto, P.apelido,
       TM.descricao AS tipoMovimentacao, LR.dataMovimentacao, LR.valorMovimentacao, 
       LR.dataCadastro, U.login AS usuarioCadastro, 
       CL.descricao AS classificacao,
