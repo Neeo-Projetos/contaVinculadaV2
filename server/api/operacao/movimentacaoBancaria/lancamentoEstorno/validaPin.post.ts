@@ -5,16 +5,20 @@ import crypto from 'crypto'
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { pin } = body
-  const usuarioLogadoId = 1
+  const usuarioLogadoId = 6
 
   if (!pin) return { status: 'failed', mensagem: 'PIN não informado.' }
 
   const pinCripto = crypto.createHash('md5').update(pin).digest('hex')
 
   try {
-    const pool = await useDb()
-    const query = `SELECT codigo FROM configuracao.usuario WHERE pin = '${pinCripto}' AND codigo = ${usuarioLogadoId}`
-    const result = await pool.request().query(query)
+    const db = await useDb()
+    const request = db.request()
+    request.input('pin', pinCripto)
+    request.input('usuarioId', usuarioLogadoId)
+
+    const query = `SELECT codigo FROM configuracao.usuario WHERE pin = @pin AND codigo = @usuarioId`
+    const result = await request.query(query)
 
     if (result.recordset.length > 0) return { status: 'success', mensagem: 'PIN validado.' }
     

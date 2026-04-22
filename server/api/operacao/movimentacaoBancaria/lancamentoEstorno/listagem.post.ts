@@ -13,35 +13,41 @@ export default defineEventHandler(async (event) => {
   const dtFi = dataFim ? dataFim.split('/').reverse().join('-') : null
 
   let query = `
-    SELECT RM.codigo, RM.projeto, RM.contaVinculada, RM.valorMovimentacao, RM.tipoMovimentacao, RM.dataMovimentacao, RM.classificacao, RM.tipoLancamento, 
-    RM.estorno, STRING_AGG(RM.funcionarioNome, ', ') AS vinculo FROM (SELECT LM.codigo, P.descricao AS projeto, CONCAT(C.agencia, '/', C.conta, ' - ', 
-    B.nomeBanco) AS contaVinculada, LM.valorMovimentacao, TM.descricao AS tipoMovimentacao, LM.dataMovimentacao, F.descricao AS classificacao, 
-    2 AS tipoLancamento, LM.estorno, ISNULL(LF.nomeCompleto, 'Projeto total') AS funcionarioNome FROM operacao.lancamentoManual LM
-    LEFT JOIN operacao.lancamentoManualFuncionario LMF ON LMF.lancamentoManual = LM.codigo
-    LEFT JOIN cadastro.funcionario LF ON LF.codigo = LMF.funcionario
-    LEFT JOIN cadastro.projeto P ON P.codigo = LM.projeto
-    LEFT JOIN tabelaBasica.tipoMovimentacao TM ON TM.codigo = LM.tipoMovimentacao
-    LEFT JOIN cadastro.projetoContaVinculada C ON C.codigo = LM.contaVinculada
-    LEFT JOIN tabelaBasica.banco B ON B.codigo = C.banco
-    LEFT JOIN tabelaBasica.classificacao F ON F.codigo = LM.classificacao
-      
-    UNION ALL
-      
-    SELECT LR.codigo, P.descricao AS projeto, CONCAT(C.agencia, '/', C.conta, ' - ', B.nomeBanco) AS contaVinculada, LR.valorOficio AS valorMovimentacao, 
-    TM.descricao AS tipoMovimentacao, LR.dataMovimentacao, F.descricao AS classificacao, 3 AS tipoLancamento, LR.estorno, ISNULL(LF.nomeCompleto, 'Projeto total') AS funcionarioNome FROM operacao.lancamentoReembolso LR
-    LEFT JOIN operacao.lancamentoReembolsoFuncionario LRF ON LRF.lancamentoReembolso = LR.codigo
-    LEFT JOIN cadastro.funcionario LF ON LF.codigo = LRF.funcionario
-    LEFT JOIN cadastro.projeto P ON P.codigo = LR.projeto
-    LEFT JOIN tabelaBasica.tipoMovimentacao TM ON TM.codigo = LR.tipoMovimentacao
-    LEFT JOIN cadastro.projetoContaVinculada C ON C.codigo = LR.contaVinculada
-    LEFT JOIN tabelaBasica.banco B ON B.codigo = C.banco
-    LEFT JOIN tabelaBasica.classificacao F ON F.codigo = LR.classificacaoOficio) RM
+    SELECT RM.codigo, RM.codigoProjeto, RM.projeto, RM.apelido, RM.contaVinculada, RM.valorMovimentacao, RM.tipoMovimentacao, RM.dataMovimentacao, RM.classificacao, RM.tipoLancamento, 
+    RM.estorno, RM.usuarioNome, STRING_AGG(RM.funcionarioNome, ', ') AS vinculo FROM (
+      SELECT LM.codigo, P.codigo AS codigoProjeto, P.descricao AS projeto, P.apelido, CONCAT(C.agencia, '/', C.conta, ' - ', 
+      B.nomeBanco) AS contaVinculada, LM.valorMovimentacao, TM.descricao AS tipoMovimentacao, LM.dataMovimentacao, F.descricao AS classificacao, 
+      2 AS tipoLancamento, LM.estorno, ISNULL(LF.nomeCompleto, 'Projeto total') AS funcionarioNome, ISNULL(U.nomeUsuario, U.login) AS usuarioNome
+      FROM operacao.lancamentoManual LM
+      LEFT JOIN configuracao.usuario U ON U.codigo = LM.usuarioCadastro
+      LEFT JOIN operacao.lancamentoManualFuncionario LMF ON LMF.lancamentoManual = LM.codigo
+      LEFT JOIN cadastro.funcionario LF ON LF.codigo = LMF.funcionario
+      LEFT JOIN cadastro.projeto P ON P.codigo = LM.projeto
+      LEFT JOIN tabelaBasica.tipoMovimentacao TM ON TM.codigo = LM.tipoMovimentacao
+      LEFT JOIN cadastro.projetoContaVinculada C ON C.codigo = LM.contaVinculada
+      LEFT JOIN tabelaBasica.banco B ON B.codigo = C.banco
+      LEFT JOIN tabelaBasica.classificacao F ON F.codigo = LM.classificacao
+        
+      UNION ALL
+        
+      SELECT LR.codigo, P.codigo AS codigoProjeto, P.descricao AS projeto, P.apelido, CONCAT(C.agencia, '/', C.conta, ' - ', B.nomeBanco) AS contaVinculada, LR.valorOficio AS valorMovimentacao, 
+      TM.descricao AS tipoMovimentacao, LR.dataMovimentacao, F.descricao AS classificacao, 3 AS tipoLancamento, LR.estorno, ISNULL(LF.nomeCompleto, 'Projeto total') AS funcionarioNome, ISNULL(U.nomeUsuario, U.login) AS usuarioNome
+      FROM operacao.lancamentoReembolso LR
+      LEFT JOIN configuracao.usuario U ON U.codigo = LR.usuarioCadastro
+      LEFT JOIN operacao.lancamentoReembolsoFuncionario LRF ON LRF.lancamentoReembolso = LR.codigo
+      LEFT JOIN cadastro.funcionario LF ON LF.codigo = LRF.funcionario
+      LEFT JOIN cadastro.projeto P ON P.codigo = LR.projeto
+      LEFT JOIN tabelaBasica.tipoMovimentacao TM ON TM.codigo = LR.tipoMovimentacao
+      LEFT JOIN cadastro.projetoContaVinculada C ON C.codigo = LR.contaVinculada
+      LEFT JOIN tabelaBasica.banco B ON B.codigo = C.banco
+      LEFT JOIN tabelaBasica.classificacao F ON F.codigo = LR.classificacaoOficio
+    ) RM
     WHERE 1=1
     `
 
   if (projeto && projeto !== '0') {
     req.input('projeto', parseInt(projeto))
-    query += ` AND RM.projeto = @projeto `
+    query += ` AND RM.codigoProjeto = @projeto `
   }
 
   if (dtIn && dtFi) {
@@ -69,8 +75,8 @@ export default defineEventHandler(async (event) => {
     query += ` AND RM.estorno = @estorno `
   }
 
-  query += ` GROUP BY RM.codigo, RM.projeto, RM.contaVinculada, RM.valorMovimentacao, RM.tipoMovimentacao, RM.dataMovimentacao, RM.classificacao, 
-  RM.tipoLancamento, RM.estorno ORDER BY RM.codigo DESC`
+  query += ` GROUP BY RM.codigo, RM.codigoProjeto, RM.projeto, RM.apelido, RM.contaVinculada, RM.valorMovimentacao, RM.tipoMovimentacao, RM.dataMovimentacao, RM.classificacao, 
+  RM.tipoLancamento, RM.estorno, RM.usuarioNome ORDER BY RM.codigo DESC`
 
   try {
     const pool = await useDb()

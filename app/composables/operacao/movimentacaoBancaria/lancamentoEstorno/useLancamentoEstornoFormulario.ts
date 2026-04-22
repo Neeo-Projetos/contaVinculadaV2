@@ -1,278 +1,171 @@
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 export function useLancamentoEstornoFormulario() {
-  const route = useRoute()
   const router = useRouter()
   
-  const registroId = route.query.id as string
-  const carregandoTela = ref(false)
-  const salvando = ref(false)
-  const modalConfirmaTodosAberto = ref(false)
-  const modalSucessoAberto = ref(false)
+  const projetosAtivos = ref<any[]>([])
+  const projetoId = ref('')
+  const tipoLancamento = ref(2) // Default Manual
+  const buscando = ref(false)
+  const buscaRealizada = ref(false)
+  const lancamentos = ref<any[]>([])
   
-  const modalAlertaAberto = ref(false)
-  const modalAlertaMensagem = ref('')
-  
-  const erros = reactive(new Set<string>())
+  const modalEstornoAberto = ref(false)
+  const modalPinAberto = ref(false)
+  const processandoEstorno = ref(false)
+  const dataEstornoDisplay = ref('')
+  let timerRelogio: any = null
 
-  // Configuração de Passos
-  const passoAtual = ref(0)
-  const passos = ['Informações do Reembolso', 'Vínculo de Funcionários']
-
-  interface FormReembolso {
-    codigo: string
-    projeto: string
-    contaVinculada: string
-    tipoMovimentacao: string
-    valorMovimentacao: string
-    dataMovimentacao: string
-    classificacaoLancamento: string
-    motivo: string
-    // Campos Ofício
-    numeroOficio: string
-    dataOficio: string
-    valorOficio: string
-    status: string
-    dataResposta: string
-    dataEntrada: string
-    classificacaoOficio: string
-    funcionarios: any[]
-  }
-
-  const form = reactive<FormReembolso>({
-    codigo: registroId || '0',
-    projeto: '',
-    contaVinculada: '',
-    tipoMovimentacao: '',
-    valorMovimentacao: '',
-    dataMovimentacao: '',
-    classificacaoLancamento: '',
+  const estornoObj = reactive({
+    codigo: 0,
+    tipoLancamento: 0,
     motivo: '',
-    numeroOficio: '',
-    dataOficio: '',
-    valorOficio: '',
-    status: '1',
-    dataResposta: '',
-    dataEntrada: '',
-    classificacaoOficio: '',
-    funcionarios: []
+    pin: ''
   })
-
-  const combos = reactive({
-    projetos: [] as any[],
-    contasVinculadas: [] as any[],
-    tiposMovimentacao: [] as any[],
-    classificacoes: [] as any[],
-    funcionariosAtivos: [] as any[],
-    statusList: [
-      { codigo: '1', descricao: 'Pendente' },
-      { codigo: '2', descricao: 'Em Análise' },
-      { codigo: '3', descricao: 'Aprovado' },
-      { codigo: '4', descricao: 'Reprovado' }
-    ]
-  })
-
-  const funcionarioTemp = ref<any>(null)
-
-  const editando = computed(() => form.codigo !== '0' && !!form.codigo)
 
   const carregarCombos = async () => {
-    carregandoTela.value = true
     try {
-      const [resProj, resTipo, resClass, resFunc] = await Promise.all([
-        $fetch<{ data: any[] }>('/api/cadastro/projeto/ativos'),
-        $fetch<any[]>('/api/tabelaBasica/tipoMovimentacao/ativos'),
-        $fetch<{ data: any[] }>('/api/tabelaBasica/classificacao/ativos'),
-        $fetch<{ data: any[] }>('/api/cadastro/funcionario/ativos')
-      ])
-      combos.projetos = resProj.data || []
-      combos.tiposMovimentacao = resTipo || []
-      combos.classificacoes = resClass.data || []
-      combos.funcionariosAtivos = resFunc.data || []
-
-      if (editando.value) {
-         // Carregar dados se for edição (opcional agora)
-      }
+      const resp = await $fetch<{ data: any[] }>('/api/cadastro/projeto/ativos')
+      projetosAtivos.value = resp.data || []
     } catch (error) {
-      console.error("Erro ao carregar combos", error)
-    } finally {
-      carregandoTela.value = false
+      console.error('Erro ao carregar projetos', error)
     }
   }
 
-  const carregarContas = async (idProjeto: string) => {
-    if (!idProjeto) {
-      combos.contasVinculadas = []
-      return
-    }
+  const buscarLancamentos = async () => {
+    if (!projetoId.value) return
+    buscando.value = true
+    buscaRealizada.value = true
     try {
-      const res = await $fetch<{ status: string, data: any[] }>('/api/operacao/movimentacaoBancaria/lancamentoManual/contasPorProjeto', {
-        method: 'POST', body: { projeto: idProjeto }
+      // Reutiliza o endpoint de listagem passando os filtros
+      const resp = await $fetch<{ data: any[] }>('/api/operacao/movimentacaoBancaria/lancamentoEstorno/listagem', {
+        method: 'POST',
+        body: {
+          projetoParam: projetoId.value,
+          tipoLancamentoParam: tipoLancamento.value,
+          estornadoParam: '0' // Apenas não estornados
+        }
       })
-      combos.contasVinculadas = res.data || []
-      if (res.data.length === 1) form.contaVinculada = res.data[0].codigo
-    } catch (e) { console.error(e) }
-  }
-
-  const carregarProjetoDaConta = async (idConta: string) => {
-    if (!idConta) return
-    try {
-      const res = await $fetch<{ status: string, data: { projeto: number } }>('/api/operacao/movimentacaoBancaria/lancamentoManual/projetoPorConta', {
-        method: 'POST', body: { conta: idConta }
-      })
-      if (res.data?.projeto) {
-        form.projeto = String(res.data.projeto)
-        await carregarContas(form.projeto)
-      }
-    } catch (e) { console.error(e) }
-  }
-
-  const validarPasso0 = () => {
-    erros.clear()
-    if (!form.projeto) erros.add('projeto')
-    if (!form.contaVinculada) erros.add('contaVinculada')
-    if (!form.tipoMovimentacao) erros.add('tipoMovimentacao')
-    if (!form.valorMovimentacao) erros.add('valorMovimentacao')
-    if (!form.dataMovimentacao) erros.add('dataMovimentacao')
-    if (!form.numeroOficio) erros.add('numeroOficio')
-    if (!form.dataOficio) erros.add('dataOficio')
-    if (!form.classificacaoLancamento) erros.add('classificacaoLancamento')
-
-    return erros.size === 0
-  }
-
-  const avancarPasso = () => {
-    if (passoAtual.value === 0) {
-      if (validarPasso0()) {
-        passoAtual.value = 1
-      } else {
-        modalAlertaMensagem.value = 'Preencha os campos obrigatórios para continuar.'
-        modalAlertaAberto.value = true
-      }
-    }
-  }
-
-  const voltarPasso = () => {
-    if (passoAtual.value > 0) {
-      passoAtual.value--
-    } else {
-      voltarParaLista()
-    }
-  }
-
-  const tentarGravar = () => {
-    const temFuncionario = form.funcionarios.some(f => f.tipoAlteracao !== 2)
-    if (!temFuncionario) {
-      modalConfirmaTodosAberto.value = true
-    } else {
-      gravar()
-    }
-  }
-
-  const gravar = async () => {
-    modalConfirmaTodosAberto.value = false
-    salvando.value = true
-    try {
-      // ValorOficio = ValorMovimentacao se não preenchido? Normalmente sim em reembolso.
-      if (!form.valorOficio) form.valorOficio = form.valorMovimentacao
-
-      const res = await $fetch<{ status: string, message: string }>('/api/operacao/oficio/lancamentoReembolso/gravar', {
-        method: 'POST', body: form
-      })
-      if (res.status === 'success') {
-        modalSucessoAberto.value = true
-      } else {
-        modalAlertaMensagem.value = res.message || 'Erro ao gravar registro.'
-        modalAlertaAberto.value = true
-      }
+      lancamentos.value = resp.data || []
     } catch (error) {
-      console.error('Erro ao gravar:', error)
-      modalAlertaMensagem.value = 'Erro interno ao gravar dados.'
-      modalAlertaAberto.value = true
+      console.error('Erro ao buscar lançamentos', error)
+      lancamentos.value = []
     } finally {
-      salvando.value = false
+      buscando.value = false
     }
   }
 
-  const addFuncionario = () => {
-    if (!funcionarioTemp.value) return
+  const atualizarRelogio = () => {
+    const agora = new Date()
+    dataEstornoDisplay.value = `${agora.toLocaleDateString('pt-BR')} - ${agora.toLocaleTimeString('pt-BR')}`
+  }
+
+  const prepararEstornoRapido = (item: any) => {
+    estornoObj.codigo = item.codigo
+    estornoObj.tipoLancamento = item.tipoLancamento
+    estornoObj.motivo = ''
+    estornoObj.pin = ''
     
-    const existe = form.funcionarios.some(f => f.funcionarioId === funcionarioTemp.value.codigo && f.tipoAlteracao !== 2)
-    if (existe) {
-       modalAlertaMensagem.value = 'Funcionário já adicionado à lista.'
-       modalAlertaAberto.value = true
-       return
+    atualizarRelogio()
+    if (timerRelogio) clearInterval(timerRelogio)
+    timerRelogio = setInterval(atualizarRelogio, 1000)
+    
+    modalEstornoAberto.value = true
+  }
+
+  const vaiParaPin = () => {
+    if (!estornoObj.motivo.trim()) return
+    modalEstornoAberto.value = false
+    modalPinAberto.value = true
+  }
+
+  const tentarFinalizar = async () => {
+    if (!estornoObj.pin) return
+    processandoEstorno.value = true
+    try {
+      // 1. Valida PIN (MD5 no backend)
+      const resPin = await $fetch<{ status: string }>('/api/operacao/movimentacaoBancaria/lancamentoEstorno/validaPin', {
+        method: 'POST', body: { pin: estornoObj.pin }
+      })
+      
+      if (resPin.status !== 'success') {
+        alert('PIN incorreto!')
+        estornoObj.pin = ''
+        return
+      }
+
+      // 2. Grava Estorno
+      const resGravar = await $fetch<{ status: string, mensagem: string }>('/api/operacao/movimentacaoBancaria/lancamentoEstorno/gravar', {
+        method: 'POST', body: estornoObj
+      })
+
+      if (resGravar.status === 'success') {
+        modalPinAberto.value = false
+        buscarLancamentos() // Atualiza a lista na tela
+        alert('Estorno realizado com sucesso!')
+      } else {
+        alert(resGravar.mensagem)
+      }
+    } catch (error) {
+      console.error('Erro ao finalizar estorno', error)
+    } finally {
+      processandoEstorno.value = false
     }
-
-    form.funcionarios.push({
-      codigoFuncionario: 0,
-      funcionarioId: funcionarioTemp.value.codigo,
-      funcionarioNome: funcionarioTemp.value.nomeCompleto,
-      tipoAlteracao: 1,
-      selecionadoParaRemover: false
-    })
-    funcionarioTemp.value = null
   }
 
-  const removerFuncionariosSelecionados = () => {
-    form.funcionarios.forEach(f => {
-      if (f.selecionadoParaRemover) f.tipoAlteracao = 2
-    })
+  const navegarParaCadastro = (codigo: number, tipo: number) => {
+    const modulo = tipo === 2 ? 'lancamentoManual' : 'lancamentoReembolso'
+    router.push(`/operacao/movimentacaoBancaria/${modulo}/cadastro?codigo=${codigo}`)
   }
 
-  const voltarParaLista = () => router.push('/operacao/movimentacaoBancaria/lancamentoEstorno')
-
-  const novoRegistro = () => {
-    router.push('/operacao/movimentacaoBancaria/lancamentoEstorno/cadastro?id=0')
-    passoAtual.value = 0
-    Object.assign(form, {
-      codigo: '0',
-      projeto: '',
-      contaVinculada: '',
-      tipoMovimentacao: '',
-      valorMovimentacao: '',
-      dataMovimentacao: '',
-      classificacaoLancamento: '',
-      motivo: '',
-      numeroOficio: '',
-      dataOficio: '',
-      valorOficio: '',
-      status: '1',
-      dataResposta: '',
-      dataEntrada: '',
-      classificacaoOficio: '',
-      funcionarios: []
-    })
-  }
+  const formatarMoeda = (valor: number) => Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 
   onMounted(() => {
     carregarCombos()
   })
 
+  const modalFuncionarioAberto = ref(false)
+  const listaFuncionariosModal = ref<any[]>([])
+
+  const abrirModalFuncionarios = async (codigo: number, tipo: number, projetoId: number) => {
+    try {
+      const response = await $fetch<{ status: string, data: any[] }>('/api/operacao/movimentacaoBancaria/lancamentoEstorno/funcionarios', {
+        method: 'POST', body: { codigo, tipoLancamento: tipo, projeto: projetoId }
+      })
+      listaFuncionariosModal.value = response.data || []
+      modalFuncionarioAberto.value = true
+    } catch (error) { console.error(error) }
+  }
+
+  const lancamentoSelecionado = ref<any>(null)
+
+  const selecionarParaEstorno = (item: any) => {
+    lancamentoSelecionado.value = item
+  }
+
   return {
-    form,
-    combos,
-    carregandoTela,
-    salvando,
-    editando,
-    erros,
-    passoAtual,
-    passos,
-    avancarPasso,
-    voltarPasso,
-    modalConfirmaTodosAberto,
-    modalSucessoAberto,
-    modalAlertaAberto,
-    modalAlertaMensagem,
-    funcionarioTemp,
-    carregarContas,
-    carregarProjetoDaConta,
-    tentarGravar,
-    gravar,
-    addFuncionario,
-    removerFuncionariosSelecionados,
-    voltarParaLista,
-    novoRegistro
+    projetoId,
+    tipoLancamento,
+    projetosAtivos,
+    buscando,
+    buscaRealizada,
+    lancamentos,
+    lancamentoSelecionado,
+    modalFuncionarioAberto,
+    listaFuncionariosModal,
+    abrirModalFuncionarios,
+    modalEstornoAberto,
+    modalPinAberto,
+    estornoObj,
+    dataEstornoDisplay,
+    processandoEstorno,
+    buscarLancamentos,
+    selecionarParaEstorno,
+    prepararEstornoRapido,
+    vaiParaPin,
+    tentarFinalizar,
+    formatarMoeda,
+    navegarParaCadastro
   }
 }

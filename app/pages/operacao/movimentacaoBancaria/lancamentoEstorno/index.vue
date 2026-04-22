@@ -26,56 +26,67 @@
 
         <template #cabecalho-tabela>
           <th v-if="colunas.projeto" scope="col"
-            class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider text-left">Projeto</th>
-          <th v-if="colunas.conta" scope="col"
-            class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider text-left">Conta</th>
+            class="p-4 text-xs font-black text-gray-400 uppercase tracking-widest text-left">Projeto / Conta</th>
           <th v-if="colunas.tipoLancamento" scope="col"
-            class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider text-center">Origem</th>
+            class="p-4 text-xs font-black text-gray-400 uppercase tracking-widest text-center">Origem</th>
           <th v-if="colunas.tipoMovimentacao" scope="col"
-            class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider text-center">Movimentação</th>
+            class="p-4 text-xs font-black text-gray-400 uppercase tracking-widest text-center">Movimentação</th>
           <th v-if="colunas.valor" scope="col"
-            class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider text-center">Valor</th>
+            class="p-4 text-xs font-black text-gray-400 uppercase tracking-widest text-center">Valor</th>
           <th v-if="colunas.data" scope="col"
-            class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider text-center">Data</th>
+            class="p-4 text-xs font-black text-gray-400 uppercase tracking-widest text-center">Data</th>
           <th v-if="colunas.classificacao" scope="col"
-            class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider text-left">Classificação</th>
+            class="p-4 text-xs font-black text-gray-400 uppercase tracking-widest text-center">Classificação</th>
           <th v-if="colunas.acoes" scope="col"
-            class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider text-center w-32">Ações</th>
+            class="p-4 text-xs font-black text-gray-400 uppercase tracking-widest text-center w-32">Ações</th>
         </template>
 
         <template #linhas-tabela="{ item }">
-          <td v-if="colunas.projeto" class="px-6 py-4">
-            <span class="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-tight">{{ item.projeto
-              }}</span>
+          <td v-if="colunas.projeto" class="p-4">
+            <div class="flex flex-col">
+              <span 
+                @click="navegarParaCadastro(item.codigo, item.tipoLancamento)"
+                class="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-tight hover:text-blue-500 dark:hover:text-blue-400 cursor-pointer transition-colors"
+              >
+                {{ item.apelido }} - {{ item.projeto }}
+              </span>
+              <span class="text-[11px] text-gray-400 font-bold uppercase tracking-tighter opacity-70">
+                {{ item.contaVinculada }}
+              </span>
+            </div>
           </td>
-          <td v-if="colunas.conta" class="px-6 py-4">
-            <span class="text-xs text-gray-500 dark:text-gray-400 font-medium italic">{{ item.contaVinculada }}</span>
-          </td>
-          <td v-if="colunas.tipoLancamento" class="px-6 py-4 text-center">
+          <td v-if="colunas.tipoLancamento" class="p-4 text-center">
             <span
-              class="text-[10px] font-black uppercase bg-gray-100 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+              class="text-[10px] font-black uppercase bg-gray-100 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 whitespace-nowrap">
               {{ item.tipoLancamento === 2 ? 'Manual' : 'Reembolso' }}
             </span>
           </td>
-          <td v-if="colunas.tipoMovimentacao" class="px-6 py-4 text-center">
+          <td v-if="colunas.tipoMovimentacao" class="p-4 text-center">
             <span class="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-tight">{{
               item.tipoMovimentacao }}</span>
           </td>
           <td v-if="colunas.valor"
-            class="px-6 py-4 text-center font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">
-            R$ {{ formatarMoeda(item.valorMovimentacao) }}
+            class="p-4 text-center font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">
+            <span class="whitespace-nowrap px-2.5 py-1 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg">
+              R$ {{ formatarMoeda(item.valorMovimentacao) }}
+            </span>
           </td>
-          <td v-if="colunas.data" class="px-6 py-4 text-center text-xs font-bold text-gray-500 tabular-nums">
+          <td v-if="colunas.data" class="p-4 text-center text-xs font-bold text-gray-500 tabular-nums whitespace-nowrap">
             {{ item.dataMovimentacao }}
           </td>
           <td v-if="colunas.classificacao"
-            class="px-6 py-4 text-xs text-gray-600 dark:text-gray-400 font-bold uppercase tracking-widest">
+            class="p-4 text-xs text-gray-600 dark:text-gray-400 font-bold uppercase tracking-widest text-center">
             {{ item.classificacao }}
           </td>
-          <td v-if="colunas.acoes" class="px-6 py-4 text-center">
+          <td v-if="colunas.acoes" class="p-4 text-center">
             <div class="flex items-center justify-center gap-2">
-              <button @click="abrirModalFuncionarios(item.codigo, item.tipoLancamento)" title="Ver Funcionários"
-                class="w-10 h-10 flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 rounded-xl transition-all active:scale-95 shadow-sm">
+              <button @click="navegarParaCadastro(item.codigo, item.tipoLancamento)" title="Ver Cadastro"
+                class="w-10 h-10 flex items-center justify-center text-blue-500 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 rounded-xl transition-all active:scale-95 shadow-sm border border-blue-200/50 dark:border-blue-700/30">
+                <Icon name="fa7-solid:eye" class="w-4 h-4" />
+              </button>
+
+              <button @click="abrirModalFuncionarios(item.codigo, item.tipoLancamento, item.codigoProjeto)" title="Ver Funcionários"
+                class="w-10 h-10 flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 rounded-xl transition-all active:scale-95 shadow-sm border border-blue-200/50 dark:border-blue-700/30">
                 <Icon name="fa7-solid:users" class="w-4 h-4" />
               </button>
 
@@ -85,7 +96,7 @@
               </button>
               
               <button v-if="item.estorno === 0" @click="prepararEstorno(item)" title="Realizar Estorno"
-                class="w-10 h-10 flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 rounded-xl transition-all active:scale-95 shadow-sm">
+                class="w-10 h-10 flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 rounded-xl transition-all active:scale-95 shadow-sm border border-rose-200/50 dark:border-rose-700/30">
                 <Icon name="fa7-solid:reply" class="w-4 h-4" />
               </button>
               
@@ -104,7 +115,7 @@
               { icone: 'fa7-solid:building-columns', texto: item.contaVinculada },
               { icone: 'fa7-solid:money-bill-transfer', texto: `R$ ${formatarMoeda(item.valorMovimentacao)}` },
               { icone: 'fa7-solid:tag', texto: item.tipoMovimentacao }
-            ]" @ver-detalhes="abrirModalFuncionarios(item.codigo, item.tipoLancamento)">
+            ]" @ver-detalhes="abrirModalFuncionarios(item.codigo, item.tipoLancamento, item.codigoProjeto)">
             <template #footer-actions>
               <AppBotao v-if="item.estorno === 0" variacao="padrao" icone="fa7-solid:reply" class="flex-1"
                 @click="prepararEstorno(item)">Estornar</AppBotao>
@@ -131,62 +142,22 @@
         @close="modalFuncionarioAberto = false"
     />
 
-    <AppModal :isOpen="modalEstornoAberto" title="Motivo do Estorno" icon="fa7-solid:pen-fancy"
-      @close="modalEstornoAberto = false" tamanho="sm">
-      <div class="p-6 space-y-6">
-        <div>
-          <label class="text-[10px] font-black uppercase text-gray-400 mb-3 block tracking-widest">Justificativa
-            Operacional</label>
-          <textarea v-model="estornoObj.motivo" rows="4"
-            class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-bold text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none transition-all resize-none placeholder:font-medium"
-            placeholder="Descreva detalhadamente o motivo da reversão..."></textarea>
-        </div>
-        <div
-          class="p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-2xl flex items-center gap-4">
-          <Icon name="fa7-solid:clock-rotate-left" class="text-amber-500 w-5 h-5 shrink-0" />
-          <div class="flex flex-col">
-            <span class="text-[8px] font-black text-amber-600 uppercase tracking-widest">Data Programada</span>
-            <span class="text-xs font-black text-amber-700 dark:text-amber-500 tabular-nums uppercase">{{
-              dataEstornoDisplay
-              }}</span>
-          </div>
-        </div>
-      </div>
-      <template #footer>
-        <div class="flex gap-3 w-full">
-          <AppBotao variacao="padrao" @click="modalEstornoAberto = false"
-            class="flex-1 font-black uppercase tracking-widest text-[10px]">Cancelar</AppBotao>
-          <AppBotao variacao="primario" icone="fa7-solid:shield-halved" @click="vaiParaPin"
-            class="flex-1 font-black uppercase tracking-widest text-[10px]">Avançar para PIN</AppBotao>
-        </div>
-      </template>
-    </AppModal>
+    <AppModalMotivoEstorno 
+        :aberto="modalEstornoAberto"
+        v-model:motivo="estornoObj.motivo"
+        :data-programada="dataEstornoDisplay"
+        @close="modalEstornoAberto = false"
+        @avancar="vaiParaPin"
+    />
 
-    <AppModal :isOpen="modalPinAberto" title="Assinatura Eletrônica" icon="fa7-solid:lock"
-      @close="modalPinAberto = false" tamanho="sm">
-      <div class="p-8 text-center space-y-8">
-        <div class="space-y-2">
-          <p class="text-gray-700 dark:text-gray-300 font-bold text-sm">Confirmação de Segurança</p>
-          <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Insira seu PIN operacional para
-            processar
-          </p>
-        </div>
-        <div class="relative group">
-          <input :type="mostrarPin ? 'text' : 'password'" v-model="estornoObj.pin" maxlength="6"
-            class="w-full h-20 text-center text-4xl font-black tracking-[0.8em] bg-gray-50 dark:bg-gray-900/80 border-2 border-gray-100 dark:border-gray-800 rounded-[2rem] focus:border-emerald-500 outline-none transition-all shadow-inner pl-6" />
-          <button @click="mostrarPin = !mostrarPin"
-            class="absolute right-6 top-1/2 -translate-y-1/2 p-2 text-gray-300 hover:text-emerald-500 transition-colors">
-            <Icon :name="mostrarPin ? 'fa7-solid:eye-slash' : 'fa7-solid:eye'" class="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-      <template #footer>
-        <AppBotao variacao="perigo" :carregando="processandoEstorno"
-          class="w-full h-14 font-black uppercase tracking-[0.2em]" @click="tentarFinalizar">
-          {{ processandoEstorno ? 'PROCESSANDO...' : 'CONFIRMAR ESTORNO' }}
-        </AppBotao>
-      </template>
-    </AppModal>
+    <AppModalAssinaturaEletronica
+        :aberto="modalPinAberto"
+        v-model:pin="estornoObj.pin"
+        :carregando="processandoEstorno"
+        label-botao="Confirmar Estorno"
+        @close="modalPinAberto = false"
+        @confirmar="tentarFinalizar"
+    />
 
     <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" @close="modalFiltroAvancadoAberto = false"
       @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
@@ -257,6 +228,11 @@ const camposFiltro = computed(() => [
 
 const tentarBuscar = async () => {
   await buscarLista()
+}
+
+const navegarParaCadastro = (codigo: number, tipo: number) => {
+  const modulo = tipo === 2 ? 'lancamentoManual' : 'lancamentoReembolso'
+  navigateTo(`/operacao/movimentacaoBancaria/${modulo}/cadastro?codigo=${codigo}`)
 }
 
 const vaiParaPin = () => {

@@ -171,13 +171,12 @@ export function useLancamentoEstornoListagem() {
     } catch (error) { console.error(error) }
   }
 
-  const abrirModalFuncionarios = async (codigo: number, tipo: number) => {
+  const abrirModalFuncionarios = async (codigo: number, tipo: number, projetoId: number) => {
     try {
-      const response = await $fetch<{ status: string, data: any[] } | any[]>('/api/operacao/movimentacaoBancaria/lancamentoEstorno/funcionarios', {
-        method: 'POST', body: { codigo, tipoLancamento: tipo }
+      const response = await $fetch<{ status: string, data: any[] }>('/api/operacao/movimentacaoBancaria/lancamentoEstorno/funcionarios', {
+        method: 'POST', body: { codigo, tipoLancamento: tipo, projeto: projetoId }
       })
-      // Ajuste para suportar os dois formatos (antes e depois da padronização da API)
-      listaFuncionariosModal.value = Array.isArray(response) ? response : (response.data || [])
+      listaFuncionariosModal.value = response.data || []
       modalFuncionarioAberto.value = true
     } catch (error) { console.error(error) }
   }

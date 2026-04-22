@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const db = await useDb()
 
   const { codigo, tipoLancamento, motivo } = await readBody(event)
-  const usuarioEstorno = 1 
+  const usuarioEstorno = 6 
 
   try {
     let sqlLancamento = ''
