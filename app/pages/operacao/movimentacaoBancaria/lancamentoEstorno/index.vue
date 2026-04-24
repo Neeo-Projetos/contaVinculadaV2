@@ -5,7 +5,7 @@
       descricao="Gerencie estornos de movimentações manuais e reembolsos" icone-titulo="fa7-solid:reply"
       :breadcrumbs="[{ label: 'Início', to: '/' }, { label: 'Operação' }, { label: 'Tesouraria' }, { label: 'Estorno' }]"
       :pending="carregando" @buscar="tentarBuscar" @openAdvancedFilter="abrirModalFiltroAvancado"
-      @buscarSugestao="buscarProjetosAutocomplete"
+      @buscarSugestao="buscarSugestoesProjeto"
       @selecionarSugestao="({ sugestao }) => selecionarProjetoAutocomplete(sugestao)"
       @fecharSugestao="fecharSugestoesDelay">
       <template #acoes>
@@ -18,6 +18,7 @@
       </template>
 
       <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
+        v-model:filtro-global="filtroGlobal"
         :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
         :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
         :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
@@ -177,13 +178,14 @@
 
 <script setup lang="ts">
 const {
-  carregando, buscaRealizada, visaoAtual, dados, filtro, buscarLista,
+  carregando, buscaRealizada, visaoAtual, dados, filtro, filtroGlobal, buscarLista,
   abrirModalFiltroAvancado, modalFiltroAvancadoAberto, limparFiltrosAvancados, aplicarFiltroAvancado,
   abrirModalExibicao, modalExibicaoAberto, colunas, labels, aplicarExibicao, colunasTemp,
   projetosAtivos, funcionariosAtivos,
   // Autocomplete Projeto
-  projetoSearch, sugestoesProjetos, buscandoProjetos, mostrarMenuProjetos,
-  buscarProjetosAutocomplete, selecionarProjetoAutocomplete, fecharSugestoesDelay,
+  sugestoesProjetos, buscandoSugestoes, mostrandoSugestoes,
+  buscarSugestoesProjeto, selecionarProjetoAutocomplete, fecharSugestoesDelay,
+  placeholderDinamico,
   modalFuncionarioAberto, listaFuncionariosModal, abrirModalFuncionarios,
   modalDetalhesAberto, detalhes, abrirModalDetalhes,
   modalEstornoAberto, modalPinAberto, mostrarPin, processandoEstorno, dataEstornoDisplay, estornoObj,
@@ -197,14 +199,13 @@ const { dispararAlerta } = useAppNotificacao()
 
 const camposFiltro = computed(() => [
   {
-    key: 'projetoParam',
+    key: 'projetoNomeParam',
     label: 'Projeto',
     type: 'autocomplete' as const,
-    placeholder: 'Buscar projeto...',
+    placeholder: placeholderDinamico.value,
     sugestoes: sugestoesProjetos.value,
-    buscando: buscandoProjetos.value,
-    mostrarMenu: mostrarMenuProjetos.value,
-    colSpan: 'md:col-span-5'
+    buscando: buscandoSugestoes.value,
+    mostrarMenu: mostrandoSugestoes.value
   },
   {
     key: 'dataInicioParam',
@@ -212,8 +213,7 @@ const camposFiltro = computed(() => [
     type: 'text' as const,
     placeholder: 'Data Início',
     mask: '##/##/####',
-    icon: 'fa7-solid:calendar-day',
-    colSpan: 'md:col-span-2'
+    icon: 'fa7-solid:calendar-day'
   },
   {
     key: 'dataFimParam',
@@ -221,8 +221,7 @@ const camposFiltro = computed(() => [
     type: 'text' as const,
     placeholder: 'Data Fim',
     mask: '##/##/####',
-    icon: 'fa7-solid:calendar-day',
-    colSpan: 'md:col-span-2'
+    icon: 'fa7-solid:calendar-day'
   }
 ])
 

@@ -3,11 +3,11 @@ import { useWindowSize } from '@vueuse/core'
 
 export function useLancamentoEstornoListagem() {
   const { width } = useWindowSize()
-  
+
   const carregandoTela = ref(false)
   const buscaRealizada = ref(false)
   const visaoAtual = ref<'lista' | 'cards'>('lista')
-  
+
   const modalFiltroAvancadoAberto = ref(false)
   const modalExibicaoAberto = ref(false)
 
@@ -18,8 +18,9 @@ export function useLancamentoEstornoListagem() {
 
   // Filtros padrão segundo Padrão Ouro
   const filtro = ref({
-    nomeParam: '', // Termo de busca principal (Autocomplete opcional)
-    projetoParam: '',
+    nomeParam: '', // Termo de busca principal
+    projetoParam: '', // ID do Projeto (Interno)
+    projetoNomeParam: '', // Texto do Autocomplete (Exibição)
     funcionarioParam: '',
     tipoLancamentoParam: '',
     dataInicioParam: '',
@@ -27,40 +28,51 @@ export function useLancamentoEstornoListagem() {
     estornadoParam: '0'
   })
 
-  // Autocomplete Projetos (Padrão Ouro)
-  const projetoSearch = ref('')
-  const sugestoesProjetos = ref<any[]>([])
-  const buscandoProjetos = ref(false)
-  const mostrarMenuProjetos = ref(false)
+  const filtroGlobal = ref('')
 
-  const buscarProjetosAutocomplete = async () => {
-    if (!projetoSearch.value) {
+  // Autocomplete Projetos (Padrão Ouro - Baseado em Cadastro/Projeto)
+  const sugestoesProjetos = ref<any[]>([])
+  const mostrandoSugestoes = ref(false)
+  const buscandoSugestoes = ref(false)
+  let timerDebounce: ReturnType<typeof setTimeout>
+
+  const buscarSugestoesProjeto = (termo: string) => {
+    // Limpa o projeto ID (interno) ao começar a digitar uma nova busca
+    filtro.value.projetoParam = ''
+
+    if (!termo || termo.length < 2) {
       sugestoesProjetos.value = []
+      mostrandoSugestoes.value = false
       return
     }
-    buscandoProjetos.value = true
-    mostrarMenuProjetos.value = true
-    try {
-      const resp = await $fetch<any[]>('/api/cadastro/projeto/autocomplete', {
-        params: { busca: projetoSearch.value }
-      })
-      sugestoesProjetos.value = resp
-    } catch (error) {
-      console.error('Erro ao buscar projetos', error)
-    } finally {
-      buscandoProjetos.value = false
-    }
+
+    clearTimeout(timerDebounce)
+    mostrandoSugestoes.value = true
+
+    timerDebounce = setTimeout(async () => {
+      buscandoSugestoes.value = true
+      try {
+        const resposta = await $fetch<any>(`/api/cadastro/projeto/autocomplete?q=${termo}`)
+        sugestoesProjetos.value = resposta?.data || resposta || []
+      } catch (e) {
+        console.error('Erro no autocomplete de projeto:', e)
+      } finally {
+        buscandoSugestoes.value = false
+      }
+    }, 400)
   }
 
-  const selecionarProjetoAutocomplete = (proj: any) => {
-    filtro.value.projetoParam = String(proj.projetoId)
-    projetoSearch.value = proj.apelido
-    mostrarMenuProjetos.value = false
+  const selecionarProjetoAutocomplete = (sugestao: any) => {
+    // Seta o ID para o filtro de busca e o nome para exibição no campo
+    filtro.value.projetoParam = String(sugestao.projetoId || sugestao.id)
+    filtro.value.projetoNomeParam = sugestao.apelido || sugestao.descricao
+    mostrandoSugestoes.value = false
+    buscarLista()
   }
 
   const fecharSugestoesDelay = () => {
     setTimeout(() => {
-      mostrarMenuProjetos.value = false
+      mostrandoSugestoes.value = false
     }, 200)
   }
 
@@ -91,7 +103,17 @@ export function useLancamentoEstornoListagem() {
   const colunasTemp = reactive({ ...colunasVisiveis })
 
   const listaCompleta = ref<any[]>([])
-  const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
+  const listaFiltrada = computed(() => {
+    if (!filtroGlobal.value) return listaCompleta.value
+    const term = filtroGlobal.value.toLowerCase()
+    return listaCompleta.value.filter(item =>
+      String(item.projeto).toLowerCase().includes(term) ||
+      String(item.apelido).toLowerCase().includes(term) ||
+      String(item.classificacao).toLowerCase().includes(term) ||
+      String(item.tipoMovimentacao).toLowerCase().includes(term)
+    )
+  })
+  const paginacao = usePaginacaoFrontEnd(listaFiltrada, visaoAtual)
 
   const projetosAtivos = ref<any[]>([])
   const funcionariosAtivos = ref<any[]>([])
@@ -105,7 +127,7 @@ export function useLancamentoEstornoListagem() {
       projetosAtivos.value = resProj.data || []
       funcionariosAtivos.value = resFunc.data || []
     } catch (error) {
-       console.error("Erro combos", error)
+      console.error("Erro combos", error)
     }
   }
 
@@ -114,7 +136,7 @@ export function useLancamentoEstornoListagem() {
     buscaRealizada.value = true
     try {
       const response = await $fetch<{ status: string, data: any[] }>('/api/operacao/movimentacaoBancaria/lancamentoEstorno/listagem', {
-        method: 'POST', 
+        method: 'POST',
         body: {
           projeto: filtro.value.projetoParam,
           funcionarioId: filtro.value.funcionarioParam,
@@ -137,7 +159,7 @@ export function useLancamentoEstornoListagem() {
   const aplicarFiltroAvancado = () => { modalFiltroAvancadoAberto.value = false; buscarLista() }
   const limparFiltrosAvancados = () => {
     filtro.value.projetoParam = ''
-    projetoSearch.value = ''
+    filtro.value.projetoNomeParam = ''
     filtro.value.funcionarioParam = ''
     filtro.value.tipoLancamentoParam = ''
     filtro.value.estornadoParam = '0'
@@ -206,7 +228,7 @@ export function useLancamentoEstornoListagem() {
     estornoObj.motivo = ''
     estornoObj.pin = ''
     mostrarPin.value = false
-    
+
     atualizarRelogio()
     timerRelogio = setInterval(atualizarRelogio, 1000)
     modalEstornoAberto.value = true
@@ -221,14 +243,14 @@ export function useLancamentoEstornoListagem() {
 
   const finalizarEstorno = async () => {
     if (!estornoObj.pin) return 'pin_obrigatorio'
-    
+
     processandoEstorno.value = true
     try {
       // 1. Valida PIN
       const resPin = await $fetch<{ status: string }>('/api/operacao/movimentacaoBancaria/lancamentoEstorno/validaPin', {
         method: 'POST', body: { pin: estornoObj.pin }
       })
-      
+
       if (resPin.status !== 'success') {
         estornoObj.pin = ''
         return 'pin_incorreto'
@@ -269,11 +291,11 @@ export function useLancamentoEstornoListagem() {
     buscaRealizada,
     visaoAtual,
     filtro,
-    projetoSearch,
+    filtroGlobal,
     sugestoesProjetos,
-    buscandoProjetos,
-    mostrarMenuProjetos,
-    buscarProjetosAutocomplete,
+    buscandoSugestoes,
+    mostrandoSugestoes,
+    buscarSugestoesProjeto,
     selecionarProjetoAutocomplete,
     fecharSugestoesDelay,
     placeholderDinamico,
@@ -290,7 +312,7 @@ export function useLancamentoEstornoListagem() {
     aplicarExibicao,
     projetosAtivos,
     funcionariosAtivos,
-    
+
     // Modais específicos
     modalDetalhesAberto,
     detalhes,
@@ -298,7 +320,7 @@ export function useLancamentoEstornoListagem() {
     modalFuncionarioAberto,
     listaFuncionariosModal,
     abrirModalFuncionarios,
-    
+
     modalEstornoAberto,
     modalPinAberto,
     mostrarPin,
@@ -308,7 +330,7 @@ export function useLancamentoEstornoListagem() {
     prepararEstorno,
     avancarParaPin,
     finalizarEstorno,
-    
+
     formatarMoeda,
 
     // Paginação

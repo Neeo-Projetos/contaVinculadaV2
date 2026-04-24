@@ -42,9 +42,9 @@ export function useLancamentoEstornoFormulario() {
       const resp = await $fetch<{ data: any[] }>('/api/operacao/movimentacaoBancaria/lancamentoEstorno/listagem', {
         method: 'POST',
         body: {
-          projetoParam: projetoId.value,
-          tipoLancamentoParam: tipoLancamento.value,
-          estornadoParam: '0' // Apenas não estornados
+          projeto: projetoId.value,
+          tipoLancamento: tipoLancamento.value,
+          estornado: 0 // Apenas não estornados
         }
       })
       lancamentos.value = resp.data || []
@@ -80,6 +80,8 @@ export function useLancamentoEstornoFormulario() {
     modalPinAberto.value = true
   }
 
+  const { dispararAlerta } = useAppNotificacao()
+
   const tentarFinalizar = async () => {
     if (!estornoObj.pin) return
     processandoEstorno.value = true
@@ -90,7 +92,7 @@ export function useLancamentoEstornoFormulario() {
       })
       
       if (resPin.status !== 'success') {
-        alert('PIN incorreto!')
+        dispararAlerta('Erro de Segurança', 'O PIN informado está incorreto. Verifique seus dados.', 'error')
         estornoObj.pin = ''
         return
       }
@@ -102,13 +104,15 @@ export function useLancamentoEstornoFormulario() {
 
       if (resGravar.status === 'success') {
         modalPinAberto.value = false
+        lancamentoSelecionado.value = null // Volta para a lista
         buscarLancamentos() // Atualiza a lista na tela
-        alert('Estorno realizado com sucesso!')
+        dispararAlerta('Sucesso', 'Estorno realizado com sucesso!', 'success')
       } else {
-        alert(resGravar.mensagem)
+        dispararAlerta('Falha na Operação', resGravar.mensagem, 'error')
       }
     } catch (error) {
       console.error('Erro ao finalizar estorno', error)
+      dispararAlerta('Erro Crítico', 'Não foi possível completar a operação no momento.', 'error')
     } finally {
       processandoEstorno.value = false
     }
