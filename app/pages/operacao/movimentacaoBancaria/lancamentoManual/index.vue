@@ -25,6 +25,7 @@
       </template>
 
       <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
+        v-model:filtro-global="filtroGlobal"
         :visaoAtual="visaoAtual" :registroInicial="registroInicial" :registroFinal="registroFinal"
         :totalRegistros="totalRegistros" :itensPorPagina="itensPorPagina" :totalPaginas="totalPaginas"
         :paginaAtual="paginaAtual" :paginasExibidas="paginasExibidas" @mudarPagina="mudarPagina"
@@ -136,7 +137,7 @@
 
 <script setup lang="ts">
 const {
-  carregando, buscaRealizada, visaoAtual, dados, filtro, 
+  carregando, buscaRealizada, visaoAtual, dados, filtro, filtroGlobal,
   buscarLista, abrirModalFiltroAvancado, modalFiltroAvancadoAberto, limparFiltrosAvancados, aplicarFiltroAvancado,
   abrirModalExibicao, modalExibicaoAberto, colunas, labels, aplicarExibicao, colunasTemp,
   tiposMovimentacao, modalDetalhesAberto, detalhes, modalFuncionarioAberto, listaFuncionariosModal,

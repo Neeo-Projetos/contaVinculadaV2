@@ -86,10 +86,22 @@ export function useLancamentoManualListagem() {
 
   const colunasTemp = reactive({ ...colunasVisiveis })
 
+  const filtroGlobal = ref('')
   const listaCompleta = ref<any[]>([])
 
+  const listaFiltrada = computed(() => {
+    if (!filtroGlobal.value) return listaCompleta.value
+    const term = filtroGlobal.value.toLowerCase()
+    return listaCompleta.value.filter(item =>
+      String(item.projeto).toLowerCase().includes(term) ||
+      String(item.apelido).toLowerCase().includes(term) ||
+      String(item.classificacao).toLowerCase().includes(term) ||
+      String(item.tipoMovimentacao).toLowerCase().includes(term)
+    )
+  })
+
   // Como o sistema parece usar uma paginação front-end padrão
-  const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
+  const paginacao = usePaginacaoFrontEnd(listaFiltrada, visaoAtual)
 
   const projetosAtivos = ref<any[]>([])
   const tiposMovimentacao = ref<any[]>([])
@@ -209,6 +221,7 @@ export function useLancamentoManualListagem() {
     buscaRealizada,
     visaoAtual,
     filtro,
+    filtroGlobal,
     // Autocomplete Projetos
     projetoSearch,
     sugestoesProjetos,

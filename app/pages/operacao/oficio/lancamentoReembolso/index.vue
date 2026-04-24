@@ -28,6 +28,7 @@
         :carregando="carregando" 
         :buscaRealizada="buscaRealizada" 
         :lista="dados || []"
+        v-model:filtro-global="filtroGlobal"
         :visaoAtual="visaoAtual" 
         :registroInicial="registroInicial" 
         :registroFinal="registroFinal"
@@ -147,7 +148,7 @@
 
 <script setup lang="ts">
 const {
-  carregando, buscaRealizada, visaoAtual, dados, filtro, projetos, tiposMovimentacao,
+  carregando, buscaRealizada, visaoAtual, dados, filtro, filtroGlobal, projetos, tiposMovimentacao,
   buscarLista, filtrar, novoRegistro,
   modalDetalhesAberto, detalhes, abrirModalDetalhes,
   modalFuncionarioAberto, listaFuncionariosModal, abrirModalFuncionarios, gerarPdfOficio,

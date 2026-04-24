@@ -96,8 +96,21 @@ export function useLancamentoReembolsoListagem() {
 
   const colunasTemp = reactive({ ...colunasVisiveis })
 
+  const filtroGlobal = ref('')
   const listaCompleta = ref<any[]>([])
-  const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
+
+  const listaFiltrada = computed(() => {
+    if (!filtroGlobal.value) return listaCompleta.value
+    const term = filtroGlobal.value.toLowerCase()
+    return listaCompleta.value.filter(item =>
+      String(item.projeto).toLowerCase().includes(term) ||
+      String(item.apelido).toLowerCase().includes(term) ||
+      String(item.classificacao).toLowerCase().includes(term) ||
+      String(item.tipoMovimentacao).toLowerCase().includes(term)
+    )
+  })
+
+  const paginacao = usePaginacaoFrontEnd(listaFiltrada, visaoAtual)
 
   const carregarCombos = async () => {
     try {
@@ -204,6 +217,7 @@ export function useLancamentoReembolsoListagem() {
     buscaRealizada,
     visaoAtual,
     filtro,
+    filtroGlobal,
     projetos,
     tiposMovimentacao,
     buscarLista,
