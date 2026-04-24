@@ -86,7 +86,7 @@
                         </td>
                         <td v-if="colunas.projeto" class="px-6 py-4">
                             <span
-                                class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 px-2 py-1 rounded-lg border border-emerald-500/10">
+                                class="inline-block text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 px-2.5 py-1.5 rounded-xl border border-emerald-500/10 leading-relaxed max-w-[200px] sm:max-w-none">
                                 {{ item.projeto }}
                             </span>
                         </td>
