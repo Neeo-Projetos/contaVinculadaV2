@@ -71,9 +71,9 @@
 </template>
 
 <script setup lang="ts">
-defineProps({
-  itens: { type: Array as PropType<any[]>, default: () => [] }
-})
+defineProps<{
+  itens: any[]
+}>()
 
 const formatarMoeda = (valor: number | string) => {
   return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })

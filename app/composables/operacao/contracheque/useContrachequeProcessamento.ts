@@ -79,10 +79,64 @@ export function useContrachequeProcessamento() {
 
   const detalhesVerba = ref<any[]>([])
   
-  // Estados para Modais
+  // Estados para Modais e Painéis
   const modalDetalhesAberto = ref(false)
   const modalSucessoAberto = ref(false)
   const modalFiltroAvancadoAberto = ref(false)
+  const painelAberto = ref(false)
+  const itemSelecionado = ref<ProcessamentoItem | null>(null)
+
+  const totalSelecionados = computed(() => {
+    return listaCompleta.value.filter(i => i.selecionado && i.statusAprovacao === 2).length
+  })
+
+  const abrirPainelAuditoria = async (item: ProcessamentoItem) => {
+    itemSelecionado.value = item
+    // Carrega as verbas antes de abrir o painel
+    try {
+      const response = await $fetch<any>('/api/operacao/contracheque/processamento/detalhes', {
+        method: 'POST',
+        body: { codigoContracheque: item.codigo }
+      })
+      detalhesVerba.value = response.data || []
+      painelAberto.value = true
+    } catch (error) {
+      console.error('Erro ao buscar detalhes:', error)
+      dispararAlerta('Erro de Detalhamento', 'Não foi possível carregar as verbas deste registro.', 'error')
+    }
+  }
+
+  const fecharPainelAuditoria = () => {
+    painelAberto.value = false
+    itemSelecionado.value = null
+  }
+
+  const processarIndividual = async (item: ProcessamentoItem | null, status: number) => {
+    if (!item) return
+    carregando.value = true
+    try {
+      const res = await $fetch<any>('/api/operacao/contracheque/processamento/gravar', {
+        method: 'POST',
+        body: { 
+          matriculas: [item.matricula],
+          statusAprovacao: status 
+        }
+      })
+
+      if (res.status === 'success') {
+        dispararAlerta('Sucesso', `Registro ${status === 1 ? 'aprovado' : 'reprovado'} com sucesso.`, 'success')
+        fecharPainelAuditoria()
+        // Pequeno delay para a animação do painel fechar antes de recarregar a lista
+        setTimeout(() => buscarProcessamentos(), 300)
+      } else {
+        dispararAlerta('Falha na Operação', res.mensagem || 'Não foi possível gravar as alterações.', 'error')
+      }
+    } catch (error) {
+      dispararAlerta('Erro de Conexão', 'Erro técnico ao tentar se comunicar com o servidor.', 'error')
+    } finally {
+      carregando.value = false
+    }
+  }
 
   const carregarCombos = async () => {
     try {
@@ -290,6 +344,14 @@ export function useContrachequeProcessamento() {
     labels: labelsColunas,
     modalExibicaoAberto,
     abrirModalExibicao,
-    aplicarExibicao
+    aplicarExibicao,
+
+    // Painel Lateral e Seleção Contextual
+    painelAberto,
+    itemSelecionado,
+    totalSelecionados,
+    abrirPainelAuditoria,
+    fecharPainelAuditoria,
+    processarIndividual
   }
 }
