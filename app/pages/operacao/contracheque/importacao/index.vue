@@ -5,11 +5,11 @@
             descricao="Envie o arquivo TXT de retenções para processamento e aprovação"
             icone="fa7-solid:file-arrow-up" />
 
-        <AppCartaoFormulario>
+        <AppCartaoFormulario :class="{ 'min-h-[450px] transition-all duration-500': importando }">
             <AppSobreposicaoCarregamento :carregando="importando"
-                mensagem="Realizando upload e processando arquivo..." />
+                :mensagem="mensagemCarregamento" />
 
-            <form v-if="!importando" @submit.prevent="importarArquivo" class="space-y-10 relative z-0" novalidate>
+            <form v-if="!importando" @submit.prevent="importarArquivo" class="space-y-10 relative z-0 animate-in fade-in duration-700" novalidate>
 
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-x-10 gap-y-10 mt-4">
 
@@ -269,6 +269,6 @@
 const {
     form, arquivoSelecionado, ultimaImportacao, importando, modalImportadosAberto,
     modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem,
-    aoSelecionarArquivo, importarArquivo, irParaProcessamento
+    aoSelecionarArquivo, importarArquivo, irParaProcessamento, mensagemCarregamento
 } = useContrachequeImportacao()
 </script>

@@ -1,7 +1,7 @@
 <template>
   <Transition name="fade-blur">
     <div v-if="carregando" 
-      class="absolute inset-0 z-[100] flex flex-col items-center justify-center rounded-[inherit] overflow-hidden pointer-events-none"
+      class="absolute inset-0 z-[100] flex flex-col items-center justify-center rounded-[inherit] overflow-hidden"
     >
       <!-- Fundo Glassmorphism Premium -->
       <div class="absolute inset-0 bg-white/60 dark:bg-[#1e2029]/80 backdrop-blur-md transition-all duration-500"></div>

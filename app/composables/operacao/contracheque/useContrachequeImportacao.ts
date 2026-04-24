@@ -1,4 +1,4 @@
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 export function useContrachequeImportacao() {
@@ -18,6 +18,8 @@ export function useContrachequeImportacao() {
   const modalAlertaTitulo = ref('Atenção')
   const modalAlertaMensagem = ref('')
 
+  let loopMensagens: any = null
+
   const exibirAlerta = (titulo: string, mensagem: string) => {
     modalAlertaTitulo.value = titulo
     modalAlertaMensagem.value = mensagem
@@ -34,14 +36,38 @@ export function useContrachequeImportacao() {
   }
 
   const aoSelecionarArquivo = (file: File) => {
-    if (file.size > 1048576) {
-      exibirAlerta('Arquivo muito grande', 'O arquivo ultrapassou o valor máximo permitido de 1MB.')
+    if (file.size > 2097152) {
+      exibirAlerta('Arquivo muito grande', 'O arquivo ultrapassou o valor máximo permitido de 2MB.')
       return false
     }
     
     // Check extension manually if needed, but AppInputFile should handle it via accept
     arquivoSelecionado.value = file
     return true
+  }
+
+  const mensagemCarregamento = ref('Realizando upload e processando arquivo...')
+  
+  const iniciarCicloMensagens = () => {
+    const mensagens = [
+      'Enviando arquivo para o servidor...',
+      'Validando estrutura do arquivo...',
+      'Processando registros de contracheque...',
+      'Organizando dados para conferência...',
+      'Quase pronto, finalizando...'
+    ]
+    let index = 0
+    if (loopMensagens) clearInterval(loopMensagens)
+    
+    loopMensagens = setInterval(() => {
+      if (!importando.value) {
+        clearInterval(loopMensagens)
+        loopMensagens = null
+        return
+      }
+      mensagemCarregamento.value = mensagens[index % mensagens.length]
+      index++
+    }, 3000)
   }
 
   const importarArquivo = async () => {
@@ -55,6 +81,9 @@ export function useContrachequeImportacao() {
     }
 
     importando.value = true
+    mensagemCarregamento.value = 'Iniciando upload...'
+    iniciarCicloMensagens()
+
     const formData = new FormData()
     formData.append('ano', form.ano)
     formData.append('arquivo', arquivoSelecionado.value)
@@ -74,6 +103,10 @@ export function useContrachequeImportacao() {
       exibirAlerta('Erro de Conexão', 'Houve um erro técnico ao tentar enviar o arquivo para o servidor.')
     } finally {
       importando.value = false
+      if (loopMensagens) {
+        clearInterval(loopMensagens)
+        loopMensagens = null
+      }
     }
   }
 
@@ -84,6 +117,10 @@ export function useContrachequeImportacao() {
 
   onMounted(() => {
     carregarUltimaImportacao()
+  })
+
+  onUnmounted(() => {
+    if (loopMensagens) clearInterval(loopMensagens)
   })
 
   return {
@@ -97,6 +134,7 @@ export function useContrachequeImportacao() {
     modalAlertaMensagem,
     aoSelecionarArquivo,
     importarArquivo,
-    irParaProcessamento
+    irParaProcessamento,
+    mensagemCarregamento
   }
 }
