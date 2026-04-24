@@ -1,4 +1,5 @@
 import { ref, reactive, computed, onMounted, type Ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAppNotificacao } from '../../global/useAppNotificacao'
 import { usePaginacaoFrontEnd } from '../../global/usePaginacaoFrontEnd'
 
@@ -28,6 +29,7 @@ interface ProcessamentoItem {
 
 export function useContrachequeProcessamento() {
   const { dispararAlerta } = useAppNotificacao()
+  const route = useRoute()
   const carregando = ref(false)
   const buscaRealizada = ref(false)
   const visaoAtual = ref<'lista' | 'cards'>('lista')
@@ -214,6 +216,16 @@ export function useContrachequeProcessamento() {
 
   onMounted(() => {
     carregarCombos()
+
+    // Automatização: Preenchimento e Busca automática via Query Param
+    if (route.query.mesAno) {
+      filtro.value.mesAno = String(route.query.mesAno)
+      
+      // Delay pequeno para garantir que o sistema está pronto e os combos carregando
+      setTimeout(() => {
+        buscarProcessamentos()
+      }, 500)
+    }
   })
 
   const abrirModalFiltroAvancado = () => { modalFiltroAvancadoAberto.value = true }

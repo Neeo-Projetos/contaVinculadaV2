@@ -112,7 +112,10 @@ export function useContrachequeImportacao() {
 
   const irParaProcessamento = () => {
     modalImportadosAberto.value = false
-    router.push('/operacao/contracheque/processamento') 
+    router.push({
+      path: '/operacao/contracheque/processamento',
+      query: { mesAno: form.ano }
+    })
   }
 
   onMounted(() => {
